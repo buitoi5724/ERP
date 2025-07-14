@@ -1,16 +1,108 @@
 .app-container {
   display: flex;
-  min-height: 100vh;
+  align-items: flex-start;
+  padding: 10px;
 }
 
-.sidebar {
+.menu {
   width: 220px;
-  background: #f4f4f4;
-  padding: 15px;
-  border-right: 1px solid #ccc;
+  margin-right: 20px;
+}
+.menu ul {
+  list-style: none;
+  padding: 0;
+}
+.menu li {
+  margin-bottom: 8px;
+}
+.menu a {
+  text-decoration: none;
+  color: #333;
+}
+.menu a:hover {
+  color: #671038;
 }
 
 .content {
   flex: 1;
+}
+
+.account-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.account-list {
+  background: #c68c8c;
   padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #ccc;
+}
+
+.account-form {
+  background: #cd7b7b;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #a56d6d;
+}
+.account-form label {
+  width: 80px;
+  display: inline-block;
+}
+.account-form input {
+  padding: 5px;
+  margin-bottom: 10px;
+}
+.account-form button {
+  margin-top: 20px;
+}
+.menu {
+  width: 220px;
+  background: #d7b1b1;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #1c0101;
+  padding: 20px;
+}
+
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  margin-bottom: 12px;
+}
+
+.menu li a,
+.menu li span {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  font-size: 15px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.menu li a:hover,
+.menu li span:hover {
+  background: #d64444;
+}
+
+.menu li a svg,
+.menu li span svg {
+  margin-right: 8px;
+}
+
+/* Submenu */
+.menu .submenu {
+  margin-top: 6px;
+  margin-left: 20px;
+}
+
+.menu .submenu li a {
+  font-size: 14px;
 }

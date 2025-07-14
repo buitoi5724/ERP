@@ -16,7 +16,7 @@ export default function AccountComponent() {
   const loadAccounts = () => {
     accountService.getAccounts()
       .then(data => setAccounts(data))
-      .catch(() => toast.error('Lỗi tải danh sách account'));
+      .catch(() => toast.error("Lỗi tải danh sách account"));
   };
 
   const handleSubmit = (e) => {
@@ -45,33 +45,37 @@ export default function AccountComponent() {
   );
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>Danh sách Accounts</h2>
-      <DataTable value={accounts} tableStyle={{ minWidth: '50rem', marginBottom: '30px' }}>
-        <Column field="id" header="ID" />
-        <Column field="username" header="Username" />
-        <Column field="email" header="Email" />
-        <Column header="Thao tác" body={actionBodyTemplate} />
-      </DataTable>
+    <div className="account-container">
+      <div className="account-list">
+        <h2>Danh sách Accounts</h2>
+        <DataTable value={accounts} tableStyle={{ minWidth: '30rem' }}>
+          <Column field="id" header="ID" />
+          <Column field="username" header="Username" />
+          <Column field="email" header="Email" />
+          <Column header="Thao tác" body={actionBodyTemplate} />
+        </DataTable>
+      </div>
 
-      <h3>Thêm Account mới</h3>
-      <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ width: '80px', display: 'inline-block' }}>Username:</label>
-          <input
-            value={account.username}
-            onChange={(e) => setAccount({ ...account, username: e.target.value })}
-          />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ width: '80px', display: 'inline-block' }}>Email:</label>
-          <input
-            value={account.email}
-            onChange={(e) => setAccount({ ...account, email: e.target.value })}
-          />
-        </div>
-        <button type="submit">Thêm Account</button>
-      </form>
+      <div className="account-form">
+        <h3>Thêm Account mới</h3>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>Username:</label>
+            <input
+              value={account.username}
+              onChange={(e) => setAccount({ ...account, username: e.target.value })}
+            />
+          </div>
+          <div>
+            <label>Email:</label>
+            <input
+              value={account.email}
+              onChange={(e) => setAccount({ ...account, email: e.target.value })}
+            />
+          </div>
+          <button type="submit">Thêm Account</button>
+        </form>
+      </div>
 
       <ToastContainer />
     </div>

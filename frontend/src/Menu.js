@@ -3,31 +3,25 @@ import { Link } from "react-router-dom";
 import { FaChartLine, FaCogs, FaUsers, FaClock, FaTools, FaBoxOpen } from "react-icons/fa";
 
 export default function Menu() {
-  return (
-    <div className="sidebar">
-      <div className="sidebar-header">
-        <h1>MENU</h1>
-      </div>
-      <nav className="sidebar-nav">
-        <ul>
-          <MenuItem icon={<FaUsers />} label="Accounts" to="/accounts" highlight />
-          <MenuItem icon={<FaChartLine />} label="Edit" to="/plant" />
-          <MenuItem icon={<FaChartLine />} label="Setup" to="/analytics" />
-          <MenuGroup icon={<FaCogs />} label="Setup">
-            <SubMenuItem label="Machine" to="/setup/machine" />
-            <SubMenuItem label="Products" to="/setup/products" />
-          </MenuGroup>
-          <MenuItem icon={<FaUsers />} label="Employees" to="/employees" />
-          <MenuItem icon={<FaClock />} label="Downtime" to="/downtime" />
-          <MenuItem icon={<FaTools />} label="Scrap" to="/scrap" />
-          <MenuItem icon={<FaBoxOpen />} label="Product Cat" to="/product-cat" />
-          <MenuItem icon={<FaTools />} label="Tool Life" to="/toollife" />
-        </ul>
-      </nav>
+   return (
+    <div className="menu">
+      <h1>MENU</h1>
+      <ul>
+        <li><Link to="/accounts"><FaUsers /> Accounts</Link></li>
+        <li><Link to="/plant"><FaChartLine /> Edit</Link></li>
+        <li><Link to="/analytics"><FaChartLine /> Setup</Link></li>
+       
+      
+        <li><Link to="/employees"><FaUsers /> Employees</Link></li>
+        <li><Link to="/downtime"><FaClock /> Downtime</Link></li>
+        <li><Link to="/scrap"><FaTools /> Scrap</Link></li>
+        <li><Link to="/product-cat"><FaBoxOpen /> Product Cat</Link></li>
+        <li><Link to="/toollife"><FaTools /> Tool Life</Link></li>
+        <li><Link to="/toollife"><FaTools/> LogIn </Link></li>
+      </ul>
     </div>
   );
 }
-
 function MenuItem({ icon, label, to, highlight }) {
   return (
     <li className={`menu-item ${highlight ? 'highlight' : ''}`}>
