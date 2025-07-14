@@ -1,99 +1,16 @@
 .app-container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
 }
 
-/* Sidebar styles */
 .sidebar {
-  width: 250px;
-  background-color: #2d3748;
-  color: white;
-  display: flex;
-  flex-direction: column;
+  width: 220px;
+  background: #f4f4f4;
+  padding: 15px;
+  border-right: 1px solid #ccc;
 }
 
-.sidebar-header {
-  padding: 16px;
-  font-size: 20px;
-  font-weight: bold;
-  border-bottom: 1px solid #4a5568;
-}
-
-.sidebar-nav {
-  flex: 1;
-  margin-top: 16px;
-}
-
-/* Menu & submenu items */
-.menu-item, 
-.menu-group, 
-.submenu-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 24px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-.menu-item:hover,
-.menu-group:hover {
-  background-color: #4a5568;
-}
-
-.submenu-list {
-  margin-left: 32px;
-  list-style: none;
-  padding-left: 0;
-}
-
-.submenu-item {
-  padding: 8px 0;
-}
-
-.submenu-item:hover {
-  color: #63b3ed;
-}
-
-/* Link styling */
-.link {
-  display: flex;
-  align-items: center;
-  color: white;
-  text-decoration: none;
-}
-
-/* Content area */
 .content {
   flex: 1;
-  background-color: #f7fafc;
-  padding: 32px;
-  overflow-y: auto;
-}
-
-/* Table styling */
-.products-table {
-  width: 100%;
-  background-color: white;
-  border-collapse: collapse;
-}
-
-.products-table th {
-  padding: 8px 16px;
-  border-bottom: 1px solid #cbd5e0;
-  text-align: left;
-  background-color: #e2e8f0;
-}
-
-.products-table td {
-  padding: 8px 16px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.products-table tr.highlight {
-  background-color: #bee3f8;
-}
-
-/* Icon spacing */
-.icon {
-  margin-right: 12px;
+  padding: 20px;
 }

@@ -1,15 +1,26 @@
-// src/services/userService.js
-    const API_BASE_URL = 'http://localhost:8080/accounts';
+import axios from 'axios';
 
-    const accountService = {
-      getAccounts: async () => {
-        const response = await fetch(`${API_BASE_URL}/accounts`);
-        return response.json();
-      },
-      getAccountByEmail: async (id) => {
-        const response = await fetch(`${API_BASE_URL}/users/${id}`);
-        return response.json();
-      },
-    };
+const API_BASE_URL = 'http://localhost:8081';
 
-    export default accountService;
+const accountService = {
+    getAccounts: async () => {
+        const response = await axios.get(`${API_BASE_URL}/accounts`);
+        return response.data;
+    },
+
+    getAccountByEmail: async (id) => {
+        const response = await axios.get(`${API_BASE_URL}/users/${id}`);
+        return response.data;
+    },
+
+    createAccount: async (account) => {
+        const response = await axios.post(`${API_BASE_URL}/accounts`, account);
+        return response.data;
+    },
+
+    deleteAccount: async (id) => {
+        await axios.delete(`${API_BASE_URL}/accounts/${id}`);
+    }
+};
+
+export default accountService;
