@@ -17,7 +17,14 @@ public class AccountService {
     }
 
     public Account create(Account account) {
-        return accountRepository.save(account);
+    	Account savedAccount  = checkEmail(account.getEmail());
+    	if(savedAccount != null) return savedAccount;
+        
+    	
+    	//TODO: check username
+    	
+    	accountRepository.save(account);
+    	return null;
     }
 
     public List<Account> getAll() {
@@ -26,6 +33,10 @@ public class AccountService {
 
     public Optional<Account> getById(Long id) {
         return accountRepository.findById(id);
+    }
+    
+    public Account checkEmail(String email) {
+    	return accountRepository.findByEmail(email);
     }
 
     public Account update(Long id, Account newAccount) {
