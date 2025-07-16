@@ -48,12 +48,16 @@ export default function AccountComponent() {
     <div className="account-container">
       <div className="account-list">
         <h2>Danh sách Accounts</h2>
-        <DataTable value={accounts} tableStyle={{ minWidth: '30rem' }}>
-          <Column field="id" header="ID" />
-          <Column field="username" header="Username" />
-          <Column field="email" header="Email" />
-          <Column header="Thao tác" body={actionBodyTemplate} />
-        </DataTable>
+      <DataTable
+  value={accounts}
+  tableStyle={{ minWidth: '30rem' }}
+  tableClassName="custom-table"
+>
+  <Column field="id" header="ID" ></Column>
+  <Column field="username" header="Username" ></Column>
+  <Column field="email" header="Email"></Column>
+  <Column header="Thao tác" body={actionBodyTemplate} />
+</DataTable>
       </div>
 
       <div className="account-form">
