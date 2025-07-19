@@ -106,7 +106,3 @@
 .menu .submenu li a {
   font-size: 14px;
 }
-.custom-table .p-datatable-tbody > tr > td {
-  border-bottom: 1px solid #140202;
-  border-right: none;
-}

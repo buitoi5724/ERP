@@ -8,7 +8,7 @@ export default function Menu() {
       <h1>MENU</h1>
       <ul>
         <li><Link to="/accounts"><FaUsers /> Accounts</Link></li>
-        <li><Link to="/plant"><FaChartLine /> Edit</Link></li>
+        <li><Link to="/products"><FaChartLine /> Products</Link></li>
         <li><Link to="/analytics"><FaChartLine /> Setup</Link></li>
        
       
