@@ -1,4 +1,43 @@
 Học Spring Boot 
+Học gitbub
+Git làm việc qua 3 khu vực chính trong quy trình commit:
+1 Sửa file nămở trong working area
+2 chạy git add chuyển sang Straging  area
+3 chạy git commit chuyển và git repository
+// 1. Xem trạng thái
+git status
+#  Working Area (Thư mục làm việc)
+ Đây là nơi bạn chỉnh sửa, xóa, thêm các file trong dự án.
+- Chứa các file bạn đang làm việc (đã thay đổi nhưng chưa theo dõi).
+- Ví dụ: bạn sửa `index.js` → file này sẽ nằm ở trạng thái "Modified".
+📌 Lệnh kiểm tra:
+```bash
+git status
+// 2. Đưa file vào staging
+git add main.js
+2️⃣ Staging Area (Khu vực chuẩn bị)
+📝 Là nơi bạn lựa chọn những thay đổi nào sẽ được commit.
+Sau khi chạy git add, file được đưa vào khu vực này.
+Bạn có thể staging một vài file hoặc tất cả.
+📌 Lệnh đưa vào Staging:
+bash
+git add file1.js
+git add .  # Thêm tất cả thay đổi
+// 3. Commit vào repository
+3️⃣ Git Repository (Kho lưu trữ cục bộ)
+✅ Nơi chứa các thay đổi đã được xác nhận (committed).
+Các commit được lưu trữ lâu dài, có thể khôi phục lại sau này.
+Đây là cơ sở của việc theo dõi lịch sử thay đổi trong Git.
+📌 Lệnh commit:
+bash
+git commit -m "feat: thêm chức năng đăng nhập"
+git commit -m "fix: sửa lỗi hàm tính toán"
+kết luận :
+[Working Area] 
+     ↓ git add
+[Staging Area]
+     ↓ git commit
+[Git Repository]
 1.1
 Spring Boot giúp bạn tạo và chạy ứng dụng Spring dễ dàng mà không cần phải viết nhiều file cấu hình XML hay Java phức tạp.
 Dùng @SpringBootApplication để:
