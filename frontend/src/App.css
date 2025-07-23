@@ -1,99 +1,108 @@
 .app-container {
   display: flex;
-  height: 100vh;
+  align-items: flex-start;
+  padding: 10px;
 }
 
-/* Sidebar styles */
-.sidebar {
-  width: 250px;
-  background-color: #2d3748;
-  color: white;
-  display: flex;
-  flex-direction: column;
+.menu {
+  width: 220px;
+  margin-right: 20px;
 }
-
-.sidebar-header {
-  padding: 16px;
-  font-size: 20px;
-  font-weight: bold;
-  border-bottom: 1px solid #4a5568;
-}
-
-.sidebar-nav {
-  flex: 1;
-  margin-top: 16px;
-}
-
-/* Menu & submenu items */
-.menu-item, 
-.menu-group, 
-.submenu-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 24px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-.menu-item:hover,
-.menu-group:hover {
-  background-color: #4a5568;
-}
-
-.submenu-list {
-  margin-left: 32px;
+.menu ul {
   list-style: none;
-  padding-left: 0;
+  padding: 0;
 }
-
-.submenu-item {
-  padding: 8px 0;
+.menu li {
+  margin-bottom: 8px;
 }
-
-.submenu-item:hover {
-  color: #63b3ed;
-}
-
-/* Link styling */
-.link {
-  display: flex;
-  align-items: center;
-  color: white;
+.menu a {
   text-decoration: none;
+  color: #333;
+}
+.menu a:hover {
+  color: #671038;
 }
 
-/* Content area */
 .content {
   flex: 1;
-  background-color: #f7fafc;
-  padding: 32px;
-  overflow-y: auto;
 }
 
-/* Table styling */
-.products-table {
-  width: 100%;
-  background-color: white;
-  border-collapse: collapse;
+.account-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.products-table th {
-  padding: 8px 16px;
-  border-bottom: 1px solid #cbd5e0;
-  text-align: left;
-  background-color: #e2e8f0;
+.account-list {
+  background: #c68c8c;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #ccc;
 }
 
-.products-table td {
-  padding: 8px 16px;
-  border-bottom: 1px solid #e2e8f0;
+.account-form {
+  background: #cd7b7b;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #a56d6d;
+}
+.account-form label {
+  width: 80px;
+  display: inline-block;
+}
+.account-form input {
+  padding: 5px;
+  margin-bottom: 10px;
+}
+.account-form button {
+  margin-top: 20px;
+}
+.menu {
+  width: 220px;
+  background: #d7b1b1;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #1c0101;
+  padding: 20px;
 }
 
-.products-table tr.highlight {
-  background-color: #bee3f8;
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-/* Icon spacing */
-.icon {
-  margin-right: 12px;
+.menu li {
+  margin-bottom: 12px;
+}
+
+.menu li a,
+.menu li span {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  font-size: 15px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.menu li a:hover,
+.menu li span:hover {
+  background: #d64444;
+}
+
+.menu li a svg,
+.menu li span svg {
+  margin-right: 8px;
+}
+
+/* Submenu */
+.menu .submenu {
+  margin-top: 6px;
+  margin-left: 20px;
+}
+
+.menu .submenu li a {
+  font-size: 14px;
 }
