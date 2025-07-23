@@ -1,4 +1,4 @@
-// Import các thư viện cần thiết
+
 import { useEffect, useState } from 'react'; // React hooks
 import { DataTable } from 'primereact/datatable'; // Bảng dữ liệu từ PrimeReact
 import { Column } from 'primereact/column'; // Cột trong bảng PrimeReact
@@ -134,7 +134,7 @@ export default function AccountComponent() {
   );
   return (
     <div className="account-container">
-      {/* ✅ Popup xác nhận truy cập */}
+      {/*  Popup xác nhận truy cập */}
       <Dialog
         header="Xác nhận truy cập"
         visible={showAccessPopup}
@@ -162,7 +162,7 @@ export default function AccountComponent() {
           </button>
         </div>
       </Dialog>
-      {/* ✅ Giao diện chính chỉ hiện khi được cấp quyền */}
+      {/*  Giao diện chính chỉ hiện khi được cấp quyền */}
       {accessGranted && (
         <>
           {/* Danh sách các tài khoản */}
@@ -270,7 +270,7 @@ export default function AccountComponent() {
                 </div>
                 <button type="submit">Lưu</button>
               </form>
-            )}
+            )}loa
           </Dialog>
         </>
       )}
