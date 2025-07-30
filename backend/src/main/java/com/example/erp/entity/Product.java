@@ -5,15 +5,22 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "product")
 public class Product {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String name;
+
     private Double price;
+
     private String image;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
+
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String category;
 
     // Getters & Setters
