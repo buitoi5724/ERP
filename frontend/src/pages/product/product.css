@@ -1,0 +1,147 @@
+/* Container chính */
+.product-container {
+  padding: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Thẻ sản phẩm */
+.product-card {
+  display: flex;
+  gap: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  align-items: flex-start;
+}
+
+/* Ảnh sản phẩm */
+.product-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Phần thông tin */
+.product-info {
+  flex: 1;
+}
+
+.product-info h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+.product-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.product-info strong {
+  color: #222;
+}
+
+/* Hành động */
+.product-actions {
+  margin-top: 10px;
+}
+
+.product-actions button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.product-actions button:first-child {
+  background-color: #2196F3;
+  color: white;
+}
+
+.product-actions button:last-child {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Form sản phẩm */
+.product-form {
+  margin-top: 30px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+.product-form input,
+.product-form textarea {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.product-form button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+
+.product-form button[type="button"] {
+  background-color: #999;
+  margin-left: 10px;
+}
+
+/* ========== ✨ Dialog overlay thêm mới/sửa sản phẩm ========= */
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog-content {
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 10px;
+  width: 450px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+/* Hiệu ứng mở */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
