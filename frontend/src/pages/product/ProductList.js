@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import './productList.css'; // Import CSS
+import { InputText } from 'primereact/inputtext';
+import './productList.css'; // CSS riêng của bạn
 
 const ProductList = ({ products, onEdit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -8,13 +9,18 @@ const ProductList = ({ products, onEdit, onDelete }) => {
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getImageSrc = (product) => {
+    if (!product.id) return '/images/default-product.png';
+    return `http://localhost:8080/api/products/get-image/${product.id}`;
+  };
+
   return (
     <div>
-      {/* Ô tìm kiếm */}
+      {/* Ô tìm kiếm sử dụng PrimeReact */}
       <div className="product-search">
-        <label><strong>Tìm kiếm theo tên:</strong> </label>
-        <input
-          type="text"
+        <label htmlFor="search"><strong>Tìm kiếm theo tên:</strong> </label>
+        <InputText
+          id="search"
           placeholder="Nhập tên sản phẩm..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -25,7 +31,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
       {filteredProducts.map(p => (
         <div key={p.id} className="product-card">
           <img
-            src={p.image}
+            src={getImageSrc(p)}
             alt={p.name}
             className="product-image"
           />

@@ -1,10 +1,11 @@
-import React from "react";
+
 import { Routes, Route } from "react-router-dom";
 import Menu from "./Menu";
 import AccountComponent from "./pages/account/account";
 import Product from './pages/product/Product';
 import "./App.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
+import 'primeflex/primeflex.css';
 
 export default function App() {
   return (
