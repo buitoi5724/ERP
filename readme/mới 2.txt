@@ -1,0 +1,165 @@
+import { useState, useEffect } from 'react';
+import { getProductById, updateProduct, getImage } from './productService';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { FileUpload } from 'primereact/fileupload';
+import { InputTextarea } from 'primereact/inputtextarea';
+        
+
+const ProductForm = ({ selectedId, onSuccess, onCancel }) => {
+  const [product, setProduct] = useState({
+    name: '',
+    price: '',
+    image: '',
+    category: '',
+    description: ''
+  });
+
+  const [priceError, setPriceError] = useState('');
+  const [file, setFile] = useState(null); // chứa file ảnh
+  const [imageUrl, setImageUrl] = useState(null); // chứa file ảnh
+
+  useEffect( () => {
+    if (selectedId) {
+      const savedProduct = getProductById(selectedId);
+      setProduct(savedProduct);
+      console.log(savedProduct);
+    }
+  }, [selectedId]);
+
+  const loadImage = async () => {
+    console.log(product);
+    await getImage(product).then(response => response.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob); // tạo URL từ blob
+        setImageUrl(url);
+      })
+      .catch(error => {
+        console.error('Lỗi khi tải ảnh:', error);
+      });
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'price') {
+      if (/^[a-zA-Z]/.test(value)) {
+        setPriceError('Bạn nhập giá bằng số đầu tiên');
+      } else {
+        setPriceError('');
+      }
+    }
+
+    setProduct({ ...product, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    console.log(e);
+    const selectedFile = e.files[0];
+    console.log(selectedFile);
+    setFile(selectedFile);
+  };
+
+  const handleSubmit = async (e) => {
+    console.log("got here");
+    e.preventDefault();
+
+    if (/^[a-zA-Z]/.test(product.price)) {
+      setPriceError('Bạn nhập giá bằng số đầu tiên');
+      return;
+    }
+
+    if (product.price === '' || isNaN(Number(product.price))) {
+      setPriceError('Giá phải là số hợp lệ');
+      return;
+    }
+
+    const finalProduct = { ...product, price: Number(product.price) };
+
+    console.log(file);
+
+    const formData = new FormData();
+    formData.append('product', new Blob([JSON.stringify(finalProduct)], { type: 'application/json' }));
+    if (file) {
+      formData.append('image', file);
+    }
+
+    //TODO: move to service
+    const response = await fetch('http://localhost:8080/api/products', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      onSuccess();
+      setProduct({ name: '', price: '', image: '', category: '', description: '' });
+      setFile(null);
+      setPriceError('');
+    } else {
+      alert('Lỗi khi gửi dữ liệu!');
+    }
+  };
+
+  // Tạo đường dẫn preview ảnh khi chọn file mới
+  const previewImageUrl = file ? URL.createObjectURL(file) : (product.image?.trim() ? `http://localhost:8080${product.image}` : null);
+
+
+  return (
+    <div className="grid">
+      <div className="col-4">Tên sản phẩm</div>
+      <div className="col-8">
+        <InputText 
+        name="name"
+        placeholder="Tên sản phẩm"
+        value={product.name}
+        onChange={handleChange}
+        required />
+      </div>
+      
+      <div className="col-4">Giá sản phẩm</div>
+      <div className="col-8">
+        <InputText
+          name="price"
+          placeholder="Giá sản phẩm"
+          value={product.price}
+          onChange={handleChange}
+          required
+        />
+        {priceError && <span style={{ color: 'red' }}>{priceError}</span>}<br />
+      </div>
+      <div className="col-4">Ảnh</div>
+      <div className="col-8">
+        <FileUpload mode="basic" accept="image/*" onSelect={handleFileChange} />  
+      </div>
+           
+      {imageUrl && (
+        <img src={imageUrl} alt="preview" width="100" />
+      )}<br />
+
+      <div className="col-4">Loại sản phẩm</div>
+      <div className="col-8">
+        <InputText
+          name="category"
+          placeholder="Loại sản phẩm"
+          value={product.category}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="col-4">Loại sản phẩm</div>
+      <div className="col-8">
+        <InputTextarea
+          name="description"
+          placeholder="Miêu tả"
+          value={product.description}
+          onChange={handleChange}
+        />
+      </div>
+
+      <Button onClick={handleSubmit} label={selectedId ? 'Cập nhật' : 'Thêm mới'} />
+      <Button label="Hủy" onClick={onCancel} style={{ marginLeft: 10 }} />
+      <Button label="Load Image" onClick={loadImage} style={{ marginLeft: 10 }} />
+  </div>
+  );
+};
+
+export default ProductForm;

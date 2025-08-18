@@ -9,7 +9,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>com.example.erp</groupId>
@@ -19,7 +19,8 @@
     <description>Spring Boot project for managing accounts (CRUD)</description>
 
     <properties>
-        <java.version>24</java.version>
+        <!-- Java 21 (hoặc 17 nếu máy bạn chưa lên 21) -->
+        <java.version>21</java.version>
     </properties>
 
     <dependencies>
@@ -35,14 +36,14 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- SQL SERVER JDBC driver -->
+        <!-- SQL Server JDBC driver (version ổn định, có sẵn trên Maven Central) -->
         <dependency>
-		    <groupId>com.microsoft.sqlserver</groupId>
-		    <artifactId>mssql-jdbc</artifactId>
-		    <scope>runtime</scope>
-		</dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>12.8.1.jre11</version>
+        </dependency>
 
-        <!-- DevTools (tự động reload khi code thay đổi) -->
+        <!-- DevTools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>

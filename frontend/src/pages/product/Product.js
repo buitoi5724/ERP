@@ -2,12 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { getAllProducts, deleteProduct } from './productService';
 import ProductForm from './ProductForm';
 import ProductList from './ProductList';
-import './product.css'; // để dùng CSS dialog
+import ProductDetail from './ProductDetail'; // ✅ import vào
+import './product.css';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
+  // ✅ thêm state cho chi tiết
+  const [showDetail, setShowDetail] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const loadProducts = () => {
     getAllProducts().then(res => setProducts(res.data));
@@ -34,8 +39,14 @@ const Product = () => {
     loadProducts();
   };
 
+  // ✅ thêm hàm mở chi tiết
+  const handleDetail = (product) => {
+    setSelectedProduct(product);
+    setShowDetail(true);
+  };
+
   return (
-    <div style={{ padding: '30px' }}>
+    <div style={{ padding: '40px' }}>
       <h1>Quản lý sản phẩm</h1>
       <button onClick={() => { setSelectedId(null); setShowForm(true); }}>
         Thêm sản phẩm mới
@@ -53,7 +64,20 @@ const Product = () => {
         </div>
       )}
 
-      <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} />
+      {/* ✅ Truyền thêm onDetail cho ProductList */}
+      <ProductList
+        products={products}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onDetail={handleDetail}
+      />
+
+      {/* ✅ Dialog chi tiết */}
+      <ProductDetail
+        visible={showDetail}
+        onHide={() => setShowDetail(false)}
+        product={selectedProduct}
+      />
     </div>
   );
 };

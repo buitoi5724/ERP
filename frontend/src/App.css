@@ -1,108 +1,125 @@
+/* === CÀI ĐẶT TỔNG THỂ === */
+body {
+    background-color: #f4f7fa; /* Nền xám nhạt cho toàn bộ trang, tạo cảm giác sạch sẽ */
+    font-family: Arial, sans-serif; /* Sử dụng font chữ dễ đọc */
+}
+
 .app-container {
-  display: flex;
-  align-items: flex-start;
-  padding: 10px;
+    display: flex;
+    align-items: flex-start;
+    padding: 24px;
+    gap: 24px;
 }
 
+/* === MENU BÊN TRÁI === */
 .menu {
-  width: 220px;
-  margin-right: 20px;
-}
-.menu ul {
-  list-style: none;
-  padding: 0;
-}
-.menu li {
-  margin-bottom: 8px;
-}
-.menu a {
-  text-decoration: none;
-  color: #333;
-}
-.menu a:hover {
-  color: #671038;
-}
-
-.content {
-  flex: 1;
-}
-
-.account-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.account-list {
-  background: #c68c8c;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 5px #ccc;
-}
-
-.account-form {
-  background: #cd7b7b;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 5px #a56d6d;
-}
-.account-form label {
-  width: 80px;
-  display: inline-block;
-}
-.account-form input {
-  padding: 5px;
-  margin-bottom: 10px;
-}
-.account-form button {
-  margin-top: 20px;
-}
-.menu {
-  width: 220px;
-  background: #d7b1b1;
-  border-radius: 8px;
-  box-shadow: 0 0 5px #1c0101;
-  padding: 20px;
+    width: 230px;
+    flex-shrink: 0; /* Giữ cho menu không bị co lại */
+    background: #ffffff; /* Nền trắng cho menu */
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Đổ bóng nhẹ nhàng */
 }
 
 .menu ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .menu li {
-  margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .menu li a,
 .menu li span {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #333;
-  font-size: 15px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #495057; /* Màu chữ xám đậm, dịu mắt */
+    font-size: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+    font-weight: 500;
 }
 
+/* Trạng thái khi di chuột vào hoặc được chọn */
 .menu li a:hover,
-.menu li span:hover {
-  background: #d64444;
+.menu li span:hover,
+.menu li.active a { /* Thêm class 'active' vào thẻ li của trang hiện tại */
+    background-color: #eef2ff; /* Màu nền xanh dương rất nhạt */
+    color: #4361ee; /* Màu chữ xanh dương chủ đạo */
+    font-weight: 600;
 }
 
 .menu li a svg,
 .menu li span svg {
-  margin-right: 8px;
+    margin-right: 12px;
 }
 
-/* Submenu */
-.menu .submenu {
-  margin-top: 6px;
-  margin-left: 20px;
+/* === KHU VỰC NỘI DUNG CHÍNH === */
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
-.menu .submenu li a {
-  font-size: 14px;
+/* Áp dụng style "card" cho cả form và list */
+.account-list,
+.account-form {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.account-form label {
+    display: block; /* Hiển thị label trên 1 dòng riêng */
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #343a40;
+}
+
+.account-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-sizing: border-box; /* Quan trọng để padding không làm tăng width */
+}
+
+.account-form button {
+    background-color: #4361ee; /* Màu xanh chủ đạo */
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.account-form button:hover {
+    background-color: #3a52cc; /* Màu xanh đậm hơn khi hover */
+}
+
+.p-inputtext {
+    width: 100%;
+}
+
+.button-right-flex {
+  display: flex;
+  justify-content: flex-end; /* đẩy tất cả nút sang phải */
+}
+
+.p-inputtext {
+    padding: 5px;
+}
+
+.p-button {
+    padding: 5px;
+    font-size: 12px;
 }
