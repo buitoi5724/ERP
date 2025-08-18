@@ -105,3 +105,21 @@ body {
 .account-form button:hover {
     background-color: #3a52cc; /* Màu xanh đậm hơn khi hover */
 }
+
+.p-inputtext {
+    width: 100%;
+}
+
+.button-right-flex {
+  display: flex;
+  justify-content: flex-end; /* đẩy tất cả nút sang phải */
+}
+
+.p-inputtext {
+    padding: 5px;
+}
+
+.p-button {
+    padding: 5px;
+    font-size: 12px;
+}

@@ -3,6 +3,9 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ToastContainer, toast } from 'react-toastify';
 import { Dialog } from 'primereact/dialog';
+import { Card } from 'primereact/card';
+import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -19,7 +22,6 @@ export default function AccountComponent() {
   const [showEditForm, setShowEditForm] = useState(false);
   const navigate = useNavigate();
 
-  // Tự động load danh sách account khi component được mount
   useEffect(() => {
     loadAccounts();
   }, []);
@@ -98,118 +100,67 @@ export default function AccountComponent() {
 
   const actionBodyTemplate = (rowData) => (
     <>
-      <button onClick={() => editAccount(rowData.id)}>Edit</button>{' '}
-      <button onClick={() => deleteAccount(rowData.id)}>Xoá</button>
+      <Button label="Edit" icon="pi pi-pencil" className="p-button-sm p-button-text" onClick={() => editAccount(rowData.id)} />
+      <Button label="Xoá" icon="pi pi-trash" className="p-button-sm p-button-danger p-button-text" onClick={() => deleteAccount(rowData.id)} />
     </>
   );
 
   return (
-    <div className="account-container">
+    <div className="p-4 space-y-6">
       {/* Danh sách tài khoản */}
-      <div className="account-list card">
-        <h2>Danh sách Accounts</h2>
-        <DataTable value={accounts} tableStyle={{ minWidth: '30rem' }}>
-          <Column field="id" header="ID"></Column>
-          <Column field="email" header="Email"></Column>
-          <Column field="name" header="Name"></Column>
-          <Column field="password" header="Password"></Column>
-          <Column field="username" header="Username"></Column>
-          <Column header="Thao tác" body={actionBodyTemplate}></Column>
+      <Card title="Danh sách Accounts">
+        <DataTable value={accounts} paginator rows={5} responsiveLayout="scroll">
+          <Column field="id" header="ID" sortable />
+          <Column field="email" header="Email" sortable />
+          <Column field="name" header="Name" sortable />
+          <Column field="password" header="Password" />
+          <Column field="username" header="Username" sortable />
+          <Column header="Thao tác" body={actionBodyTemplate} />
         </DataTable>
-      </div>
+      </Card>
 
       {/* Form thêm tài khoản */}
-      <div className="account-form">
-        <h3>Thêm Account mới</h3>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>Email:</label>
-            <input
-              value={account.email}
-              onChange={(e) => setAccount({ ...account, email: e.target.value })}
-              list="emailSuggestions"
-            />
-            <datalist id="emailSuggestions">
-              {accounts.map((acc) => (
-                <option key={acc.id} value={acc.email} />
-              ))}
-            </datalist>
+      <Card title="Thêm Account mới">
+        <form onSubmit={handleSubmit} className="p-fluid grid formgrid">
+          <div className="field col-12 md:col-6">
+            <label>Email</label>
+            <InputText value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
           </div>
-          <div>
-            <label>Name:</label>
-            <input
-              value={account.name}
-              onChange={(e) => setAccount({ ...account, name: e.target.value })}
-              list="nameSuggestions"
-            />
-            <datalist id="nameSuggestions">
-              {accounts.map((acc) => (
-                <option key={acc.id} value={acc.name} />
-              ))}
-            </datalist>
+          <div className="field col-12 md:col-6">
+            <label>Name</label>
+            <InputText value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
           </div>
-          <div>
-            <label>Password:</label>
-            <input
-              value={account.password}
-              onChange={(e) => setAccount({ ...account, password: e.target.value })}
-            />
+          <div className="field col-12 md:col-6">
+            <label>Password</label>
+            <InputText value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
           </div>
-          <div>
-            <label>Username:</label>
-            <input
-              value={account.username}
-              onChange={(e) => setAccount({ ...account, username: e.target.value })}
-              list="usernameSuggestions"
-            />
-            <datalist id="usernameSuggestions">
-              {accounts.map((acc) => (
-                <option key={acc.id} value={acc.username} />
-              ))}
-            </datalist>
+          <div className="field col-12 md:col-6">
+            <label>Username</label>
+            <InputText value={account.username} onChange={(e) => setAccount({ ...account, username: e.target.value })} />
           </div>
-          <button type="submit">Thêm Account</button>
+          <div className="col-12">
+            <Button type="submit" label="Thêm Account" icon="pi pi-plus" className="p-button-primary" />
+          </div>
         </form>
-      </div>
+      </Card>
 
       {/* Dialog chỉnh sửa */}
-      <Dialog
-        header="Chỉnh sửa Account"
-        visible={showEditForm}
-        style={{ width: '30vw' }}
-        onHide={() => setShowEditForm(false)}
-      >
+      <Dialog header="Chỉnh sửa Account" visible={showEditForm} style={{ width: '30vw' }} onHide={() => setShowEditForm(false)} modal>
         {selectedAccount && (
-          <form onSubmit={(e) => { e.preventDefault(); saveAccount(); }}>
-            <div>
-              <label>Email:</label>
-              <input
-                value={selectedAccount.email}
-                onChange={(e) => setSelectedAccount({ ...selectedAccount, email: e.target.value })}
-              />
-            </div>
-            <div>
-              <label>Name:</label>
-              <input
-                value={selectedAccount.name}
-                onChange={(e) => setSelectedAccount({ ...selectedAccount, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <label>Password:</label>
-              <input
-                value={selectedAccount.password}
-                onChange={(e) => setSelectedAccount({ ...selectedAccount, password: e.target.value })}
-              />
-            </div>
-            <div>
-              <label>Username:</label>
-              <input
-                value={selectedAccount.username}
-                onChange={(e) => setSelectedAccount({ ...selectedAccount, username: e.target.value })}
-              />
-            </div>
-            <button type="submit">Lưu</button>
+          <form onSubmit={(e) => { e.preventDefault(); saveAccount(); }} className="p-fluid space-y-3">
+            <label>Email</label>
+            <InputText value={selectedAccount.email} onChange={(e) => setSelectedAccount({ ...selectedAccount, email: e.target.value })} />
+
+            <label>Name</label>
+            <InputText value={selectedAccount.name} onChange={(e) => setSelectedAccount({ ...selectedAccount, name: e.target.value })} />
+
+            <label>Password</label>
+            <InputText value={selectedAccount.password} onChange={(e) => setSelectedAccount({ ...selectedAccount, password: e.target.value })} />
+
+            <label>Username</label>
+            <InputText value={selectedAccount.username} onChange={(e) => setSelectedAccount({ ...selectedAccount, username: e.target.value })} />
+
+            <Button type="submit" label="Lưu" icon="pi pi-check" className="p-button-success mt-3" />
           </form>
         )}
       </Dialog>

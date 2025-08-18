@@ -6,6 +6,7 @@ import Product from './pages/product/Product';
 import "./App.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import 'primeflex/primeflex.css';
+import ProductDetail from "./pages/product/ProductDetail";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Routes>
           <Route path="/accounts" element={<AccountComponent />} />
           <Route path="/products" element={<Product />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/employees" element={<h1>Employees Page</h1>} />
           <Route path="*" element={<h1>Welcome BuiToi</h1>} />
         </Routes>
