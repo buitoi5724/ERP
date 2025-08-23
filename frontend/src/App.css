@@ -1,4 +1,5 @@
 /* === CÀI ĐẶT TỔNG THỂ === */
+
 body {
     background-color: #f4f7fa; /* Nền xám nhạt cho toàn bộ trang, tạo cảm giác sạch sẽ */
     font-family: Arial, sans-serif; /* Sử dụng font chữ dễ đọc */
@@ -116,10 +117,20 @@ body {
 }
 
 .p-inputtext {
-    padding: 5px;
+    padding: 10px;
 }
 
 .p-button {
     padding: 5px;
     font-size: 12px;
+}
+
+.p-component {
+    font-size: 13px;
+}
+.button-group {
+  display: flex;
+  justify-content: flex-end; /* đẩy nút về góc phải */
+  gap: 10px;                 /* khoảng cách giữa 2 nút */
+  margin-top: 1rem;
 }

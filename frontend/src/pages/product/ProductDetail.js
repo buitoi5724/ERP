@@ -1,13 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { TabView, TabPanel } from "primereact/tabview";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { getPriceHistory } from "./productService";
 
 const ProductDetail = ({ visible, onHide, product }) => {
-  if (!product) return null;
+  const [priceHistory, setPriceHistory] = useState([]);
 
-  const priceHistory = product.priceHistory || [];
+  useEffect(() => {
+    if (product?.id) {
+      getPriceHistory(product.id).then((data) => setPriceHistory(data));
+    }
+  }, [product]);
+
+  if (!product) return null;
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";

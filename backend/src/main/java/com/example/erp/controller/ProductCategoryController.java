@@ -49,7 +49,7 @@ public class ProductCategoryController {
         return productCategoryService.getAll()
                 // 2. TÁC DỤNG: Xử lý dữ liệu vừa lấy được.
                 .stream() // Chuyển danh sách (List) thành một luồng (Stream) để xử lý.
-                // Ánh xạ (map) mỗi đối tượng ProductCategory (đầy đủ) thành một đối tượng ProductCategoryDTO (gọn nhẹ hơn).
+                // Ánh xạ (map) mỗi đối tượng ProductCategory (đầy đủ) thành một đối tượng ProductCategoryDTO .
                 .map(category -> new ProductCategoryDTO(category.getId(), category.getName()))
                 // Thu thập (collect) tất cả các đối tượng DTO đã tạo thành một danh sách mới.
                 .collect(Collectors.toList());

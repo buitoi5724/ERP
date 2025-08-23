@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository // Đánh dấu interface này là một 'Repository', một bean (thành phần) được quản lý bởi Spring.
             // Nó chịu trách nhiệm cho việc truy cập và thao tác với dữ liệu.
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Long> {
-    // --- Thật đáng kinh ngạc, chỉ cần như vậy là đủ! ---
+  
 
     // Bằng việc kế thừa JpaRepository, interface này sẽ có ngay lập tức các phương thức như:
     // - save(ProductCategory entity): Lưu hoặc cập nhật một danh mục.

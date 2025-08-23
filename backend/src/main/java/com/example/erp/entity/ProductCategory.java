@@ -3,38 +3,45 @@ package com.example.erp.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "product_category")
+@Entity // Đánh dấu đây là một Entity (tương ứng với 1 bảng trong DB)
+@Table(name = "product_category") // Map tới bảng product_category trong DB
 public class ProductCategory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id // Khóa chính
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    // AUTO_INCREMENT trong DB (tăng tự động)
     private Long id;
 
     @Column(
-        nullable = false,
-        unique = true,
-        length = 50
+        nullable = false,   // Không được null
+        unique = true,      // Giá trị phải duy nhất (mỗi category có 1 code riêng)
+        length = 50         // Giới hạn tối đa 50 ký tự
     )
-    private String code;
+    private String code; // Mã danh mục (ví dụ: "FOOD", "ELEC")
 
     @Column(
-        nullable = false,
-        length = 255
+        nullable = false,   // Không được null
+        length = 255        // Giới hạn tối đa 255 ký tự
     )
-    private String name;
+    private String name; // Tên danh mục (ví dụ: "Đồ ăn", "Điện tử")
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(columnDefinition = "TEXT") 
+    // Kiểu TEXT trong DB (có thể lưu nội dung dài)
+    private String description; // Mô tả chi tiết về danh mục
 
-    private LocalDateTime createDate;
-    private String createBy;
-    private LocalDateTime updateDate;
-    private String updateBy;
+    // Các trường thông tin audit (theo dõi ai tạo/cập nhật và khi nào)
+    private LocalDateTime createDate; // Ngày tạo
+    private String createBy;          // Người tạo
+    private LocalDateTime updateDate; // Ngày cập nhật
+    private String updateBy;          // Người cập nhật
 
+    // Constructor mặc định (bắt buộc cho JPA/Hibernate)
     public ProductCategory() {}
 
+    // ------------------------
     // Getters & Setters
+    // ------------------------
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
