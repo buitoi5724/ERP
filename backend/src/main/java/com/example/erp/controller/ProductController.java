@@ -2,7 +2,7 @@ package com.example.erp.controller;
 
 import com.example.erp.entity.Product;
 import com.example.erp.entity.ProductCategory;
-import com.example.erp.entity.ProductPrice; // <-- Thêm import này
+import com.example.erp.entity.ProductPrice; // Lịch sử giá
 import com.example.erp.repository.ProductCategoryRepository;
 import com.example.erp.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,44 +12,42 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigDecimal; // <-- Thêm import này
+import java.math.BigDecimal; // Làm việc với số thập phân (giá)
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime; // <-- Thêm import này
+import java.time.LocalDateTime; // Ngày giờ
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/products")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/products") // Tất cả API sản phẩm sẽ bắt đầu bằng /api/products
+@CrossOrigin(origins = "*") // Cho phép gọi từ FE (tránh lỗi CORS)
 public class ProductController {
 
     @Autowired
-    private ProductService productService;
+    private ProductService productService; // Gọi business/service
     @Autowired
-    private ProductCategoryRepository productCategoryRepository;
+    private ProductCategoryRepository productCategoryRepository; // Gọi DB cho Category
 
-    private String uploadFolder = "D:/uploads/product/";
+    private String uploadFolder = "D:/uploads/product/"; // Folder lưu ảnh
 
 
     /*
      * =================================================================================
-     * DTO (Data Transfer Object) - CÁC LỚP "VẬN CHUYỂN DỮ LIỆU"
+     * DTO (Data Transfer Object) - Các lớp vận chuyển dữ liệu ra ngoài API
      * =================================================================================
      */
 
-    // <-- BẮT ĐẦU PHẦN CẬP NHẬT CHO BƯỚC 1.4
-
-    // 1. DTO MỚI ĐỂ HIỂN THỊ LỊCH SỬ GIÁ
+    // DTO: hiển thị lịch sử giá sản phẩm
     public static class PriceHistoryDTO {
         private Long id;
         private Double price;
         private boolean active;
         private LocalDateTime createdAt;
 
-        // Constructor để chuyển đổi từ Entity sang DTO
+        // Map từ entity ProductPrice -> DTO
         public PriceHistoryDTO(ProductPrice priceEntity) {
             this.id = priceEntity.getId();
             this.price = priceEntity.getPrice();
@@ -64,7 +62,7 @@ public class ProductController {
         public LocalDateTime getCreatedAt() { return createdAt; }
     }
 
-    // 2. CẬP NHẬT LẠI PRODUCTDTO ĐỂ CHỨA DANH SÁCH LỊCH SỬ GIÁ
+    // DTO: cho Product (bao gồm category + lịch sử giá)
     public static class ProductDTO {
         private Long id;
         private String name;
@@ -72,7 +70,7 @@ public class ProductController {
         private String description;
         private String image;
         private CategoryDTO category;
-        private List<PriceHistoryDTO> priceHistory; // <-- THÊM TRƯỜNG MỚI NÀY
+        private List<PriceHistoryDTO> priceHistory;
 
         public ProductDTO(Product product) {
             this.id = product.getId();
@@ -80,33 +78,31 @@ public class ProductController {
             this.price = product.getPrice();
             this.description = product.getDescription();
             this.image = product.getImage();
+
+            // Map category
             if (product.getCategory() != null) {
                 this.category = new CategoryDTO(product.getCategory());
             }
 
-            // --- THÊM LOGIC MỚI ĐỂ CHUYỂN ĐỔI LỊCH SỬ GIÁ ---
+            // Map lịch sử giá
             if (product.getPriceHistory() != null) {
                 this.priceHistory = product.getPriceHistory().stream()
-                        .map(PriceHistoryDTO::new) // Với mỗi ProductPrice, tạo một PriceHistoryDTO
+                        .map(PriceHistoryDTO::new)
                         .collect(Collectors.toList());
             }
         }
 
-        // Getters cũ giữ nguyên
+        // Getters
         public Long getId() { return id; }
         public String getName() { return name; }
         public Double getPrice() { return price; }
         public String getDescription() { return description; }
         public String getImage() { return image; }
         public CategoryDTO getCategory() { return category; }
-        
-        // <-- THÊM GETTER MỚI NÀY
         public List<PriceHistoryDTO> getPriceHistory() { return priceHistory; }
     }
 
-    // <-- KẾT THÚC PHẦN CẬP NHẬT
-
-    // CategoryDTO giữ nguyên, không thay đổi
+    // DTO: cho Category
     public static class CategoryDTO {
         private Long id;
         private String name;
@@ -120,10 +116,13 @@ public class ProductController {
     }
 
 
-    // ---------------------------------------------------------------------------------
-    // CÁC NHIỆM VỤ CỤ THỂ (API ENDPOINTS) - KHÔNG CẦN THAY ĐỔI GÌ Ở ĐÂY
-    // ---------------------------------------------------------------------------------
+    /*
+     * =================================================================================
+     * API ENDPOINTS
+     * =================================================================================
+     */
 
+    // Lấy tất cả sản phẩm
     @GetMapping
     public List<ProductDTO> getAll() {
         return productService.getAll()
@@ -132,6 +131,7 @@ public class ProductController {
                 .collect(Collectors.toList());
     }
 
+    // Lấy sản phẩm theo id
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getById(@PathVariable Long id) {
         return productService.getById(id)
@@ -140,6 +140,7 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Lấy ảnh sản phẩm (trả về byte[])
     @GetMapping("/get-image/{id}")
     public ResponseEntity<byte[]> getImage(@PathVariable Long id) throws IOException {
         byte[] image = productService.getImage(id);
@@ -148,12 +149,13 @@ public class ProductController {
                 .body(image);
     }
 
+    // Tạo sản phẩm mới
     @PostMapping(consumes = {"multipart/form-data"})
     public Product create(
             @RequestPart("product") Product product,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) throws IOException {
-        // ... code giữ nguyên
+        // Kiểm tra category
         if (product.getCategory() != null && product.getCategory().getId() != null) {
             ProductCategory category = productCategoryRepository
                     .findById(product.getCategory().getId())
@@ -161,6 +163,7 @@ public class ProductController {
             product.setCategory(category);
         }
 
+        // Xử lý ảnh nếu có
         if (image != null && !image.isEmpty()) {
             String fileName = UUID.randomUUID().toString() + ".jpg";
             Path filePath = Paths.get(uploadFolder, fileName);
@@ -171,19 +174,18 @@ public class ProductController {
 
         return productService.save(product);
     }
- // Trong file: ProductController.java
 
+    // Cập nhật sản phẩm
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Product update(
             @PathVariable Long id,
             @RequestPart("product") Product updatedProduct,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) throws IOException {
-        // ĐÃ SỬA: Gọi phương thức mới của service (chỉ có 3 tham số)
         return productService.update(id, updatedProduct, image);
     }
-    
 
+    // Xóa sản phẩm
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         productService.delete(id);

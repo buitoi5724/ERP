@@ -6,7 +6,6 @@ import { Dialog } from 'primereact/dialog';
 import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-import { useNavigate } from 'react-router-dom';
 
 import 'react-toastify/dist/ReactToastify.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -20,7 +19,7 @@ export default function AccountComponent() {
   const [account, setAccount] = useState({ email: '', name: '', password: '', username: '' });
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
-  const navigate = useNavigate();
+  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     loadAccounts();
@@ -58,6 +57,7 @@ export default function AccountComponent() {
       .then(() => {
         toast.success('Thêm account thành công');
         setAccount({ email: '', name: '', password: '', username: '' });
+        setShowAddForm(false);
         loadAccounts();
       })
       .catch((err) => {
@@ -107,63 +107,170 @@ export default function AccountComponent() {
 
   return (
     <div className="p-4 space-y-6">
-      {/* Danh sách tài khoản */}
-      <Card title="Danh sách Accounts">
-        <DataTable value={accounts} paginator rows={5} responsiveLayout="scroll">
-          <Column field="id" header="ID" sortable />
-          <Column field="email" header="Email" sortable />
-          <Column field="name" header="Name" sortable />
-          <Column field="password" header="Password" />
-          <Column field="username" header="Username" sortable />
-          <Column header="Thao tác" body={actionBodyTemplate} />
-        </DataTable>
-      </Card>
+      {/* Danh sách tài khoản + nút thêm */}
+<Card>
+  <div className="flex justify-between items-center mb-3">
+    <h1 className="text-xl font-bold">Danh sách Accounts</h1>
+    <div className="ml-auto">   {/* đẩy nút sang phải */}
+      <Button
+        label="Thêm Account"
+        icon="pi pi-plus"
+        className="p-button-success"
+        onClick={() => setShowAddForm(true)}
+      />
+    </div>
+  </div>
 
-      {/* Form thêm tài khoản */}
-      <Card title="Thêm Account mới">
+  <DataTable value={accounts} paginator rows={5} responsiveLayout="scroll">
+    <Column field="id" header="ID" sortable />
+    <Column field="email" header="Email" sortable />
+    <Column field="name" header="Name" sortable />
+    <Column field="password" header="Password" />
+    <Column field="username" header="Username" sortable />
+    <Column header="Thao tác" body={actionBodyTemplate} />
+  </DataTable>
+</Card>
+
+      {/* Dialog thêm account */}
+      <Dialog header="Thêm Account mới" visible={showAddForm} style={{ width: '30vw' }} onHide={() => setShowAddForm(false)} modal>
         <form onSubmit={handleSubmit} className="p-fluid grid formgrid">
+          
           <div className="field col-12 md:col-6">
             <label>Email</label>
-            <InputText value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
+            <InputText
+              value={account.email}
+              onChange={(e) => setAccount({ ...account, email: e.target.value })}
+            />
           </div>
           <div className="field col-12 md:col-6">
             <label>Name</label>
-            <InputText value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
+            <InputText
+              value={account.name}
+              onChange={(e) => setAccount({ ...account, name: e.target.value })}
+            />
           </div>
           <div className="field col-12 md:col-6">
             <label>Password</label>
-            <InputText value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
+            <InputText
+              type="password"
+              value={account.password}
+              onChange={(e) => setAccount({ ...account, password: e.target.value })}
+            />
           </div>
           <div className="field col-12 md:col-6">
             <label>Username</label>
-            <InputText value={account.username} onChange={(e) => setAccount({ ...account, username: e.target.value })} />
+            <InputText
+              value={account.username}
+              onChange={(e) => setAccount({ ...account, username: e.target.value })}
+            />
           </div>
-          <div className="col-12">
-            <Button type="submit" label="Thêm Account" icon="pi pi-plus" className="p-button-primary" />
-          </div>
+       <div className="col-12">
+  <div className="flex justify-end gap-2 mt-3">
+    <Button
+      type="button"
+      label="Hủy"
+      icon="pi pi-times"
+      className="p-button-secondary p-button-sm"
+      onClick={() => setShowAddForm(false)}
+    />
+    <Button
+      type="submit"
+      label="Lưu"
+      icon="pi pi-check"
+      className="p-button-primary p-button-sm"
+    />
+  </div>
+</div>
         </form>
-      </Card>
+      </Dialog>
 
       {/* Dialog chỉnh sửa */}
-      <Dialog header="Chỉnh sửa Account" visible={showEditForm} style={{ width: '30vw' }} onHide={() => setShowEditForm(false)} modal>
-        {selectedAccount && (
-          <form onSubmit={(e) => { e.preventDefault(); saveAccount(); }} className="p-fluid space-y-3">
-            <label>Email</label>
-            <InputText value={selectedAccount.email} onChange={(e) => setSelectedAccount({ ...selectedAccount, email: e.target.value })} />
+ {/* Dialog thêm account */}
+<Dialog header="Thêm Account mới" visible={showAddForm} style={{ width: '30vw' }} onHide={() => setShowAddForm(false)} modal>
+  <form onSubmit={handleSubmit} className="p-fluid grid formgrid">
+    <div className="field col-12 md:col-6">
+      <label>Email</label>
+      <InputText value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
+    </div>
+    <div className="field col-12 md:col-6">
+      <label>Name</label>
+      <InputText value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
+    </div>
+    <div className="field col-12 md:col-6">
+      <label>Password</label>
+      <InputText type="password" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
+    </div>
+    <div className="field col-12 md:col-6">
+      <label>Username</label>
+      <InputText value={account.username} onChange={(e) => setAccount({ ...account, username: e.target.value })} />
+    </div>
+  </form>
 
-            <label>Name</label>
-            <InputText value={selectedAccount.name} onChange={(e) => setSelectedAccount({ ...selectedAccount, name: e.target.value })} />
+  {/* action buttons nằm ngoài grid */}
+  <div className="flex justify-end gap-2 mt-3">
+    <Button
+      type="button"
+      label="Hủy"
+      icon="pi pi-times"
+      className="p-button-secondary p-button-sm"
+      onClick={() => setShowAddForm(false)}
+    />
+    <Button
+      type="submit"
+      label="Lưu"
+      icon="pi pi-check"
+      className="p-button-primary p-button-sm"
+      onClick={handleSubmit}
+    />
+  </div>
+</Dialog>
 
-            <label>Password</label>
-            <InputText value={selectedAccount.password} onChange={(e) => setSelectedAccount({ ...selectedAccount, password: e.target.value })} />
+{/* Dialog chỉnh sửa */}
+<Dialog
+  header="Thêm Account mới"
+  visible={showAddForm}
+  style={{ width: '30vw' }}
+  onHide={() => setShowAddForm(false)}
+  modal
+  footer={
+    <div className="flex justify-end gap-2">
+      <Button
+        type="button"
+        label="Hủy"
+        icon="pi pi-times"
+        className="p-button-secondary p-button-sm"
+        onClick={() => setShowAddForm(false)}
+      />
+      <Button
+        type="submit"
+        label="Lưu"
+        icon="pi pi-check"
+        className="p-button-primary p-button-sm"
+        onClick={handleSubmit}
+      />
+    </div>
+  }
+>
+  <form onSubmit={handleSubmit} className="p-fluid grid formgrid">
+    <div className="field col-12 md:col-6">
+      <label>Email</label>
+      <InputText value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
+    </div>
+    <div className="field col-12 md:col-6">
+      <label>Name</label>
+      <InputText value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
+    </div>
+    <div className="field col-12 md:col-6">
+      <label>Password</label>
+      <InputText type="password" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
+    </div>
+    <div className="field col-12 md:col-6">
+      <label>Username</label>
+      <InputText value={account.username} onChange={(e) => setAccount({ ...account, username: e.target.value })} />
+    </div>
+  </form>
+</Dialog>
 
-            <label>Username</label>
-            <InputText value={selectedAccount.username} onChange={(e) => setSelectedAccount({ ...selectedAccount, username: e.target.value })} />
-
-            <Button type="submit" label="Lưu" icon="pi pi-check" className="p-button-success mt-3" />
-          </form>
-        )}
-      </Dialog>
 
       <ToastContainer />
     </div>

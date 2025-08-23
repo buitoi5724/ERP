@@ -3,33 +3,41 @@ package com.example.erp.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "product_price")
-public class ProductPrice {
+@Entity // Đây là một entity JPA (map với bảng trong DB)
+@Table(name = "product_price") // Map tới bảng product_price
+public class ProductPrice implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    // Khóa chính, auto-increment trong DB
     private Long id;
 
     @Column(nullable = false)
-    private Double price;
+    private Double price; // Giá sản phẩm tại một thời điểm
 
     @Column(nullable = false)
-    private LocalDateTime startDate;
+    private LocalDateTime startDate; // Ngày bắt đầu áp dụng giá
 
-    private LocalDateTime endDate;
+    private LocalDateTime endDate;   // Ngày kết thúc (nếu null thì giá vẫn còn hiệu lực)
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(nullable = false, updatable = false) 
+    // Không cho cập nhật sau khi tạo
+    private LocalDateTime createdAt; // Ngày giờ bản ghi được tạo
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    @JsonIgnoreProperties({"priceHistory", "category"})
+    @ManyToOne(fetch = FetchType.LAZY) // Nhiều giá thuộc về 1 sản phẩm
+    @JoinColumn(name = "product_id", nullable = false) 
+    // Khóa ngoại liên kết tới bảng product
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    // Tránh vòng lặp vô hạn khi convert sang JSON
     private Product product;
 
     // --- Lifecycle callback ---
+    // Hàm này sẽ tự động chạy trước khi persist (insert vào DB)
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -54,8 +62,10 @@ public class ProductPrice {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
+    // --- Helper method ---
+    // Xác định giá này có còn hiệu lực hay không
     public boolean isActive() {
-        return (endDate == null || endDate.isAfter(LocalDateTime.now())) &&
-               (startDate.isBefore(LocalDateTime.now()) || startDate.isEqual(LocalDateTime.now()));
+        return (endDate == null || endDate.isAfter(LocalDateTime.now())) // chưa hết hạn
+               && (startDate.isBefore(LocalDateTime.now()) || startDate.isEqual(LocalDateTime.now())); // đã bắt đầu
     }
 }

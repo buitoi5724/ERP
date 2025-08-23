@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { getAllProducts, deleteProduct } from './productService';
 import ProductForm from './ProductForm';
 import ProductList from './ProductList';
-import ProductDetail from './ProductDetail'; // ✅ import vào
+import ProductDetail from './ProductDetail';
+import { Button } from 'primereact/button';   // ✅ import Button
 import './product.css';
 
 const Product = () => {
@@ -10,7 +11,6 @@ const Product = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
-  // ✅ thêm state cho chi tiết
   const [showDetail, setShowDetail] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -39,18 +39,23 @@ const Product = () => {
     loadProducts();
   };
 
-  // ✅ thêm hàm mở chi tiết
   const handleDetail = (product) => {
     setSelectedProduct(product);
     setShowDetail(true);
   };
 
   return (
-    <div style={{ padding: '40px' }}>
-      <h1>Quản lý sản phẩm</h1>
-      <button onClick={() => { setSelectedId(null); setShowForm(true); }}>
-        Thêm sản phẩm mới
-      </button>
+    <div>
+      {/* ✅ H1 + Button cùng hàng */}
+      <div className="flex justify-content-between align-items-center mb-3">
+        <h1 className="m-0">Quản lý sản phẩm</h1>
+        <Button
+          label="Thêm sản phẩm mới"
+          icon="pi pi-plus"
+          severity="success"
+          onClick={() => { setSelectedId(null); setShowForm(true); }}
+        />
+      </div>
 
       {showForm && (
         <div className="dialog-overlay">
@@ -64,7 +69,6 @@ const Product = () => {
         </div>
       )}
 
-      {/* ✅ Truyền thêm onDetail cho ProductList */}
       <ProductList
         products={products}
         onEdit={handleEdit}
@@ -72,7 +76,6 @@ const Product = () => {
         onDetail={handleDetail}
       />
 
-      {/* ✅ Dialog chi tiết */}
       <ProductDetail
         visible={showDetail}
         onHide={() => setShowDetail(false)}
