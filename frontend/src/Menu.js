@@ -9,9 +9,7 @@ export default function Menu() {
       <ul>
         <li><Link to="/accounts"><FaUsers /> Accounts</Link></li>
         <li><Link to="/products"><FaChartLine /> Products</Link></li>
-        <li><Link to="/analytics"><FaChartLine /> Setup</Link></li>
-       
-      
+        <li><Link to="/shopping"><FaChartLine /> Shopping</Link></li>
         <li><Link to="/employees"><FaUsers /> Employees</Link></li>
         <li><Link to="/downtime"><FaClock /> Downtime</Link></li>
         <li><Link to="/scrap"><FaTools /> Scrap</Link></li>

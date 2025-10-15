@@ -6,7 +6,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from 'primereact/dropdown';
 import 'primeicons/primeicons.css';  
 import { addToCart } from "./cartService"
-import { getProductById, getImage, getCategories, createProduct, updateProduct } from './productService';
+import { getProductById, getImage, getCategories, createProduct, updateProduct } from './shoppingService';
 
 const ProductForm = ({ selectedId, onSuccess, onCancel }) => {
     const [product, setProduct] = useState({
