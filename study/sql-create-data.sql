@@ -3238,8 +3238,62 @@ VALUES
     (2153, 11077, 73, 2),
     (2154, 11077, 75, 4),
     (2155, 11077, 77, 2);
+Kiểm tra :
+Tìm ra người bản đơn nhiều nhất :-------------------
 
+SELECT TOP 1 
+    E.EmployeeID,
+    E.FirstName + ' ' + E.LastName AS EmployeeName,
+    COUNT(O.OrderID) AS SoDonHang
+FROM Employees E
+JOIN Orders O ON E.EmployeeID = O.EmployeeID
+GROUP BY E.EmployeeID, E.FirstName, E.LastName
+ORDER BY SoDonHang DESC;
 
+Tìm ra người ship nhiều đơn  nhất :-------------------
+SELECT TOP 1 
+    S.ShipperID,
+    S.ShipperName AS ShipperName,
+    COUNT(O.OrderID) AS SoDonShip
+FROM dbo.Shippers S
+JOIN dbo.Orders O ON S.ShipperID = O.ShipperID
+GROUP BY S.ShipperID, S.ShipperName
+ORDER BY SoDonShip DESC;
+
+Tìm ra người bán doanh thu it nhất :--------------------
+SELECT TOP 1
+    E.EmployeeID,
+    E.FirstName + ' ' + E.LastName AS EmployeeName,
+    SUM(OD.Quantity * P.Price) AS DoanhThu
+FROM EMPLOYEES E
+JOIN ORDERS O ON E.EmployeeID = O.EmployeeID
+JOIN ORDER_DETAILS OD ON O.OrderID = OD.OrderID
+JOIN PRODUCTS P ON OD.ProductID = P.ProductID
+GROUP BY E.EmployeeID, E.FirstName, E.LastName
+ORDER BY DoanhThu ASC;
+
+Tìm ra người có số tiền cao nhất :---------------------------
+SELECT TOP 1
+    E.EmployeeID,
+    E.FirstName + ' ' + E.LastName AS EmployeeName,
+    SUM(OD.Quantity * P.Price) AS DoanhThu
+FROM EMPLOYEES E
+JOIN ORDERS O ON E.EmployeeID = O.EmployeeID
+JOIN ORDER_DETAILS OD ON O.OrderID = OD.OrderID
+JOIN PRODUCTS P ON OD.ProductID = P.ProductID
+GROUP BY E.EmployeeID, E.FirstName, E.LastName
+ORDER BY DoanhThu DESC;
+Nhân viên có số lượng đơn hàng nhiều nhất------------
+SELECT TOP 1 
+    E.EmployeeID,
+    E.FirstName,
+    E.LastName,
+    COUNT(O.OrderID) AS TotalOrders
+FROM DBO.EMPLOYEES E
+JOIN DBO.ORDERS O 
+    ON E.EmployeeID = O.EmployeeID
+GROUP BY E.EmployeeID, E.FirstName, E.LastName
+ORDER BY TotalOrders DESC;
 
 
 

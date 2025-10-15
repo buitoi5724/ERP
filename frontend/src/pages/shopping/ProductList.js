@@ -91,7 +91,12 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
       <Button icon="pi pi-eye" rounded text severity="info" tooltip="Chi tiết" onClick={() => onDetail(product)} />
       <Button icon="pi pi-pencil" rounded text severity="warning" tooltip="Sửa" onClick={() => onEdit(product.id)} />
       <Button icon="pi pi-trash" rounded text severity="danger" tooltip="Xoá" onClick={() => onDelete(product.id)} />
- 
+            <Button
+
+        className="p-button-sm p-button-success"
+        style={{ width: 'auto' }}
+        onClick={() => addToCart(product)}
+    />
     </div>
   );
 

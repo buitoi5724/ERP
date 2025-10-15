@@ -132,61 +132,13 @@ export default function AccountComponent() {
 </Card>
 
       {/* Dialog thêm account */}
-      <Dialog header="Thêm Account mới" visible={showAddForm} style={{ width: '30vw' }} onHide={() => setShowAddForm(false)} modal>
-        <form onSubmit={handleSubmit} className="p-fluid grid formgrid">
-          
-          <div className="field col-12 md:col-6">
-            <label>Email</label>
-            <InputText
-              value={account.email}
-              onChange={(e) => setAccount({ ...account, email: e.target.value })}
-            />
-          </div>
-          <div className="field col-12 md:col-6">
-            <label>Name</label>
-            <InputText
-              value={account.name}
-              onChange={(e) => setAccount({ ...account, name: e.target.value })}
-            />
-          </div>
-          <div className="field col-12 md:col-6">
-            <label>Password</label>
-            <InputText
-              type="password"
-              value={account.password}
-              onChange={(e) => setAccount({ ...account, password: e.target.value })}
-            />
-          </div>
-          <div className="field col-12 md:col-6">
-            <label>Username</label>
-            <InputText
-              value={account.username}
-              onChange={(e) => setAccount({ ...account, username: e.target.value })}
-            />
-          </div>
-       <div className="col-12">
-  <div className="flex justify-end gap-2 mt-3">
-    <Button
-      type="button"
-      label="Hủy"
-      icon="pi pi-times"
-      className="p-button-secondary p-button-sm"
-      onClick={() => setShowAddForm(false)}
-    />
-    <Button
-      type="submit"
-      label="Lưu"
-      icon="pi pi-check"
-      className="p-button-primary p-button-sm"
-    />
-  </div>
-</div>
-        </form>
-      </Dialog>
-
-      {/* Dialog chỉnh sửa */}
- {/* Dialog thêm account */}
-<Dialog header="Thêm Account mới" visible={showAddForm} style={{ width: '30vw' }} onHide={() => setShowAddForm(false)} modal>
+<Dialog
+  header="Thêm Account mới"
+  visible={showAddForm}
+  style={{ width: '30vw' }}
+  onHide={() => setShowAddForm(false)}
+  modal
+>
   <form onSubmit={handleSubmit} className="p-fluid grid formgrid">
     <div className="field col-12 md:col-6">
       <label>Email</label>
@@ -204,26 +156,49 @@ export default function AccountComponent() {
       <label>Username</label>
       <InputText value={account.username} onChange={(e) => setAccount({ ...account, username: e.target.value })} />
     </div>
-  </form>
 
-  {/* action buttons nằm ngoài grid */}
-  <div className="flex justify-end gap-2 mt-3">
-    <Button
-      type="button"
-      label="Hủy"
-      icon="pi pi-times"
-      className="p-button-secondary p-button-sm"
-      onClick={() => setShowAddForm(false)}
-    />
-    <Button
-      type="submit"
-      label="Lưu"
-      icon="pi pi-check"
-      className="p-button-primary p-button-sm"
-      onClick={handleSubmit}
-    />
-  </div>
+    <div className="flex justify-end gap-2 mt-3">
+      <Button type="button" label="Hủy" icon="pi pi-times" className="p-button-secondary p-button-sm" onClick={() => setShowAddForm(false)} />
+      <Button type="submit" label="Lưu" icon="pi pi-check" className="p-button-primary p-button-sm" />
+    </div>
+  </form>
 </Dialog>
+
+{/* Dialog chỉnh sửa account */}
+<Dialog
+  header="Chỉnh sửa Account"
+  visible={showEditForm}
+  style={{ width: '30vw' }}
+  onHide={() => setShowEditForm(false)}
+  modal
+>
+  {selectedAccount && (
+    <div className="p-fluid grid formgrid">
+      <div className="field col-12 md:col-6">
+        <label>Email</label>
+        <InputText value={selectedAccount.email} onChange={(e) => setSelectedAccount({ ...selectedAccount, email: e.target.value })} />
+      </div>
+      <div className="field col-12 md:col-6">
+        <label>Name</label>
+        <InputText value={selectedAccount.name} onChange={(e) => setSelectedAccount({ ...selectedAccount, name: e.target.value })} />
+      </div>
+      <div className="field col-12 md:col-6">
+        <label>Password</label>
+        <InputText type="password" value={selectedAccount.password} onChange={(e) => setSelectedAccount({ ...selectedAccount, password: e.target.value })} />
+      </div>
+      <div className="field col-12 md:col-6">
+        <label>Username</label>
+        <InputText value={selectedAccount.username} onChange={(e) => setSelectedAccount({ ...selectedAccount, username: e.target.value })} />
+      </div>
+
+      <div className="flex justify-end gap-2 mt-3">
+        <Button type="button" label="Hủy" icon="pi pi-times" className="p-button-secondary p-button-sm" onClick={() => setShowEditForm(false)} />
+        <Button type="button" label="Lưu" icon="pi pi-check" className="p-button-primary p-button-sm" onClick={saveAccount} />
+      </div>
+    </div>
+  )}
+</Dialog>
+
 
 {/* Dialog chỉnh sửa */}
 <Dialog

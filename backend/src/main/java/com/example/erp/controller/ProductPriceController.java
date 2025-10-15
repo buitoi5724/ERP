@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/product-prices") // 🔥 đổi prefix để tránh trùng ProductController
 @CrossOrigin(origins = "http://localhost:3000")
 public class ProductPriceController {
 
@@ -16,14 +16,16 @@ public class ProductPriceController {
     private ProductPriceService productPriceService;
 
     // Lấy lịch sử giá theo productId
-    @GetMapping("/{id}/price-history")
-    public List<ProductPrice> getPriceHistory(@PathVariable Long id) {
-        return productPriceService.getByProductId(id);
+    // GET /api/product-prices/{productId}
+    @GetMapping("/{productId}")
+    public List<ProductPrice> getPriceHistory(@PathVariable Long productId) {
+        return productPriceService.getByProductId(productId);
     }
 
     // Thêm giá mới cho sản phẩm
-    @PostMapping("/{id}/price-history")
-    public ProductPrice addPrice(@PathVariable Long id, @RequestParam Double price) {
-        return productPriceService.addNewPrice(id, price);
+    // POST /api/product-prices/{productId}?price=100000
+    @PostMapping("/{productId}")
+    public ProductPrice addPrice(@PathVariable Long productId, @RequestParam Double price) {
+        return productPriceService.addNewPrice(productId, price);
     }
 }

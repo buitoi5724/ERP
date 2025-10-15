@@ -1,0 +1,40 @@
+.product-search {
+  margin-bottom: 20px;
+}
+
+.product-search input {
+  /*padding: 6px 10px;*/
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 250px;
+}
+
+.product-card {
+  display: flex;
+  gap: 15px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.product-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.product-info h3 {
+  margin: 0 0 5px 0;
+}
+
+.product-info p {
+  margin: 4px 0;
+}
+
+.product-info button {
+  margin-top: 8px;
+  margin-right: 10px;
+}

@@ -1,10 +1,11 @@
 package com.example.erp.controller;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
 import com.example.erp.entity.Product;
 import com.example.erp.entity.ProductCategory;
-import com.example.erp.entity.ProductPrice; // Lịch sử giá
+import com.example.erp.entity.ProductPrice;
 import com.example.erp.repository.ProductCategoryRepository;
 import com.example.erp.service.ProductService;
+import com.example.erp.service.ProductPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,57 +13,61 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigDecimal; // Làm việc với số thập phân (giá)
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime; // Ngày giờ
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RestController
-@RequestMapping("/api/products") // Tất cả API sản phẩm sẽ bắt đầu bằng /api/products
-@CrossOrigin(origins = "*") // Cho phép gọi từ FE (tránh lỗi CORS)
+@RequestMapping("/api/products")
+@CrossOrigin(origins = "http://localhost:3000")
+
 public class ProductController {
+	
+	
+    @Autowired
+    private ProductService productService;
+   
+    @Autowired
+    private ProductCategoryRepository productCategoryRepository;
 
     @Autowired
-    private ProductService productService; // Gọi business/service
-    @Autowired
-    private ProductCategoryRepository productCategoryRepository; // Gọi DB cho Category
+    private ProductPriceService productPriceService;
 
-    private String uploadFolder = "D:/uploads/product/"; // Folder lưu ảnh
-
+    private String uploadFolder = "D:/uploads/product/";
 
     /*
      * =================================================================================
-     * DTO (Data Transfer Object) - Các lớp vận chuyển dữ liệu ra ngoài API
+     * DTO CLASSES
      * =================================================================================
      */
 
-    // DTO: hiển thị lịch sử giá sản phẩm
     public static class PriceHistoryDTO {
-        private Long id;
+        private int stt; // số thứ tự riêng cho sản phẩm
+        private Long id; // id trong DB
         private Double price;
         private boolean active;
         private LocalDateTime createdAt;
 
-        // Map từ entity ProductPrice -> DTO
-        public PriceHistoryDTO(ProductPrice priceEntity) {
+        public PriceHistoryDTO(ProductPrice priceEntity, int stt) {
+            this.stt = stt;
             this.id = priceEntity.getId();
             this.price = priceEntity.getPrice();
             this.active = priceEntity.isActive();
             this.createdAt = priceEntity.getCreatedAt();
         }
 
-        // Getters
+        public int getStt() { return stt; }
         public Long getId() { return id; }
         public Double getPrice() { return price; }
         public boolean isActive() { return active; }
         public LocalDateTime getCreatedAt() { return createdAt; }
     }
 
-    // DTO: cho Product (bao gồm category + lịch sử giá)
     public static class ProductDTO {
         private Long id;
         private String name;
@@ -79,20 +84,17 @@ public class ProductController {
             this.description = product.getDescription();
             this.image = product.getImage();
 
-            // Map category
             if (product.getCategory() != null) {
                 this.category = new CategoryDTO(product.getCategory());
             }
 
-            // Map lịch sử giá
             if (product.getPriceHistory() != null) {
-                this.priceHistory = product.getPriceHistory().stream()
-                        .map(PriceHistoryDTO::new)
+                this.priceHistory = IntStream.range(0, product.getPriceHistory().size())
+                        .mapToObj(i -> new PriceHistoryDTO(product.getPriceHistory().get(i), i + 1))
                         .collect(Collectors.toList());
             }
         }
 
-        // Getters
         public Long getId() { return id; }
         public String getName() { return name; }
         public Double getPrice() { return price; }
@@ -102,7 +104,6 @@ public class ProductController {
         public List<PriceHistoryDTO> getPriceHistory() { return priceHistory; }
     }
 
-    // DTO: cho Category
     public static class CategoryDTO {
         private Long id;
         private String name;
@@ -115,14 +116,12 @@ public class ProductController {
         public String getName() { return name; }
     }
 
-
     /*
      * =================================================================================
      * API ENDPOINTS
      * =================================================================================
      */
 
-    // Lấy tất cả sản phẩm
     @GetMapping
     public List<ProductDTO> getAll() {
         return productService.getAll()
@@ -131,7 +130,6 @@ public class ProductController {
                 .collect(Collectors.toList());
     }
 
-    // Lấy sản phẩm theo id
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getById(@PathVariable Long id) {
         return productService.getById(id)
@@ -140,7 +138,6 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Lấy ảnh sản phẩm (trả về byte[])
     @GetMapping("/get-image/{id}")
     public ResponseEntity<byte[]> getImage(@PathVariable Long id) throws IOException {
         byte[] image = productService.getImage(id);
@@ -149,13 +146,11 @@ public class ProductController {
                 .body(image);
     }
 
-    // Tạo sản phẩm mới
     @PostMapping(consumes = {"multipart/form-data"})
     public Product create(
             @RequestPart("product") Product product,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) throws IOException {
-        // Kiểm tra category
         if (product.getCategory() != null && product.getCategory().getId() != null) {
             ProductCategory category = productCategoryRepository
                     .findById(product.getCategory().getId())
@@ -163,7 +158,6 @@ public class ProductController {
             product.setCategory(category);
         }
 
-        // Xử lý ảnh nếu có
         if (image != null && !image.isEmpty()) {
             String fileName = UUID.randomUUID().toString() + ".jpg";
             Path filePath = Paths.get(uploadFolder, fileName);
@@ -175,7 +169,6 @@ public class ProductController {
         return productService.save(product);
     }
 
-    // Cập nhật sản phẩm
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Product update(
             @PathVariable Long id,
@@ -185,9 +178,32 @@ public class ProductController {
         return productService.update(id, updatedProduct, image);
     }
 
-    // Xóa sản phẩm
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         productService.delete(id);
     }
+
+    /*
+     * =================================================================================
+     * PRICE HISTORY API (gọi sang ProductPriceService)
+     * =================================================================================
+     */
+
+    // Lấy lịch sử giá của sản phẩm
+    @GetMapping("/{id}/price-history")
+    public List<PriceHistoryDTO> getPriceHistory(@PathVariable Long id) {
+        List<ProductPrice> prices = productPriceService.getByProductId(id);
+        return IntStream.range(0, prices.size())
+                .mapToObj(i -> new PriceHistoryDTO(prices.get(i), i + 1))
+                .collect(Collectors.toList());
+    }
+
+    // Thêm giá mới cho sản phẩm
+    @PostMapping("/{id}/price-history")
+    public PriceHistoryDTO addPrice(@PathVariable Long id, @RequestParam Double price) {
+        ProductPrice newPrice = productPriceService.addNewPrice(id, price);
+        // Khi thêm giá mới thì gán stt = 1 (mới nhất) hoặc đếm lại toàn bộ
+        return new PriceHistoryDTO(newPrice, 1);
+    }
+    
 }
