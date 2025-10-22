@@ -57,3 +57,4 @@ export const getCategories = async () => {
   const response = await axios.get(CATEGORY_URL);
   return response.data;
 };
+

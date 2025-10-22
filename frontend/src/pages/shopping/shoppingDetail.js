@@ -7,59 +7,73 @@ function ShoppingDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
-  const [selectedOption, setSelectedOption] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [notification, setNotification] = useState("");
   const navigate = useNavigate();
-  const userId = 1; // tạm thời fix userId, có thể lấy từ context sau
 
-  // 🔹 Lấy chi tiết sản phẩm
+  const userId = 1; // Demo userId
+  const baseUrl = "http://localhost:8080/api/products/image/";
+
   useEffect(() => {
     axios
       .get(`http://localhost:8080/api/products/${id}`)
       .then((res) => {
-        const data = res.data;
-        setProduct(data);
-        setSelectedImage(
-          `http://localhost:8080/api/products/get-image/${data.id}`
+        const productData = res.data;
+
+        // ✅ Lấy danh sách ảnh gallery từ backend
+        const galleries =
+          productData.imageUrls?.map(
+            (img) => `${baseUrl}${encodeURIComponent(img)}`
+          ) || [];
+
+        const mainImage = productData.image
+          ? `${baseUrl}${encodeURIComponent(productData.image)}`
+          : "https://via.placeholder.com/400?text=No+Image";
+
+        // ✅ Gộp ảnh chính + gallery (loại trùng)
+        const allImages = [mainImage, ...galleries].filter(
+          (v, i, arr) => arr.indexOf(v) === i
         );
+
+        setProduct({ ...productData, fullImageUrls: allImages });
+        setSelectedImage(mainImage);
       })
-      .catch((err) => console.error("Lỗi khi tải chi tiết sản phẩm:", err));
+      .catch((err) => {
+        console.error("❌ Lỗi khi tải chi tiết sản phẩm:", err);
+      });
   }, [id]);
 
-  // 🔹 Gọi API thêm sản phẩm vào giỏ hàng (backend)
+  // ================== CART ==================
   const handleAddToCart = async () => {
+    if (!product) return;
     try {
       await axios.post("http://localhost:8080/api/cart/add", null, {
         params: {
-          userId: userId,
+          userId,
           productId: product.id,
-          quantity: quantity,
-          accountId: userId, // nếu backend yêu cầu
+          quantity,
+          accountId: userId,
         },
       });
-
       setNotification("✅ Đã thêm vào giỏ hàng!");
       setTimeout(() => setNotification(""), 2000);
-      // ❌ Không tự động chuyển sang giỏ hàng nữa
     } catch (error) {
-      console.error("❌ Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
-      setNotification("❌ Thêm sản phẩm thất bại!");
+      console.error("❌ Lỗi khi thêm vào giỏ:", error);
+      setNotification("❌ Thêm vào giỏ thất bại!");
       setTimeout(() => setNotification(""), 2000);
     }
   };
 
   const handleBuyNow = async () => {
     await handleAddToCart();
-    // navigate("/checkout"); // nếu có trang thanh toán
-  };
-
-  const handleViewCart = () => {
     navigate("/cart");
   };
 
-  if (!product) return <p>Đang tải chi tiết sản phẩm...</p>;
+  const handleViewCart = () => navigate("/cart");
 
+  if (!product) return <p className="loading">Đang tải chi tiết sản phẩm...</p>;
+
+  // ================== RENDER ==================
   return (
     <div className="shopping-detail">
       <button className="back-btn" onClick={() => navigate(-1)}>
@@ -69,23 +83,44 @@ function ShoppingDetail() {
       {notification && <div className="notification">{notification}</div>}
 
       <div className="detail-container">
-        {/* Hình ảnh */}
+        {/* === PHẦN HÌNH ẢNH === */}
         <div className="image-section">
-          <img src={selectedImage} alt={product.name} className="main-image" />
+          <img
+            src={selectedImage}
+            alt={product.name}
+            className="main-image"
+            onError={(e) => (e.target.src = "/images/default-product.png")}
+          />
+
+          <div className="thumbnails">
+            {product.fullImageUrls?.map((imgUrl, index) => (
+              <img
+                key={index}
+                src={imgUrl}
+                alt={`Ảnh ${index + 1}`}
+                className={`thumbnail ${
+                  selectedImage === imgUrl ? "active" : ""
+                }`}
+                onMouseEnter={() => setSelectedImage(imgUrl)} // ✅ hover đổi ảnh
+                onError={(e) => (e.target.src = "/images/default-product.png")}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Thông tin */}
+        {/* === THÔNG TIN SẢN PHẨM === */}
         <div className="info-section">
-          <h2>{product.name}</h2>
+          <h2 className="product-name">{product.name}</h2>
+
           <p className="price">
+            <strong>Giá:</strong>{" "}
             <span className="new">
-              {product.price?.toLocaleString("vi-VN")}₫
+              {product.price
+                ? product.price.toLocaleString("vi-VN") + "₫"
+                : "Chưa có giá"}
             </span>
           </p>
 
-          <p className="desc">{product.description}</p>
-
-          {/* Số lượng */}
           <div className="quantity">
             <button onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
               -
@@ -94,7 +129,6 @@ function ShoppingDetail() {
             <button onClick={() => setQuantity((q) => q + 1)}>+</button>
           </div>
 
-          {/* Nút hành động */}
           <div className="actions">
             <button className="add-cart" onClick={handleAddToCart}>
               🛒 Thêm vào giỏ hàng
@@ -107,6 +141,17 @@ function ShoppingDetail() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* === PHẦN CHI TIẾT SẢN PHẨM DƯỚI CÙNG === */}
+      <div className="product-detail-info">
+        <h3>🔍 Chi tiết sản phẩm</h3>
+        <div
+          className="detail-content"
+          dangerouslySetInnerHTML={{
+            __html: product.description || "<i>Chưa có nội dung mô tả</i>",
+          }}
+        ></div>
       </div>
     </div>
   );

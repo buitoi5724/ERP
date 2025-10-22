@@ -13,7 +13,7 @@ public class ShoppingCartService {
 
     @Autowired
     private ShoppingCartRepository cartRepo;
-
+// file này chưa logic chính sử lý trong này
     // Lấy giỏ hàng theo user
     public List<ShoppingCart> getCartByUser(Long userId) {
         return cartRepo.findByUserId(userId);
@@ -21,8 +21,8 @@ public class ShoppingCartService {
 
     // Thêm sản phẩm vào giỏ
     public ShoppingCart addToCart(Long userId, Long productId, int quantity, long accountId) {
-        Optional<ShoppingCart> existingCart = cartRepo.findByUserIdAndProductId(userId, productId);
-
+        Optional <ShoppingCart> existingCart = cartRepo.findByUserIdAndProductId(userId, productId);
+    
         if (existingCart.isPresent()) {
             // Nếu đã có sản phẩm thì cộng dồn số lượng
             ShoppingCart cart = existingCart.get();

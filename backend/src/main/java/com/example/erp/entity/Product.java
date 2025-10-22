@@ -22,12 +22,12 @@ public class Product implements Serializable {
     @Column(nullable = false)
     private Double price; // giá hiện tại của sản phẩm
 
-    private String image;
+    private String image; // ảnh đại diện chính
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    // 🔹 Thêm thuộc tính mới
+    // 🔹 Thuộc tính mới (vẫn giữ nguyên logic cũ)
     @Column(columnDefinition = "NVARCHAR(255)")
     private String sizes; // ví dụ: "S,M,L,XL"
 
@@ -41,8 +41,13 @@ public class Product implements Serializable {
 
     // 🔹 Quan hệ với lịch sử giá
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties({"product"}) // tránh vòng lặp vô hạn khi trả JSON
+    @JsonIgnoreProperties({"product"})
     private List<ProductPrice> priceHistory = new ArrayList<>();
+
+    // 🔹 Liên kết tới danh sách ảnh gallery (ProductGallery)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"product"})
+    private List<ProductGallery> galleries = new ArrayList<>();
 
     // --- Getters & Setters ---
     public Long getId() { return id; }
@@ -71,4 +76,7 @@ public class Product implements Serializable {
 
     public List<ProductPrice> getPriceHistory() { return priceHistory; }
     public void setPriceHistory(List<ProductPrice> priceHistory) { this.priceHistory = priceHistory; }
+
+    public List<ProductGallery> getGalleries() { return galleries; }
+    public void setGalleries(List<ProductGallery> galleries) { this.galleries = galleries; }
 }

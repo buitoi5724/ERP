@@ -16,34 +16,34 @@
     <artifactId>ERP</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ERP</name>
-    <description>Spring Boot project for managing accounts (CRUD)</description>
+    <description>Spring Boot project for managing products (ERP system)</description>
 
     <properties>
-        <!-- Java 21 (hoặc 17 nếu máy bạn chưa lên 21) -->
+        <!-- Nếu bạn đang dùng Java 21 -->
         <java.version>21</java.version>
     </properties>
 
     <dependencies>
-        <!-- Web -->
+        <!-- ✅ Spring Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JPA -->
+        <!-- ✅ Spring Data JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- SQL Server JDBC driver (version ổn định, có sẵn trên Maven Central) -->
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>12.8.1.jre11</version>
-        </dependency>
+        <!-- ✅ SQL Server JDBC driver (bản phù hợp cho Java 21) -->
+   <dependency>
+    <groupId>com.microsoft.sqlserver</groupId>
+    <artifactId>mssql-jdbc</artifactId>
+    <version>12.8.1.jre11</version>
+</dependency>
 
-        <!-- DevTools -->
+        <!-- ✅ DevTools (reload nhanh khi code thay đổi) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -51,7 +51,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Test -->
+        <!-- ✅ Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -61,11 +61,11 @@
 
     <build>
         <plugins>
+            <!-- ✅ Plugin để build và chạy Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
-
 </project>
