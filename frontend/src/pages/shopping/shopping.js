@@ -56,7 +56,7 @@ function ProductPage() {
       <div className="header">
         <h2>Danh Sách Sản Phẩm</h2>
         <button className="btn-cart" onClick={() => navigate("/cart")}>
-          🛒
+          Giỏ Hàng🛒
         </button>
       </div>
 

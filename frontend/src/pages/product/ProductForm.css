@@ -1,0 +1,43 @@
+.product-form {
+  padding: 10px;
+}
+
+.form-layout {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.left-section {
+  border-right: 1px solid #ddd;
+  padding-right: 20px;
+}
+
+.right-section {
+  padding-left: 20px;
+}
+
+.preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.thumbnail:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+}
+
+.thumbnail.new {
+  border-color: #4caf50;
+}

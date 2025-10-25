@@ -19,6 +19,7 @@ public class ShoppingCartController {
     public List<ShoppingCart> getCart(@PathVariable Long userId) {
         return shoppingCartService.getCartByUser(userId);
     }
+// lấy danh sách sản phẩm trong giỏ hàng của người dùng trả về item trong giỏ hàng  
 
     @PostMapping("/add")
     public ShoppingCart addToCart(@RequestParam Long userId,
@@ -27,20 +28,21 @@ public class ShoppingCartController {
                                   @RequestParam Long accountId) {
         return shoppingCartService.addToCart(userId, productId, quantity, accountId);
     }
-
+//lấy các giá trị của từng data có trong from 
     @PutMapping("/update/{cartId}")
     public ShoppingCart updateQuantity(@PathVariable Long cartId,
                                        @RequestParam int quantity) {
         return shoppingCartService.updateQuantity(cartId, quantity);
     }
-
+// cập nhật thoogn tin cũng như số lượng 
     @DeleteMapping("/remove/{cartId}")
     public void removeFromCart(@PathVariable Long cartId) {
         shoppingCartService.removeFromCart(cartId);
     }
-
+// xóa mottj san phẩm của trong một giỏ hàng 
     @DeleteMapping("/clear/{userId}")
     public void clearCart(@PathVariable Long userId) {
         shoppingCartService.clearCart(userId);
     }
+    // xóa toàn bộ giỏ hàng của useId 
 }
