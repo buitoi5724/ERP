@@ -1,155 +1,155 @@
-.product-search {
-  margin-bottom: 20px;
-}
+/* ===================== GALLERIA CUSTOM ===================== */
 
-.product-search input {
-  /*padding: 6px 10px;*/
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  width: 250px;
-}
-
-.product-card {
-  display: flex;
-  gap: 15px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
-  align-items: center;
-}
-
-.product-image {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.product-info h3 {
-  margin: 0 0 5px 0;
-}
-
-.product-info p {
-  margin: 4px 0;
-}
-
-.product-info button {
-  margin-top: 8px;
-  margin-right: 10px;
-}
-/* 🖼️ Ảnh trong bảng sản phẩm */
-img.w-6rem {
-  width: 6rem;
-  height: 6rem;
-  object-fit: cover;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-img.w-6rem:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-/* 🪟 Popup hiển thị gallery */
-.p-dialog .p-dialog-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #fafafa;
-}
-
+/* Giới hạn chiều rộng dialog ảnh */
 .p-dialog {
-  border-radius: 10px;
+  max-width: 900px !important;
 }
 
-/* 🎞️ Hình ảnh chính trong gallery */
-.p-galleria-item img {
-  width: 100%;
-  max-height: 500px;
-  object-fit: contain;
-  border-radius: 10px;
-  background-color: #fff;
-}
-
-/* 🖼️ Thumbnail (ảnh nhỏ bên dưới) */
-.p-galleria-thumbnail-item img {
-  border-radius: 6px;
-  border: 2px solid transparent;
-  transition: border 0.2s ease;
-  cursor: pointer;
-}
-
-.p-galleria-thumbnail-item img:hover {
-  border-color: #2196f3;
-}
-
-/* 🔘 Nút điều hướng gallery */
-.p-galleria-item-prev,
-.p-galleria-item-next {
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 50%;
-  transition: background 0.2s ease;
-}
-
-.p-galleria-item-prev:hover,
-.p-galleria-item-next:hover {
-  background: rgba(0, 0, 0, 0.6);
-}
-.image-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.image-item {
-  flex: 1 1 calc(33.333% - 1rem);
+.p-dialog .p-dialog-content {
+  background-color: #ffffff;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #fff;
+}
+
+/* ----- Ảnh chính (item trong Galleria) ----- */
+.p-galleria-item-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f8f8f8;
   border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
   padding: 10px;
-  transition: transform 0.2s;
 }
 
-.image-item:hover {
-  transform: scale(1.02);
-}
-
-.product-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #ddd;
-  transition: all 0.3s ease;
-}
-
-.product-image.selected {
-  border-color: #22c55e;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-}
-
-.radio-container label {
-  font-size: 0.9rem;
-}
 .gallery-image {
-  width: 100%;
-  height: 350px;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 500px;
+  object-fit: contain;
   border-radius: 8px;
-  border: 3px solid #eee;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .gallery-image:hover {
   transform: scale(1.02);
 }
 
-.flex.gap-2 label {
-  font-size: 0.9rem;
+/* ----- Nhóm radio chọn ảnh đại diện ----- */
+.p-galleria-item-wrapper .flex {
+  margin-top: 10px;
+}
+
+.p-radiobutton-box {
+  width: 20px;
+  height: 20px;
+}
+
+.p-radiobutton-label {
+  font-size: 14px;
+}
+
+/* ----- Vùng thumbnail (ảnh nhỏ phía dưới) ----- */
+.p-galleria-thumbnail-container {
+  margin-top: 1rem;
+  background: #111;
+  padding: 10px 15px;
+  border-radius: 10px;
+}
+
+.p-galleria-thumbnail-items-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.p-galleria-thumbnail-item img {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.p-galleria-thumbnail-item img:hover {
+  transform: scale(1.05);
+  border-color: #aaa;
+}
+
+.p-galleria-thumbnail-item.p-galleria-thumbnail-item-current img {
+  border-color: #007ad9;
+  transform: scale(1.08);
+}
+
+/* Nút điều hướng trái/phải */
+.p-galleria-thumbnail-prev,
+.p-galleria-thumbnail-next {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  transition: background 0.2s ease;
+}
+
+.p-galleria-thumbnail-prev:hover,
+.p-galleria-thumbnail-next:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Tiêu đề dialog */
+.p-dialog .p-dialog-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #ddd;
+}
+/* ===== GIỮ DIALOG ỔN ĐỊNH ===== */
+.p-dialog {
+  width: 900px !important;
+  max-width: 95vw;
+}
+
+/* ===== KHUNG CHỨA ẢNH CHÍNH ===== */
+.p-galleria-item-wrapper {
+  width: 100%;
+  height: 500px;
+  display: flex;
+  flex-direction: column; /* để phần nút nằm dưới ảnh */
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f8f8;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+/* ẢNH TRONG GALLERIA */
+.p-galleria-item-wrapper img {
+  width: auto;
+  height: 420px; /* chỉ chiếm 420px, còn lại chỗ cho nút */
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* PHẦN CHỨA RADIO + LABEL CHỌN ẢNH */
+.p-galleria-item-wrapper .flex.align-items-center {
+  margin-top: 8px;
+  gap: 8px;
+}
+
+/* ===== ẢNH THUMBNAIL ===== */
+.p-galleria-thumbnail-container {
+  margin-top: 10px;
+}
+
+.p-galleria-thumbnail-item img {
+  width: 100px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 6px;
 }

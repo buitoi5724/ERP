@@ -7,39 +7,49 @@ import { getPriceHistory } from "./productService";
 import "./product.css";
 
 const ProductDetail = ({ visible, onHide, product }) => {
-  const [priceHistory, setPriceHistory] = useState([]);
-  const [activeImage, setActiveImage] = useState(null);
-  const [imageList, setImageList] = useState([]);
+  // =================================================================
+  // STATE QUẢN LÝ DỮ LIỆU
+  // =================================================================
+  const [priceHistory, setPriceHistory] = useState([]); // lưu lịch sử giá
+  const [activeImage, setActiveImage] = useState(null); // ảnh đang hiển thị
+  const [imageList, setImageList] = useState([]); // danh sách ảnh
 
-  const baseUrl = "http://localhost:8080/api/products/image/"; // ✅ đường dẫn ảnh backend
+  const baseUrl = "http://localhost:8080/api/products/image/"; // đường dẫn ảnh backend
 
+  // =================================================================
+  //  LẤY DỮ LIỆU CHI TIẾT & XỬ LÝ ẢNH
+  // =================================================================
   useEffect(() => {
-    if (product?.id) {
-      // 🧾 Lấy lịch sử giá
-      getPriceHistory(product.id).then((data) => setPriceHistory(data));
+    if (!product?.id) return;
 
-      // 🖼️ Xử lý danh sách ảnh
-      if (product.imageUrls && product.imageUrls.length > 0) {
-        // Nếu dữ liệu chỉ là tên file → thêm baseUrl phía trước
-        const urls = product.imageUrls.map((img) =>
-          img.startsWith("http") ? img : `${baseUrl}${encodeURIComponent(img)}`
-        );
-        setImageList(urls);
-        setActiveImage(urls[0]);
-      } else if (product.image) {
-        // Nếu chỉ có 1 ảnh chính
-        setImageList([`${baseUrl}${encodeURIComponent(product.image)}`]);
-        setActiveImage(`${baseUrl}${encodeURIComponent(product.image)}`);
-      } else {
-        // fallback: ảnh mặc định
-        setImageList(["/images/default-product.png"]);
-        setActiveImage("/images/default-product.png");
-      }
+    //  Lấy lịch sử giá từ API
+    getPriceHistory(product.id)
+      .then((data) => setPriceHistory(data))
+      .catch((err) => console.error("Lỗi khi lấy lịch sử giá:", err));
+
+    // Xử lý danh sách ảnh hiển thị
+    if (product.imageUrls && product.imageUrls.length > 0) {
+      // Nếu backend trả về chỉ là tên file → thêm baseUrl
+      const urls = product.imageUrls.map((img) =>
+        img.startsWith("http") ? img : `${baseUrl}${encodeURIComponent(img)}`
+      );
+      setImageList(urls);
+      setActiveImage(urls[0]);
+    } else if (product.image) {
+      // Nếu chỉ có 1 ảnh duy nhất
+      const url = `${baseUrl}${encodeURIComponent(product.image)}`;
+      setImageList([url]);
+      setActiveImage(url);
+    } else {
+      // fallback nếu không có ảnh
+      setImageList(["/images/default-product.png"]);
+      setActiveImage("/images/default-product.png");
     }
   }, [product]);
 
-  if (!product) return null;
-
+  // =================================================================
+  //  HÀM HỖ TRỢ ĐỊNH DẠNG DỮ LIỆU
+  // =================================================================
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     return new Intl.DateTimeFormat("vi-VN", {
@@ -47,6 +57,11 @@ const ProductDetail = ({ visible, onHide, product }) => {
       timeStyle: "short",
     }).format(new Date(dateStr));
   };
+
+  // =================================================================
+  // GIAO DIỆN CHI TIẾT SẢN PHẨM
+  // =================================================================
+  if (!product) return null;
 
   return (
     <Dialog
@@ -57,11 +72,13 @@ const ProductDetail = ({ visible, onHide, product }) => {
       onHide={onHide}
     >
       <TabView>
-        {/* 🧾 Tab thông tin sản phẩm */}
+        {/* ------------------------------------------------------------- */}
+        {/*  TAB THÔNG TIN SẢN PHẨM */}
+        {/* ------------------------------------------------------------- */}
         <TabPanel header="Thông tin sản phẩm">
           <div className="p-fluid">
             <div className="grid">
-              {/* Cột thông tin chi tiết */}
+              {/*  Cột thông tin sản phẩm */}
               <div className="col-12 md:col-6">
                 <p><strong>Tên:</strong> {product.name}</p>
                 <p>
@@ -74,7 +91,7 @@ const ProductDetail = ({ visible, onHide, product }) => {
                 <p><strong>Mô tả:</strong> {product.description || "Không có mô tả"}</p>
               </div>
 
-              {/* 🖼️ Cột hình ảnh sản phẩm */}
+              {/* Cột hiển thị hình ảnh sản phẩm */}
               <div className="col-12 md:col-6 flex flex-column align-items-center">
                 {activeImage && (
                   <img
@@ -84,6 +101,8 @@ const ProductDetail = ({ visible, onHide, product }) => {
                     onError={(e) => (e.target.src = "/images/default-product.png")}
                   />
                 )}
+
+                {/* Ảnh thumbnail nhỏ */}
                 <div className="thumbs-row mt-3">
                   {imageList.map((img, idx) => (
                     <img
@@ -101,7 +120,9 @@ const ProductDetail = ({ visible, onHide, product }) => {
           </div>
         </TabPanel>
 
-        {/* 📈 Tab lịch sử giá */}
+        {/* ------------------------------------------------------------- */}
+        {/*  TAB LỊCH SỬ GIÁ */}
+        {/* ------------------------------------------------------------- */}
         <TabPanel header="Lịch sử giá">
           {priceHistory.length > 0 ? (
             <DataTable
@@ -114,9 +135,7 @@ const ProductDetail = ({ visible, onHide, product }) => {
               <Column
                 field="price"
                 header="Giá"
-                body={(rowData) =>
-                  `${Number(rowData.price).toLocaleString()} đ`
-                }
+                body={(rowData) => `${Number(rowData.price).toLocaleString()} đ`}
               />
               <Column
                 field="active"

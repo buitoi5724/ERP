@@ -134,3 +134,26 @@ body {
   gap: 10px;                 /* khoảng cách giữa 2 nút */
   margin-top: 1rem;
 }
+.menu li a.active {
+  background-color: #e0e7ff;  /* nền xanh nhạt */
+  color: #1e3a8a;             /* chữ xanh đậm */
+  font-weight: 700;
+  border-left: 4px solid #4361ee; /* thanh viền trái */
+  padding-left: 12px;
+}
+
+.menu li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #495057;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.menu li a:hover {
+  background-color: #f0f4ff;
+  color: #4361ee;
+}

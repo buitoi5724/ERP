@@ -1,8 +1,7 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./shopping.css";
-
+import { getAllProducts, addToCart, getImage } from "./shoppingService";
 function ProductPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,9 +12,8 @@ function ProductPage() {
   const userId = 1;
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8080/api/products")
-      .then((res) => setProducts(res.data))
+    getAllProducts()
+      .then(setProducts)
       .catch((err) => {
         console.error("Lỗi khi tải sản phẩm:", err);
         setError("Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.");
@@ -23,12 +21,9 @@ function ProductPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const addToCart = (productId, e) => {
-    e.stopPropagation(); // ⛔ Ngăn chặn sự kiện click mở chi tiết khi bấm nút giỏ hàng
-    axios
-      .post("http://localhost:8080/api/cart/add", null, {
-        params: { userId, productId, quantity: 1, accountId: 1 },
-      })
+  const handleAddToCart = (productId, e) => {
+    e.stopPropagation();
+    addToCart(userId, productId, 1)
       .then(() => {
         setNotification("✅ Đã thêm sản phẩm vào giỏ hàng!");
         setTimeout(() => setNotification(""), 3000);
@@ -40,10 +35,8 @@ function ProductPage() {
       });
   };
 
-  const getImageSrc = (product) =>
-    product?.id
-      ? `http://localhost:8080/api/products/get-image/${product.id}`
-      : "/images/default-product.png";
+const getImageSrc = (product) =>
+  product?.image ? getImage(product.image) : "/images/default-product.png";
 
   if (error)
     return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
@@ -65,7 +58,7 @@ function ProductPage() {
           <div
             key={product.id}
             className="product-card"
-            onClick={() => navigate(`/shopping/${product.id}`)} // 👈 chuyển tới trang chi tiết
+            onClick={() => navigate(`/shopping/${product.id}`)}
             style={{ cursor: "pointer" }}
           >
             <div className="product-image-container">
@@ -95,7 +88,7 @@ function ProductPage() {
 
               <button
                 className="add-to-cart-btn"
-                onClick={(e) => addToCart(product.id, e)} // 👈 thêm e.stopPropagation()
+                onClick={(e) => handleAddToCart(product.id, e)} // ✅ sửa đúng
               >
                 + Thêm vào giỏ
               </button>

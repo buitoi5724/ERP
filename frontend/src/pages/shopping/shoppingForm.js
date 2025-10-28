@@ -5,7 +5,6 @@ import { FileUpload } from 'primereact/fileupload';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from 'primereact/dropdown';
 import 'primeicons/primeicons.css';  
-import { addToCart } from "./cartService"
 import { getProductById, getImage, getCategories, createProduct, updateProduct } from './shoppingService';
 
 const ProductForm = ({ selectedId, onSuccess, onCancel }) => {
