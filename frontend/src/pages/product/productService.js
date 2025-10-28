@@ -31,7 +31,7 @@ export const updateProduct = async (id, formData) => {
 // 🧩 Xóa sản phẩm
 export const deleteProduct = (id) => axios.delete(`${API_URL}/${id}`);
 
-// 🧩 Lấy ảnh sản phẩm (đơn ảnh hoặc nhiều)
+// 🧩 Lấy ảnh sản phẩm
 export const getImage = (productId, imageName) =>
   axios.get(`${API_URL}/${productId}/images/${imageName}`, {
     responseType: "arraybuffer",
@@ -47,4 +47,15 @@ export const getPriceHistory = async (id) => {
 export const getCategories = async () => {
   const response = await axios.get(CATEGORY_URL);
   return response.data;
+};
+
+// 🧩 Cập nhật ảnh đại diện
+export const updateMainImage = (productId, imageUrl) => {
+  return axios.put(`${API_URL}/${productId}/main-image`, { imageUrl });
+};
+
+// 🧩 Hàm build URL ảnh dùng chung
+export const buildImageUrl = (img) => {
+  const baseUrl = "http://localhost:8080/api/products/image/";
+  return img?.startsWith("http") ? img : `${baseUrl}${encodeURIComponent(img)}`;
 };

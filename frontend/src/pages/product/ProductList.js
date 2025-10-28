@@ -9,6 +9,7 @@ import { Dialog } from "primereact/dialog";
 import { RadioButton } from "primereact/radiobutton";
 import { Galleria } from "primereact/galleria";
 import "./productList.css";
+import { updateMainImage, buildImageUrl } from "./productService";
 
 const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
   const [filters, setFilters] = useState({ name: "", priceFrom: "", priceTo: "" });
@@ -17,9 +18,7 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
   const [selectedMainImage, setSelectedMainImage] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const baseUrl = "http://localhost:8080/api/products/image/";
-
-  // ✅ Lọc sản phẩm
+  // 🔍 Lọc sản phẩm
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const nameMatch =
@@ -47,11 +46,11 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
 
   const handleClear = () => setFilters({ name: "", priceFrom: "", priceTo: "" });
 
-  // 🖼️ Ảnh sản phẩm trong bảng
+  // 🖼️ Hiển thị ảnh trong bảng
   const imageBodyTemplate = useCallback((product) => {
     const mainImage =
       product.image && product.image !== "null" && product.image !== ""
-        ? `${baseUrl}${encodeURIComponent(product.image)}`
+        ? buildImageUrl(product.image)
         : "/images/default-product.png";
 
     return (
@@ -72,29 +71,21 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
     );
   }, []);
 
-  // ✅ Cập nhật ảnh đại diện
-  const handleSetMainImage = useCallback(async (imageUrl) => {
-    if (!selectedProduct) return;
-    try {
-      const trimmedUrl = decodeURIComponent(imageUrl);
-      const response = await fetch(
-        `http://localhost:8080/api/products/${selectedProduct.id}/main-image`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageUrl: trimmedUrl }),
-        }
-      );
-
-      if (!response.ok) throw new Error(`Status ${response.status}`);
-
-      alert("✅ Đã đặt ảnh đại diện thành công!");
-      setSelectedMainImage(trimmedUrl);
-    } catch (error) {
-      console.error("Lỗi cập nhật ảnh đại diện:", error);
-      alert("❌ Cập nhật thất bại!");
-    }
-  }, [selectedProduct]);
+  // 🧩 Cập nhật ảnh đại diện
+  const handleSetMainImage = useCallback(
+    async (imageUrl) => {
+      if (!selectedProduct) return;
+      try {
+        await updateMainImage(selectedProduct.id, imageUrl);
+        alert("✅ Đã đặt ảnh đại diện thành công!");
+        setSelectedMainImage(decodeURIComponent(imageUrl));
+      } catch (error) {
+        console.error("❌ Lỗi cập nhật ảnh đại diện:", error);
+        alert("❌ Cập nhật thất bại!");
+      }
+    },
+    [selectedProduct]
+  );
 
   const priceBodyTemplate = (product) =>
     product.price != null
@@ -142,9 +133,9 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
     </div>
   );
 
-  // ✅ Item hiển thị trong Galleria
+  // 🖼️ Hiển thị từng ảnh trong Galleria
   const itemTemplate = (item) => {
-    const filename = decodeURIComponent(item.replace(baseUrl, ""));
+    const filename = decodeURIComponent(item.split("/image/")[1] || "");
     const isSelected = selectedMainImage === filename;
 
     return (
@@ -193,7 +184,7 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
         </DataTable>
       </div>
 
-      {/* 📸 Galleria trong Dialog */}
+      {/* 🖼️ Galleria trong Dialog */}
       <Dialog
         visible={visible}
         onHide={() => setVisible(false)}
@@ -202,7 +193,7 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
       >
         {selectedProduct && (
           <Galleria
-            value={selectedProduct.imageUrls.map((img) => baseUrl + encodeURIComponent(img))}
+            value={selectedProduct.imageUrls.map((img) => buildImageUrl(img))}
             numVisible={5}
             circular
             showThumbnails
