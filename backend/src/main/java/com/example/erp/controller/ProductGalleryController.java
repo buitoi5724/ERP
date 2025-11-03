@@ -13,7 +13,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/products")
 @CrossOrigin(origins = "http://localhost:3000")
-public class ProductGallery {
+public class ProductGalleryController {
 
     @Autowired
     private ProductRepository productRepo;
@@ -38,8 +38,6 @@ public class ProductGallery {
         }
 
         Product product = optProduct.get();
-
-        // Cập nhật ảnh đại diện
         product.setImage(imageUrl);
         productRepo.save(product);
 

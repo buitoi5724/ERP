@@ -206,9 +206,11 @@ public class ProductController {
     public Product update(
             @PathVariable Long id,
             @RequestPart("product") Product updatedProduct,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "existingImages", required = false) String existingImagesJson
     ) throws IOException {
-        return productService.update(id, updatedProduct, images);
+        // ✅ Gọi đúng hàm xử lý giữ ảnh cũ
+        return productService.updateProductKeepExisting(id, updatedProduct, images, existingImagesJson);
     }
 
     // =================================================================================
@@ -266,5 +268,15 @@ public class ProductController {
             @PathVariable Long galleryId) {
         productService.setMainImage(productId, galleryId);
         return ResponseEntity.ok("Cập nhật ảnh đại diện thành công!");
+    }
+    
+    //xóa từng cái ảnh 
+    
+    @DeleteMapping("/{productId}/gallery/{filename}")
+    public ResponseEntity<String> deleteGalleryImage(
+            @PathVariable Long productId,
+            @PathVariable String filename) {
+        productService.deleteGalleryImage(productId, filename);
+        return ResponseEntity.ok("Xóa ảnh thành công!");
     }
 }

@@ -1,0 +1,38 @@
+
+      BẮT ĐẦU NHẬP KHO                          
+
+              │
+              
+   Kiểm tra loại nghiệp vụ
+        ├── Mua hàng từ nhà cung cấp?
+        ├── Hàng trả lại từ khách hàng?
+        └── Kiểm kê thừa / điều chỉnh?
+              │
+              
+     Nhập thông tin phiếu nhập
+        ├── Ngày nhập
+        ├── Nhà cung cấp
+        ├── Kho nhập
+        ├── Danh sách sản phẩm
+              │
+              |
+     Kiểm tra tính hợp lệ dữ liệu
+        ├── Mã sản phẩm tồn tại?
+        ├── Số lượng > 0?
+        └── Kho hợp lệ?
+              │
+              
+     Lưu phiếu nhập kho (database)
+              │
+              
+     Cập nhật tồn kho:
+        inventory[product_id][warehouse_id] += quantity
+              │
+              
+     Ghi sổ kế toán:
+        Nợ 156 (Hàng tồn kho)
+        Có 331 (Phải trả NCC)
+              │
+              
+
+ KẾT THÚC QUY TRÌNH NHẬP KHO 

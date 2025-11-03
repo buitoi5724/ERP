@@ -59,3 +59,6 @@ export const buildImageUrl = (img) => {
   const baseUrl = "http://localhost:8080/api/products/image/";
   return img?.startsWith("http") ? img : `${baseUrl}${encodeURIComponent(img)}`;
 };
+export const deleteProductImage = async (productId, filename) => {
+  return axios.delete(`http://localhost:8080/api/products/${productId}/gallery/${filename}`);
+};;

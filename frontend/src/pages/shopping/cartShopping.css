@@ -1,0 +1,171 @@
+/* =====================================================
+   🛒 CART SHOPPING PAGE - MODERN STYLE
+   -----------------------------------------------------
+   Giao diện đẹp, hiện đại, phù hợp trang thương mại điện tử
+===================================================== */
+
+/* Toàn bộ container */
+.cart-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", Roboto, sans-serif;
+  transition: all 0.3s ease;
+}
+
+/* Tiêu đề */
+.cart-container h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 28px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Bảng sản phẩm */
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cart-table th {
+  background: #f6f6f6;
+  padding: 12px;
+  text-align: left;
+  color: #555;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
+}
+
+.cart-table td {
+  padding: 14px 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+  text-align: left;
+}
+
+/* Ảnh sản phẩm + tên */
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cart-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  transition: transform 0.2s ease;
+}
+
+.cart-img:hover {
+  transform: scale(1.05);
+}
+
+/* Ô nhập số lượng */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+  width: 110px;
+}
+
+.quantity-control input {
+  width: 50px;
+  text-align: center;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  padding: 6px 0;
+}
+
+.quantity-control button {
+  width: 30px;
+  height: 30px;
+  background: #f1f1f1;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.quantity-control button:hover {
+  background: #ddd;
+}
+
+/* Nút xóa */
+.delete-btn {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.delete-btn:hover {
+  background: #e60000;
+  transform: scale(1.05);
+}
+
+/* Footer */
+.cart-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 2px solid #eee;
+}
+
+.cart-footer span {
+  color: #666;
+  font-size: 15px;
+}
+
+.cart-footer h3 {
+  color: #d32f2f;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cart-container {
+    padding: 16px;
+  }
+
+  .cart-table th,
+  .cart-table td {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .product-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cart-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .quantity-control {
+    width: 90px;
+  }
+
+  .cart-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
