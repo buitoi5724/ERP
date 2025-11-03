@@ -1,0 +1,37 @@
+
+ BẮT ĐẦU XUẤT KHO                          
+
+              │
+              
+   Kiểm tra loại nghiệp vụ
+        ├── Xuất bán cho khách hàng?
+        ├── Xuất điều chuyển nội bộ?
+        └── Kiểm kê thiếu / điều chỉnh?
+              │
+              
+     Nhập thông tin phiếu xuất
+        ├── Ngày xuất
+        ├── Kho xuất
+        ├── Danh sách sản phẩm
+        └── Người nhận hàng
+              │
+              
+     Kiểm tra tồn kho:
+        Nếu tồn kho < số lượng cần xuất → Báo lỗi “Không đủ hàng”
+              │
+              
+     Lưu phiếu xuất kho (database)
+              │
+              
+     Cập nhật tồn kho:
+        inventory[product_id][warehouse_id] -= quantity
+              │
+              
+     Ghi sổ kế toán:
+        Nợ 632 (Giá vốn hàng bán)
+        Có 156 (Hàng tồn kho)
+              │
+              
+
+ KẾT THÚC QUY TRÌNH XUẤT KHO          
+

@@ -52,13 +52,8 @@ public class ProductService {
         Optional<Product> productOpt = productRepository.findById(id);
 
         productOpt.ifPresent(product -> {
-            // ⚡ Ép load galleries và category để JSON hóa ra frontend đầy đủ
-            if (product.getGalleries() != null) {
-                product.getGalleries().size();
-            }
-            if (product.getCategory() != null) {
-                product.getCategory().getName();
-            }
+            if (product.getGalleries() != null) product.getGalleries().size();
+            if (product.getCategory() != null) product.getCategory().getName();
         });
 
         return productOpt;
@@ -69,9 +64,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sản phẩm với id: " + id));
 
-        if (product.getImage() == null || product.getImage().isEmpty()) {
-            return null;
-        }
+        if (product.getImage() == null || product.getImage().isEmpty()) return null;
 
         Path imagePath = Paths.get(uploadFolder, product.getImage());
         if (Files.exists(imagePath)) {
@@ -84,17 +77,14 @@ public class ProductService {
 
     @Transactional
     public Product save(Product product) throws IOException {
-        // Lưu category nếu có
         if (product.getCategory() != null && product.getCategory().getId() != null) {
             ProductCategory category = categoryRepository.findById(product.getCategory().getId())
                     .orElseThrow(() -> new EntityNotFoundException("Category not found"));
             product.setCategory(category);
         }
 
-        // Lưu product trước để có ID
         Product savedProduct = productRepository.save(product);
 
-        // Lưu giá khởi tạo
         if (product.getPrice() != null) {
             ProductPrice productPrice = new ProductPrice();
             productPrice.setProduct(savedProduct);
@@ -106,75 +96,76 @@ public class ProductService {
         return savedProduct;
     }
 
-    // ===================== UPDATE =====================
+    // ===================== UPDATE (NEW) =====================
 
     @Transactional
-    public Product update(Long id, Product updatedProduct, List<MultipartFile> imageFiles) throws IOException {
+    public Product updateProductKeepExisting(
+            Long id,
+            Product updatedProduct,
+            List<MultipartFile> imageFiles,
+            String existingImagesJson
+    ) throws IOException {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
 
+        // ----- Cập nhật thông tin cơ bản -----
         existingProduct.setName(updatedProduct.getName());
         existingProduct.setDescription(updatedProduct.getDescription());
         existingProduct.setSizes(updatedProduct.getSizes());
         existingProduct.setColors(updatedProduct.getColors());
 
-        // ================== UPDATE PRICE ==================
-        if (updatedProduct.getPrice() != null &&
-                !updatedProduct.getPrice().equals(existingProduct.getPrice())) {
-
-            ProductPrice currentPrice = productPriceRepository
-                    .findFirstByProduct_IdAndEndDateIsNull(existingProduct.getId());
-
-            if (currentPrice != null) {
-                currentPrice.setEndDate(LocalDateTime.now());
-                productPriceRepository.save(currentPrice);
-            }
-
-            ProductPrice newPrice = new ProductPrice();
-            newPrice.setProduct(existingProduct);
-            newPrice.setPrice(updatedProduct.getPrice());
-            newPrice.setStartDate(LocalDateTime.now());
-            productPriceRepository.save(newPrice);
-
-            existingProduct.setPrice(updatedProduct.getPrice());
-        }
-
-        // ================== UPDATE CATEGORY ==================
+        // ----- Cập nhật danh mục -----
         if (updatedProduct.getCategory() != null && updatedProduct.getCategory().getId() != null) {
             ProductCategory category = categoryRepository.findById(updatedProduct.getCategory().getId())
                     .orElseThrow(() -> new EntityNotFoundException("Category not found"));
             existingProduct.setCategory(category);
         }
 
-        // ================== UPDATE IMAGES ==================
+        // ----- Parse danh sách ảnh cần giữ -----
+        Set<String> keepImages = new HashSet<>();
+        if (existingImagesJson != null && !existingImagesJson.isEmpty()) {
+            existingImagesJson = existingImagesJson.replace("[", "")
+                    .replace("]", "")
+                    .replace("\"", "")
+                    .trim();
+            if (!existingImagesJson.isEmpty()) {
+                keepImages.addAll(Arrays.asList(existingImagesJson.split(",")));
+            }
+        }
+
+        // ----- Giữ lại ảnh cũ -----
+        List<ProductGallery> galleriesToKeep = new ArrayList<>();
+        if (existingProduct.getGalleries() != null) {
+            for (ProductGallery g : existingProduct.getGalleries()) {
+                if (keepImages.contains(g.getImageUrl())) {
+                    galleriesToKeep.add(g);
+                } else {
+                    deleteImageFile(g.getImageUrl());
+                }
+            }
+        }
+
+        existingProduct.getGalleries().clear();
+        existingProduct.getGalleries().addAll(galleriesToKeep);
+
+        // ----- Thêm ảnh mới -----
         if (imageFiles != null && !imageFiles.isEmpty()) {
             Files.createDirectories(Paths.get(uploadFolder));
-            List<ProductGallery> newGalleries = new ArrayList<>();
 
             for (MultipartFile file : imageFiles) {
-                String newImageName = saveImageFile(file);
-                ProductGallery gallery = new ProductGallery();
-                gallery.setImageUrl(newImageName);
-                gallery.setProduct(existingProduct);
-                newGalleries.add(gallery);
+                String fileName = saveImageFile(file);
+                ProductGallery newGallery = new ProductGallery();
+                newGallery.setImageUrl(fileName);
+                newGallery.setProduct(existingProduct);
+                existingProduct.getGalleries().add(newGallery);
             }
+        }
 
-            // Xóa ảnh cũ
-            if (existingProduct.getGalleries() != null) {
-                for (ProductGallery oldGallery : existingProduct.getGalleries()) {
-                    deleteImageFile(oldGallery.getImageUrl());
-                }
-                existingProduct.getGalleries().clear();
-            } else {
-                existingProduct.setGalleries(new ArrayList<>());
-            }
-
-            existingProduct.getGalleries().addAll(newGalleries);
-
-            // Ảnh đầu tiên làm ảnh chính
-            if (!existingProduct.getGalleries().isEmpty()) {
-                existingProduct.setImage(existingProduct.getGalleries().get(0).getImageUrl());
-            }
+        // ----- Cập nhật ảnh đại diện -----
+        if (!existingProduct.getGalleries().isEmpty()) {
+            existingProduct.setImage(existingProduct.getGalleries().get(0).getImageUrl());
+        } else {
+            existingProduct.setImage(null);
         }
 
         return productRepository.save(existingProduct);
@@ -195,6 +186,36 @@ public class ProductService {
         });
 
         productRepository.deleteById(id);
+    }
+
+    // ===================== XÓA ẢNH CỤ THỂ =====================
+
+    @Transactional
+    public void deleteGalleryImage(Long productId, String filename) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sản phẩm ID: " + productId));
+
+        if (product.getGalleries() == null || product.getGalleries().isEmpty()) {
+            throw new EntityNotFoundException("Sản phẩm không có ảnh nào để xóa");
+        }
+
+        ProductGallery target = product.getGalleries().stream()
+                .filter(g -> filename.equals(g.getImageUrl()))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy ảnh với tên: " + filename));
+
+        deleteImageFile(target.getImageUrl());
+        product.getGalleries().remove(target);
+
+        if (filename.equals(product.getImage())) {
+            if (!product.getGalleries().isEmpty()) {
+                product.setImage(product.getGalleries().get(0).getImageUrl());
+            } else {
+                product.setImage(null);
+            }
+        }
+
+        productRepository.save(product);
     }
 
     // ===================== SET MAIN IMAGE =====================

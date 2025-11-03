@@ -185,12 +185,13 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
       </div>
 
       {/* 🖼️ Galleria trong Dialog */}
-      <Dialog
-        visible={visible}
-        onHide={() => setVisible(false)}
-        header={selectedProduct?.name || "Bộ sưu tập ảnh"}
-        style={{ width: "60vw" }}
-      >
+     <Dialog
+  visible={visible}
+  onHide={() => setVisible(false)}
+  header={selectedProduct?.name || "Bộ sưu tập ảnh"}
+  style={{ width: "60vw" }}
+  dismissableMask
+>
         {selectedProduct && (
           <Galleria
             value={selectedProduct.imageUrls.map((img) => buildImageUrl(img))}

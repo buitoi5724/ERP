@@ -1,5 +1,6 @@
 package com.example.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
@@ -10,11 +11,12 @@ public class ProductGallery {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnoreProperties({"galleries", "priceHistory", "category", "sizes", "colors", "description"})
     private Product product;
 
     // --- Getter & Setter ---

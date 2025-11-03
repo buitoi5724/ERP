@@ -9,7 +9,8 @@ import {
   getCategories,
   createProduct,
   updateProduct,
-  buildImageUrl, // ✅ thêm hàm này từ service
+  buildImageUrl,
+  deleteProductImage, // ✅ thêm hàm này từ service
 } from "./productService";
 import "./ProductForm.css";
 
@@ -106,15 +107,30 @@ const ProductForm = ({ selectedId, onSuccess, onCancel }) => {
   };
 
   // 🗑️ Xóa ảnh
-  const removeImage = (id) => {
-    setPreviewItems((prev) => {
-      const toRemove = prev.find((p) => p.id === id);
-      if (toRemove && toRemove.src?.startsWith("blob:")) {
-        URL.revokeObjectURL(toRemove.src);
-      }
-      return prev.filter((p) => p.id !== id);
-    });
-  };
+  const removeImage = async (id) => {
+  const target = previewItems.find((p) => p.id === id);
+  if (!target) return;
+
+  // 🟢 Nếu là ảnh mới (blob) → chỉ xóa khỏi state
+  if (target.src.startsWith("blob:")) {
+    URL.revokeObjectURL(target.src);
+    setPreviewItems((prev) => prev.filter((p) => p.id !== id));
+    return;
+  }
+
+  // 🔵 Nếu là ảnh đã có trên server
+  if (selectedId && !target.file) {
+    const filename = decodeURIComponent(target.src.split("/image/")[1] || "");
+    try {
+      await deleteProductImage(selectedId, filename); // gọi API xóa ảnh
+      alert("Đã xóa ảnh khỏi server!");
+      setPreviewItems((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error("❌ Lỗi khi xóa ảnh:", err);
+      alert("Không thể xóa ảnh trên server!");
+    }
+  }
+};
 
   // ♻️ Cleanup blob khi unmount
   useEffect(() => {
