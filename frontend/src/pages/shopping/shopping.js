@@ -123,11 +123,12 @@ const getImageSrc = (product) =>
         ))}
       </div>
        {/* 👉 Chỉ có một dialog duy nhất ở cuối */}
-      <Dialog
+ <Dialog
   header={null}
   visible={visibleDialog}
   onHide={() => setVisibleDialog(false)}
   className="product-dialog"
+  dismissableMask // ✅ Thêm dòng này để click ngoài là đóng dialog
 >
   {selectedProduct && (
     <div className="dialog-container">
@@ -149,7 +150,7 @@ const getImageSrc = (product) =>
       src={getImage(img)}
       alt={`thumb-${index}`}
       className={`thumbnail ${selectedImage === img ? "active" : ""}`}
-      onMouseEnter={() => setSelectedImage(img)}  // ✅ ĐỔI onClick → onMouseEnter
+      onMouseEnter={() => setSelectedImage(img)}  
     />
   ))}
 </div>
@@ -239,17 +240,8 @@ const getImageSrc = (product) =>
         <button className="btn-add-cart" onClick={handleConfirmAdd}>
           THÊM VÀO GIỎ
  
-        </button>
-
-        {/* Nút chia sẻ */}
-        <div className="share-section">
-          <span>Chia sẻ:</span>
-          <div className="social-icons">
-            <i className="pi pi-facebook"></i>
-            <i className="pi pi-twitter"></i>
-            <i className="pi pi-send"></i>
-          </div>
-        </div>
+        </button>   
+       
       </div>
     </div>
   )}

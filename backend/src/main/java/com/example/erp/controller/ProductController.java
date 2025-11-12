@@ -189,16 +189,13 @@ public class ProductController {
                 gallery.setProduct(product);
                 galleries.add(gallery);
             }
-
             if (!galleries.isEmpty()) {
                 product.setImage(galleries.get(0).getImageUrl());
             }
             product.setGalleries(galleries);
         }
-
         return productService.save(product);
     }
-
     // =================================================================================
     // UPDATE PRODUCT
     // =================================================================================
