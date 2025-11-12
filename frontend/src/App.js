@@ -9,6 +9,8 @@ import ProductDetail from "./pages/product/ProductDetail";
 import Shopping from "./pages/shopping/shopping";
 import CartShopping from "./pages/shopping/cartShopping";
 import ShoppingDetail from "./pages/shopping/shoppingDetail";
+import InvoiceShopping from "./pages/shopping/InvoiceShopping";
+
 
 export default function App() {
   return (
@@ -25,7 +27,7 @@ export default function App() {
           <Route path="/shopping" element={<Shopping />} />
        <Route path="/shopping/:id" element={<ShoppingDetail />} />
           <Route path="/cart" element={<CartShopping />} />
-
+<Route path="/invoice/:invoiceId" element={<InvoiceShopping />} />
           {/* Trang mặc định */}
           <Route path="*" element={<h1>Welcome BuiToi</h1>} />
         </Routes>

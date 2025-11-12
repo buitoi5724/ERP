@@ -1054,20 +1054,6 @@ input[type=number] {
   background-color: #cc0000;
 }
 
-/* --- Chia sẻ --- */
-.share-section {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.social-icons i {
-  font-size: 20px;
-  cursor: pointer;
-  color: #555;
-  transition: 0.2s;
-}
 
 .social-icons i:hover {
   color: #d70018;
