@@ -5,7 +5,7 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Dropdown } from "primereact/dropdown";
-import "./productList.css";
+import "./productList.module.css";
 import { addToCart } from "./cartService";
 import { getImage } from "./shoppingService";
 /**

@@ -163,3 +163,109 @@ h2 {
     height: 60px;
   }
 }
+.payment-method label {
+  margin-right: 20px;
+  cursor: pointer;
+}
+.payment-method input {
+  margin-right: 5px;
+}
+/* Container thanh toán */
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin: 20px 0;
+  padding: 10px 15px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+/* Nhãn radio */
+.payment-method label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.payment-method input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #1a73e8; /* màu khi chọn radio */
+}
+
+/* Nút thanh toán */
+.pay-btn {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  background-color: #4caf50;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.pay-btn:hover:not(:disabled) {
+  background-color: #388e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pay-btn:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Thanh toán đã xong - badge nhỏ */
+.payment-status {
+  margin-left: 15px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.payment-status.done {
+  background-color: #4caf50; /* xanh: đã thanh toán */
+}
+
+.payment-status.pending {
+  background-color: #ff9800; /* cam: chờ thanh toán */
+}
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin: 15px 0;
+  padding: 12px 15px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+.payment-status.done {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.payment-status.fail {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: #dc3545;
+  color: white;
+  margin-bottom: 10px;
+}

@@ -1,26 +1,35 @@
 package com.example.erp.service;
-import com.example.erp.repository.PaymentRepository;
 
+import com.example.erp.entity.Invoice;
 import com.example.erp.entity.Payment;
 import com.example.erp.repository.InvoiceRepository;
-import com.example.erp.util.CodeGenerator;
+import com.example.erp.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 
 @Service
 public class PaymentService {
-    @Autowired private InvoiceRepository invoiceRepo;
-    @Autowired private com.example.erp.repository.PaymentRepository paymentRepo;
 
-    public Payment pay(Long invoiceId, double amount, String method) {
-        var invoice = invoiceRepo.findById(invoiceId).orElseThrow();
-        Payment p = new Payment();
-        p.setInvoice(invoice);
-        p.setPaymentCode(CodeGenerator.generateCode("PAY"));
-        p.setAmount(amount);
-        p.setMethod(method);
-        p.setPaymentDate(LocalDateTime.now());
-        return paymentRepo.save(p);
+    @Autowired
+    private PaymentRepository paymentRepo;
+
+    @Autowired
+    private InvoiceRepository invoiceRepo;
+
+    public Payment payInvoice(Long invoiceId, String method, Long accountId) {
+        Invoice invoice = invoiceRepo.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Invoice không tồn tại với ID: " + invoiceId));
+
+        Payment payment = new Payment();
+        payment.setInvoice(invoice);
+        payment.setMethod(method);
+        payment.setAmount(invoice.getTotalAmount());
+        payment.setPaymentDate(LocalDateTime.now());
+        payment.setPaymentCode("PAY-" + System.currentTimeMillis());
+
+        // Lưu Payment
+        return paymentRepo.save(payment);
     }
 }

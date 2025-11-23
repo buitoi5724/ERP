@@ -70,10 +70,10 @@ const getImageSrc = (product) =>
     <div className="product-page">
       {notification && <div className="notification">{notification}</div>}
 
-      <div className="header">
+      <div className="headerr">
         <h2>Danh Sách Sản Phẩm</h2>
-        <button className="btn-cart" onClick={() => navigate("/cart")}>
-          Giỏ Hàng🛒
+        <button className="btn-cartt" onClick={() => navigate("/cart")}>
+          🛒
         </button>
       </div>
 

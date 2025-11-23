@@ -18,4 +18,7 @@ public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Long
 
     // 🔹 Thêm dòng này để ProductService có thể xóa giỏ hàng chứa sản phẩm bị xóa
     void deleteAllByProductId(Long productId);
+
+        void deleteAllByIdInBatch(Iterable<Long> ids);
+    
 }
