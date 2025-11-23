@@ -1,5 +1,7 @@
 package com.example.erp.util;
 
 public enum InvoiceType {
-    IN, OUT
+    DOING,  // chưa thanh toán
+    DONE,   // đã thanh toán
+    CANCEL  // hủy
 }

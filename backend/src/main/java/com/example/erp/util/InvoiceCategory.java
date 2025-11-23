@@ -1,5 +1,6 @@
 package com.example.erp.util;
 
 public enum InvoiceCategory {
-    ORDER, OTHER
+    SALES,   // bán hàng
+    RETURN   // trả hàng
 }

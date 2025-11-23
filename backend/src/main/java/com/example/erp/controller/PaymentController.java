@@ -1,27 +1,24 @@
-
 package com.example.erp.controller;
 
-import com.example.erp.entity.Order;
-import com.example.erp.service.OrderService;
+import com.example.erp.entity.Payment;
+import com.example.erp.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
-@RequestMapping("/api/payments") // ✅ endpoint riêng
-@CrossOrigin
+@RequestMapping("/api/payments")
+@CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
 
     @Autowired
-    private OrderService service;
+    private PaymentService paymentService;
 
-    @PostMapping
-    public Order create(@RequestBody Order o) {
-        return service.createOrder(o);
-    }
-
-    @GetMapping
-    public List<Order> all() {
-        return service.getAll();
+    @PostMapping("/pay")
+    public ResponseEntity<Payment> payInvoice(@RequestParam Long invoiceId,
+                                              @RequestParam String method,
+                                              @RequestParam Long accountId) {
+        Payment payment = paymentService.payInvoice(invoiceId, method, accountId);
+        return ResponseEntity.ok(payment);
     }
 }

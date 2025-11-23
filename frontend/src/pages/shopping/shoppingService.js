@@ -7,10 +7,10 @@ const CATEGORY_URL = `${BASE_URL}/product-categories`;
 const IMAGE_BASE_URL = `${PRODUCT_URL}/image`;
 const CART_URL = `${BASE_URL}/cart`;
 const ORDER_URL = `${BASE_URL}/orders`;
-const INVOICE_URL = `${BASE_URL}/orders`; // giữ nguyên
+const INVOICE_URL = `${BASE_URL}/invoices`; // ✅ Mới: dùng endpoint invoices
 
 // =====================================================
-// 🛍️ HÀM LIÊN QUAN SẢN PHẨM
+// 🛍️ SẢN PHẨM
 // =====================================================
 export const getAllProducts = async () => {
   const res = await axios.get(PRODUCT_URL);
@@ -20,48 +20,48 @@ export const getAllProducts = async () => {
 };
 
 export const getProductById = async (id) => {
-  const response = await axios.get(`${PRODUCT_URL}/${id}`);
-  return response.data;
+  const res = await axios.get(`${PRODUCT_URL}/${id}`);
+  return res.data;
 };
 
 export const updateProduct = async (id, formData, productData) => {
-  const response = await axios.put(`${PRODUCT_URL}/${id}`, formData, {
+  const res = await axios.put(`${PRODUCT_URL}/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  if (productData?.price !== undefined && productData?.price !== null) {
+  if (productData?.price != null) {
     await axios.post(`${PRODUCT_URL}/${id}/price-history`, null, {
       params: { price: productData.price },
     });
   }
-  return response.data;
+  return res.data;
 };
 
 export const deleteProduct = (id) => axios.delete(`${PRODUCT_URL}/${id}`);
 
 export const createProduct = async (formData, productData) => {
-  const response = await axios.post(PRODUCT_URL, formData, {
+  const res = await axios.post(PRODUCT_URL, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  if (productData?.price !== undefined && productData?.price !== null) {
-    await axios.post(`${PRODUCT_URL}/${response.data.id}/price-history`, null, {
+  if (productData?.price != null) {
+    await axios.post(`${PRODUCT_URL}/${res.data.id}/price-history`, null, {
       params: { price: productData.price },
     });
   }
-  return response.data;
+  return res.data;
 };
 
 export const getPriceHistory = async (id) => {
-  const response = await axios.get(`${PRODUCT_URL}/${id}/price-history`);
-  return response.data;
+  const res = await axios.get(`${PRODUCT_URL}/${id}/price-history`);
+  return res.data;
 };
 
 export const getCategories = async () => {
-  const response = await axios.get(CATEGORY_URL);
-  return response.data;
+  const res = await axios.get(CATEGORY_URL);
+  return res.data;
 };
 
 // =====================================================
-// 🛒 HÀM LIÊN QUAN ĐẾN GIỎ HÀNG
+// 🛒 GIỎ HÀNG
 // =====================================================
 export const getShoppingProductById = async (id) => {
   const res = await axios.get(`${PRODUCT_URL}/${id}`);
@@ -75,33 +75,32 @@ export const getShoppingProductById = async (id) => {
     : "https://via.placeholder.com/400?text=No+Image";
 
   const allImages = [mainImage, ...galleries].filter((v, i, arr) => arr.indexOf(v) === i);
-
   return { ...productData, fullImageUrls: allImages };
 };
 
-// =========================================
-// === THAY ĐỔI CHÍNH (ĐÃ SỬA) ===
-// =========================================
-// ✅ CHỈNH SỬA ĐỂ LẤY HÓA ĐƠN CÓ TÊN SẢN PHẨM
-export const getInvoiceById = async (invoiceId) => {
-  // Thêm kiểm tra "bảo vệ": Nếu invoiceId là 'undefined', 'null', hoặc rỗng,
-  // chúng ta sẽ không gọi API và trả về 'null' để tránh lỗi 400 Bad Request.
-  if (!invoiceId) {
-    console.warn("getInvoiceById được gọi nhưng không có invoiceId. Hủy yêu cầu.");
-    return Promise.resolve(null); // Trả về null một cách an toàn
+// =====================================================
+// 🧾 HÓA ĐƠN (Invoice)
+// =====================================================
+export const getInvoiceById = async (orderId) => {
+  if (!orderId) {
+    console.warn("getInvoiceById được gọi nhưng không có orderId. Hủy yêu cầu.");
+    return null;
   }
-
-  // Logic cũ của bạn vẫn được giữ nguyên
-  const response = await axios.get(`${INVOICE_URL}/invoice/${invoiceId}`);
-  return response.data; // JSON sẽ có items[].productName
+  const res = await axios.get(`${INVOICE_URL}/by-order/${orderId}`);
+  return res.data; // JSON có items[].productName
 };
-// =========================================
 
+// =====================================================
+// 🖼️ HÌNH ẢNH
+// =====================================================
 export const getImage = (imageNameOrId) => {
   if (!imageNameOrId) return "/images/default-product.png";
   return `${IMAGE_BASE_URL}/${encodeURIComponent(imageNameOrId)}`;
 };
 
+// =====================================================
+// 🛒 GIỎ HÀNG
+// =====================================================
 export const addToCart = async (userId, productId, quantity = 1) => {
   return axios.post(`${CART_URL}/add`, null, {
     params: { userId, productId, quantity, accountId: userId },
@@ -109,17 +108,15 @@ export const addToCart = async (userId, productId, quantity = 1) => {
 };
 
 export const getCartByUser = async (userId) => {
-  const response = await axios.get(`${CART_URL}/${userId}`);
-  return response.data;
+  const res = await axios.get(`${CART_URL}/${userId}`);
+  return res.data;
 };
 
-export const updateCartQuantity = async (cartId, quantity) => {
-  return axios.put(`${CART_URL}/update/${cartId}?quantity=${quantity}`);
-};
+export const updateCartQuantity = async (cartId, quantity) =>
+  axios.put(`${CART_URL}/update/${cartId}?quantity=${quantity}`);
 
-export const removeFromCart = async (cartId) => {
-  return axios.delete(`${CART_URL}/remove/${cartId}`);
-};
+export const removeFromCart = async (cartId) =>
+  axios.delete(`${CART_URL}/remove/${cartId}`);
 
 export const getProductImage = (productId) => {
   if (!productId) return "/images/default-product.png";
@@ -127,16 +124,19 @@ export const getProductImage = (productId) => {
 };
 
 // =====================================================
-// 🧾 ĐẶT HÀNG
+// 🛒 ĐẶT HÀNG
 // =====================================================
 export const placeOrder = async (order) => {
-  const payload = {
-    ...order,
-    orderDate: new Date().toISOString(),
-  };
-  const response = await axios.post(`${ORDER_URL}`, payload);
-  return response.data;
+  const payload = { ...order, orderDate: new Date().toISOString() };
+  const res = await axios.post(`${ORDER_URL}`, payload);
+  return res.data;
 };
+export const payInvoice = async (data) => {
+  const res = await axios.post(`${INVOICE_URL}/pay`, data);
+  return res.data;
+};
+export const removeMultipleFromCart = async (cartIds) =>
+  axios.delete(`${CART_URL}/remove-multiple`, { data: cartIds });
 
 // =====================================================
 // ✅ EXPORT DEFAULT
@@ -158,6 +158,8 @@ const shoppingService = {
   getProductImage,
   placeOrder,
   getInvoiceById,
+  payInvoice,
+  removeMultipleFromCart,
 };
 
 export default shoppingService;

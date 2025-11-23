@@ -8,6 +8,7 @@ const CartShopping = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [invoice, setInvoice] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(""); // ⬅ thêm dòng này
 const navigate = useNavigate();
 
   useEffect(() => {
@@ -69,70 +70,64 @@ const navigate = useNavigate();
     cartItems.filter((item) => selectedItems.includes(item.id))
       .reduce((sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 0), 0);
 
-  const handlePlaceOrder = async () => {
-    if (!selectedItems.length) {
-      alert("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
-      return;
-    }
 
-    // Bước 1: Chuẩn bị danh sách 'items' (Đã đúng)
-    const itemsToOrder = cartItems
-      .filter(item => selectedItems.includes(item.id)) 
-      .map(item => ({
-        productId: item.productId, 
-        quantity: item.quantity,
-      }));
 
-    // === BƯỚC 2: SỬA LỖI TẠI ĐÂY ===
-    // Chuẩn bị 'orderPayload' đầy đủ thông tin khách hàng
-    const orderPayload = {
-      // --- Thông tin khách hàng (Dữ liệu test tạm thời) ---
-      // (Sau này bạn sẽ lấy từ các ô <input>)
-      customerName: "Khách hàng Test",
-      phone: "0912345678",
-      email: "test@gmail.com",
-      address: "123 Đường Test, Quận 1, TP. HCM",
-      note: "Giao hàng giờ hành chính.",
-      paymentMethod: "COD",
-      
-      // --- Thông tin thanh toán (Gửi 0, Backend sẽ tự tính) ---
-      subtotal: 0.0,
-      tax: 0.0,
-      shippingFee: 30000.0, // (Bạn có thể gửi phí ship nếu có)
-      discount: 0.0,
-      
-      // --- Danh sách sản phẩm (Đã đúng) ---
-      items: itemsToOrder,
-    };
-    
-    // In ra để kiểm tra
-    console.log("Đang gửi đi Order Payload:", orderPayload);
+const handlePlaceOrder = async () => {
+  if (!selectedItems.length) {
+    setSuccessMessage("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
+    return;
+  }
 
-    try {
-      // Bước 3: Gọi API (Giữ nguyên)
-      const result = await cartService.placeOrder(orderPayload);
-      
-      setCartItems(cartItems.filter(item => !selectedItems.includes(item.id)));
-      setSelectedItems([]);
+  const itemsToOrder = cartItems
+    .filter(item => selectedItems.includes(item.id))
+    .map(item => ({ productId: item.productId, quantity: item.quantity }));
 
-      alert(`Đặt hàng thành công! Mã đơn hàng: ${result.code || result.id}`);
-
-      // Bước 4: Điều hướng (Đã đúng)
-      navigate(`/invoice/${result.id}`, { state: { invoiceData: result } });
-      
-    } catch (err) {
-      // Bước 5: Bắt lỗi (Đã đúng)
-      console.error(err);
-      const errorMessage = err.response?.data || "Đặt hàng thất bại! Vui lòng thử lại.";
-      alert(errorMessage);
-    }
+  const orderPayload = {
+    customerName: "Khách hàng Test",
+    phone: "0912345678",
+    email: "test@gmail.com",
+    address: "123 Đường Test, Quận 1, TP. HCM",
+    note: "Giao hàng giờ hành chính.",
+    paymentMethod: "COD",
+    subtotal: getTotal(),
+    tax: 0,
+    shippingFee: 30000,
+    discount: 0,
+    items: itemsToOrder,
   };
+
+  try {
+    // 1️⃣ Tạo order + invoice
+    const result = await cartService.placeOrder(orderPayload); 
+    setInvoice(result);
+
+    // 2️⃣ Xóa các sản phẩm đã chọn khỏi DB
+    await cartService.removeMultipleFromCart(selectedItems);
+
+    // 3️⃣ Xóa trên frontend luôn
+    setCartItems(cartItems.filter(item => !selectedItems.includes(item.id)));
+    setSelectedItems([]);
+
+    // 4️⃣ Hiển thị thông báo thành công
+    setSuccessMessage(`Đặt hàng thành công! Mã đơn hàng: ${result.id}`);
+
+    // 5️⃣ Điều hướng sang trang thanh toán (nếu cần)
+    navigate(`/invoice/${result.id}`, { state: { invoiceData: result } });
+
+  } catch (err) {
+    console.error(err);
+    const errorMessage = err.response?.data || "Đặt hàng thất bại! Vui lòng thử lại.";
+    setSuccessMessage(errorMessage);
+  }
+};
+
 
   return (
     
     <div className="cart-container">
       <h2>🛒 Giỏ hàng của bạn</h2>
       {cartItems.length === 0 ? <p>Giỏ hàng trống</p> : (
+        
         <table className="cart-table">
           <thead>
             <tr>

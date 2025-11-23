@@ -9,7 +9,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
-@CrossOrigin(origins = "http://localhost:3000") // Cho React gọi
+@CrossOrigin(
+	    origins = "http://localhost:3000",
+	    allowedHeaders = "*",
+	    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
+	)
 public class ShoppingCartController {
 
     @Autowired
@@ -44,5 +48,9 @@ public class ShoppingCartController {
     public void clearCart(@PathVariable Long userId) {
         shoppingCartService.clearCart(userId);
     }
-    // xóa toàn bộ giỏ hàng của useId 
+ // Xóa nhiều sản phẩm trong giỏ hàng cùng lúc
+    @DeleteMapping("/remove-multiple")
+    public void removeMultipleFromCart(@RequestBody List<Long> cartIds) {
+        shoppingCartService.removeMultipleFromCart(cartIds); // ✅ Gọi đúng
+    }
 }

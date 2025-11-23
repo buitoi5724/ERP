@@ -57,4 +57,8 @@ public class ShoppingCartService {
     public void clearCart(Long userId) {
         cartRepo.deleteAllByUserId(userId);
     }
+    public void removeMultipleFromCart(List<Long> cartIds) {
+        if (cartIds == null || cartIds.isEmpty()) return;
+        cartRepo.deleteAllById(cartIds);
+    }
 }
