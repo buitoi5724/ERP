@@ -7,5 +7,6 @@ import java.util.List;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-List findByInvoiceId(Long invoiceId);
+    // Lấy tất cả payment theo invoiceId
+    List<Payment> findByInvoiceId(Long invoiceId);
 }

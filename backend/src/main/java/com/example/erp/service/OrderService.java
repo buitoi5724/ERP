@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +48,7 @@ public class OrderService {
 
         double subtotal = 0.0;
 
+        // Gán thông tin cho từng item
         for (OrderItem item : order.getItems()) {
             if (item.getProductId() == null) {
                 throw new IllegalArgumentException("productId bị thiếu.");
@@ -59,7 +59,7 @@ public class OrderService {
 
             item.setProductName(product.getName());
             item.setPrice(product.getPrice());
-            item.setOrder(order);
+            item.setOrder(order);  // quan trọng: liên kết item với order
             subtotal += item.getPrice() * item.getQuantity();
         }
 

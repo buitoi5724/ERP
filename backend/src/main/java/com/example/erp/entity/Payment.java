@@ -27,7 +27,11 @@ private String method;
 @ManyToOne
 @JoinColumn(name = "invoice_id")
 private Invoice invoice;
+@Column(name = "payment_code")
+private String paymentCode;
 
+public String getPaymentCode() { return paymentCode; }
+public void setPaymentCode(String paymentCode) { this.paymentCode = paymentCode; }
 // ================= Getters & Setters =================
 
 public Long getId() { return id; }

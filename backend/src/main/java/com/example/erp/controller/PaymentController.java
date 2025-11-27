@@ -14,11 +14,30 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
+    /**
+     * Thanh toán invoice
+     * @param invoiceId ID của hóa đơn cần thanh toán
+     * @param method Phương thức thanh toán (ví dụ: CASH, CARD)
+     * @param accountId ID người thực hiện thanh toán
+     * @return Payment đã lưu
+     */
     @PostMapping("/pay")
-    public ResponseEntity<Payment> payInvoice(@RequestParam Long invoiceId,
-                                              @RequestParam String method,
-                                              @RequestParam Long accountId) {
+    public ResponseEntity<Payment> payInvoice(
+            @RequestParam Long invoiceId,
+            @RequestParam String method,
+            @RequestParam Long accountId) {
+
         Payment payment = paymentService.payInvoice(invoiceId, method, accountId);
         return ResponseEntity.ok(payment);
+    }
+    /**
+     * Hoàn trả invoice (refund)
+     * @param invoiceId ID của hóa đơn cần refund
+     * @return ResponseEntity với thông báo thành công
+     */
+    @PostMapping("/refund")
+    public ResponseEntity<String> refundInvoice(@RequestParam Long invoiceId) {
+        paymentService.refundInvoice(invoiceId);
+        return ResponseEntity.ok("Hoàn trả thành công cho invoice " + invoiceId);
     }
 }

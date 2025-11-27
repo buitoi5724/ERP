@@ -72,14 +72,21 @@ const handlePayment = async () => {
     setTimeout(() => setShowSuccess(false), 3000);
   } catch (err) {
     const msg = err.response?.data || err.message || "Thanh toán thất bại!";
-    setFailMessage(msg);
+    // Nếu là lỗi tồn kho, backend nên trả dạng:
+    // "Sản phẩm Bánh kem không đủ số lượng. Chỉ còn 3 trong kho."
+    if (msg.includes("không đủ số lượng")) {
+      setFailMessage(msg); // giữ nguyên thông báo từ backend
+    } else if (msg.includes("Invoice đã được thanh toán")) {
+      setInvoice((prev) => ({ ...prev, status: "DONE" }));
+      setFailMessage(msg);
+    } else {
+      setFailMessage(msg);
+    }
+
     setShowFail(true);
     setShowSuccess(false);
     setTimeout(() => setShowFail(false), 4000);
-    // Nếu backend báo hóa đơn đã thanh toán
-    if (msg.includes("Invoice đã được thanh toán")) {
-      setInvoice((prev) => ({ ...prev, status: "DONE" }));
-    }
+
     console.error("Lỗi thanh toán:", msg);
   }
 };
@@ -90,7 +97,11 @@ const handlePayment = async () => {
   <span className="payment-status done">💰 Thanh toán thành công!</span>
 )}
 {showFail && (
-  <span className="payment-status fail">⚠️ {failMessage}</span>
+  <span className="payment-status fail">
+    ⚠️ {failMessage.includes("không đủ số lượng") 
+          ? failMessage // backend đã gửi: "Sản phẩm X không đủ số lượng. Chỉ còn Y trong kho."
+          : failMessage}
+  </span>
 )}
       {/* Thông tin hóa đơn */}
       <div className="invoice-section">
