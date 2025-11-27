@@ -14,11 +14,14 @@ public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Long
 
     Optional<ShoppingCart> findByUserIdAndProductId(Long userId, Long productId);
 
+  
     void deleteAllByUserId(Long userId);
 
-    // 🔹 Thêm dòng này để ProductService có thể xóa giỏ hàng chứa sản phẩm bị xóa
+
     void deleteAllByProductId(Long productId);
 
-        void deleteAllByIdInBatch(Iterable<Long> ids);
-    
+    void deleteAllByIdInBatch(Iterable<Long> ids);
+
+
+    void deleteAllByUserIdAndProductIdIn(Long userId, List<Long> productIds);
 }

@@ -13,9 +13,11 @@ public class ShoppingCartService {
 
     @Autowired
     private ShoppingCartRepository cartRepo;
+
 // file này chưa logic chính sử lý trong này
     // Lấy giỏ hàng theo user
     public List<ShoppingCart> getCartByUser(Long userId) {
+    	
         return cartRepo.findByUserId(userId);
     }
 

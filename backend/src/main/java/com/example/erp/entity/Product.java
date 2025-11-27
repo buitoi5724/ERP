@@ -2,6 +2,9 @@ package com.example.erp.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +14,9 @@ import java.util.List;
 public class Product implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"product"})
+    private Inventory inventory;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,38 +25,56 @@ public class Product implements Serializable {
     private String name;
 
     @Column(nullable = false)
-    private Double price; // giá hiện tại của sản phẩm
+    private Double price;
 
-    private String image; // ảnh đại diện chính
+    private String image;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    // 🔹 Thuộc tính mới (vẫn giữ nguyên logic cũ)
     @Column(columnDefinition = "NVARCHAR(255)")
-    private String sizes; // ví dụ: "S,M,L,XL"
+    private String sizes;
 
     @Column(columnDefinition = "NVARCHAR(255)")
-    private String colors; // ví dụ: "Đen,Trắng,Hồng"
+    private String colors;
+    @Transient
+    private Integer quantity;
 
-    @ManyToOne
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     @JsonIgnoreProperties({"createDate", "createBy", "updateDate", "updateBy"})
     private ProductCategory category;
 
-    // 🔹 Quan hệ với lịch sử giá
+    // ⚡ Fix N+1 query cho priceHistory
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     @JsonIgnoreProperties({"product"})
     private List<ProductPrice> priceHistory = new ArrayList<>();
 
-    // 🔹 Liên kết tới danh sách ảnh gallery (ProductGallery)
+    // ⚡ Fix N+1 query cho gallery
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     @JsonIgnoreProperties({"product"})
     private List<ProductGallery> galleries = new ArrayList<>();
-
+    
     // --- Getters & Setters ---
+    
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    /**
+	 * @return the inventory
+	 */
+	public Inventory getInventory() {
+		return inventory;
+	}
+	/**
+	 * @param inventory the inventory to set
+	 */
+	public void setInventory(Inventory inventory) {
+		this.inventory = inventory;
+	}
+	public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

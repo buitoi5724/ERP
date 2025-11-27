@@ -53,4 +53,5 @@ public class ShoppingCartController {
     public void removeMultipleFromCart(@RequestBody List<Long> cartIds) {
         shoppingCartService.removeMultipleFromCart(cartIds); // ✅ Gọi đúng
     }
+    
 }

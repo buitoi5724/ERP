@@ -2,7 +2,10 @@ package com.example.erp.repository;
 
 import com.example.erp.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
 
+@Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    boolean existsByInvoice_Id(Long invoiceId);
+List findByInvoiceId(Long invoiceId);
 }
