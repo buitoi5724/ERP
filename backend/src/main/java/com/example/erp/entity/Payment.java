@@ -7,52 +7,57 @@ import java.time.LocalDateTime;
 @Table(name = "payments")
 public class Payment {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
 
-    private String paymentCode;   // mã thanh toán
-    private double amount;        // số tiền
-    private String method;        // cash / bank
-    private LocalDateTime paymentDate;
-    private Long accountId;
-    // Trạng thái thanh toán: PENDING / DONE
-    private String status;
+// Mã payment
+private String code;
 
-    @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
+// Số tiền thanh toán
+private double amount;
+private Long accountId;  // ai thanh toán
+// Ngày thanh toán
+private LocalDateTime paymentDate;
 
-    
-    
-    /**
-	 * @return the accountId
-	 */
-	public Long getAccountId() {
-		return accountId;
-	}
-	// ==================== Getters & Setters ====================
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+// Phương thức thanh toán: cash / bank
+private String method;
 
-    public String getPaymentCode() { return paymentCode; }
-    public void setPaymentCode(String paymentCode) { this.paymentCode = paymentCode; }
+// Liên kết với Invoice
+@ManyToOne
+@JoinColumn(name = "invoice_id")
+private Invoice invoice;
 
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
+// ================= Getters & Setters =================
 
-    public String getMethod() { return method; }
-    public void setMethod(String method) { this.method = method; }
+public Long getId() { return id; }
+/**
+ * @return the accountId
+ */
+public Long getAccountId() {
+	return accountId;
+}
+/**
+ * @param accountId the accountId to set
+ */
+public void setAccountId(Long accountId) {
+	this.accountId = accountId;
+}
+public void setId(Long id) { this.id = id; }
 
-    public LocalDateTime getPaymentDate() { return paymentDate; }
-    public void setPaymentDate(LocalDateTime paymentDate) { this.paymentDate = paymentDate; }
+public String getCode() { return code; }
+public void setCode(String code) { this.code = code; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+public double getAmount() { return amount; }
+public void setAmount(double amount) { this.amount = amount; }
 
-    public Invoice getInvoice() { return invoice; }
-    public void setInvoice(Invoice invoice) { this.invoice = invoice; }
-	public void setAccountId(Long accountId) {
-		// TODO Auto-generated method stub
-		
-	}
+public LocalDateTime getPaymentDate() { return paymentDate; }
+public void setPaymentDate(LocalDateTime paymentDate) { this.paymentDate = paymentDate; }
+
+public String getMethod() { return method; }
+public void setMethod(String method) { this.method = method; }
+
+public Invoice getInvoice() { return invoice; }
+public void setInvoice(Invoice invoice) { this.invoice = invoice; }
+
 }

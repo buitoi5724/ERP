@@ -70,25 +70,22 @@ const handlePayment = async () => {
     setShowSuccess(true);
     setShowFail(false);
     setTimeout(() => setShowSuccess(false), 3000);
-
   } catch (err) {
     const msg = err.response?.data || err.message || "Thanh toán thất bại!";
     setFailMessage(msg);
     setShowFail(true);
     setShowSuccess(false);
     setTimeout(() => setShowFail(false), 4000);
-
     // Nếu backend báo hóa đơn đã thanh toán
     if (msg.includes("Invoice đã được thanh toán")) {
       setInvoice((prev) => ({ ...prev, status: "DONE" }));
     }
-
     console.error("Lỗi thanh toán:", msg);
   }
 };
   return (
     <div className="invoice-container">
-      <h2>🧾 HÓA ĐƠN MUA HÀNG</h2>
+      <h2> HÓA ĐƠN MUA HÀNG</h2>
 {showSuccess && (
   <span className="payment-status done">💰 Thanh toán thành công!</span>
 )}
@@ -97,7 +94,7 @@ const handlePayment = async () => {
 )}
       {/* Thông tin hóa đơn */}
       <div className="invoice-section">
-        <h3>📑 Thông tin hóa đơn</h3>
+        <h3> Thông tin hóa đơn</h3>
         <p><strong>Mã hóa đơn:</strong> {invoice.orderCode ?? "N/A"}</p>
         <p><strong>Ngày tạo đơn hàng:</strong> {formatDate(invoice.orderDate)}</p>
         <p>
@@ -116,7 +113,7 @@ const handlePayment = async () => {
 
   {/* Danh sách sản phẩm */}
 <div className="invoice-section">
-  <h3>📦 Danh sách sản phẩm</h3>
+  <h3> Danh sách sản phẩm</h3>
   {invoice.items && invoice.items.length > 0 ? (
     <table className="invoice-table">
       <thead>

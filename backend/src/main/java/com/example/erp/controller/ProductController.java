@@ -159,9 +159,10 @@ public class ProductController {
     // CREATE PRODUCT (Hỗ trợ nhiều ảnh, xử lý tên file an toàn)
     // =================================================================================
     @PostMapping(consumes = {"multipart/form-data"})
-    public Product create(
+    public ProductDTO create(
             @RequestPart("product") Product product,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestParam(value = "quantity", required = false) Integer quantity // 🔥 nhận quantity riêng
     ) throws IOException {
 
         if (product.getCategory() != null && product.getCategory().getId() != null) {
@@ -176,7 +177,6 @@ public class ProductController {
 
             List<ProductGallery> galleries = new ArrayList<>();
             for (MultipartFile file : images) {
-                // ✅ Làm sạch tên file để tránh lỗi URL (xóa ký tự đặc biệt, khoảng trắng)
                 String originalName = file.getOriginalFilename()
                         .replaceAll("[^a-zA-Z0-9._-]", "_");
 
@@ -194,22 +194,26 @@ public class ProductController {
             }
             product.setGalleries(galleries);
         }
-        return productService.save(product);
+
+        // 🔥 Nếu quantity null thì mặc định 0
+        if (quantity == null) quantity = 0;
+
+        Product saved = productService.save(product);
+        return new ProductDTO(saved);
     }
     // =================================================================================
     // UPDATE PRODUCT
     // =================================================================================
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Product update(
+    public ProductDTO update(
             @PathVariable Long id,
             @RequestPart("product") Product updatedProduct,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @RequestPart(value = "existingImages", required = false) String existingImagesJson
     ) throws IOException {
-        // ✅ Gọi đúng hàm xử lý giữ ảnh cũ
-        return productService.updateProductKeepExisting(id, updatedProduct, images, existingImagesJson);
+        Product updated = productService.updateProductKeepExisting(id, updatedProduct, images, existingImagesJson);
+        return new ProductDTO(updated);
     }
-
     // =================================================================================
     // DELETE PRODUCT
     // =================================================================================

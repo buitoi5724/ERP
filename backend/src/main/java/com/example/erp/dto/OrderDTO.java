@@ -27,7 +27,14 @@ public class OrderDTO {
     
     // Danh sách sản phẩm
     private List<OrderItemDTO> items;
+    private Long accountId;
+    private Long customerId;
 
+    public Long getAccountId() { return accountId; }
+    public void setAccountId(Long accountId) { this.accountId = accountId; }
+
+    public Long getCustomerId() { return customerId; }
+    public void setCustomerId(Long customerId) { this.customerId = customerId; }
     // Thông tin hóa đơn liên quan (Invoice)
     private InvoiceDTO invoice; // liên kết 1-1 với Order
 

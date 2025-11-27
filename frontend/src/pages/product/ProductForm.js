@@ -22,6 +22,7 @@ const ProductForm = ({ selectedId, onSuccess, onCancel }) => {
     price: "",
     description: "",
     category: null,
+      quantity: "", // mặc định 0
   });
 
   const [priceError, setPriceError] = useState("");
@@ -48,6 +49,7 @@ const ProductForm = ({ selectedId, onSuccess, onCancel }) => {
           price: data.price || "",
           description: data.description || "",
           category: data.category?.id || null,
+            quantity: data.quantity || "", // thêm
         });
 
         // ✅ xử lý ảnh dùng hàm trong service
@@ -156,13 +158,13 @@ const ProductForm = ({ selectedId, onSuccess, onCancel }) => {
   } else {
     setPriceError("");
   }
-
-  const productData = {
-    name: product.name,
-    price: Number(product.price),
-    description: product.description,
-    category: { id: Number(product.category) },
-  };
+const productData = {
+  name: product.name,
+  price: Number(product.price),
+  description: product.description,
+  category: { id: Number(product.category) },
+  quantity: Number(product.quantity), // ⚠️ đổi tên từ quantity -> quantity
+};
 
   const formData = new FormData();
   formData.append(
@@ -208,17 +210,31 @@ const ProductForm = ({ selectedId, onSuccess, onCancel }) => {
             <label htmlFor="name">Tên sản phẩm</label>
             <InputText id="name" name="name" value={product.name} onChange={handleChange} required />
           </div>
+<div className="field">
+  <label htmlFor="price">Giá sản phẩm</label>
+  <InputText
+    id="price"
+    name="price"
+    type="number"
+    value={product.price}
+    onChange={handleChange}
+    required
+  />
+  {priceError && <small className="p-error">{priceError}</small>}
+</div>
 
-          <div className="field">
-            <label htmlFor="price">Giá sản phẩm</label>
-            <InputText
-              id="price"
-              name="price"
-              type="number"
-              value={product.price}
-              onChange={handleChange}
-              required
-            />
+<div className="field">
+  <label htmlFor="quantity">Số lượng kho</label>
+  <InputText
+    id="quantity"
+    name="quantity"
+    type="number"
+    value={product.quantity}
+    onChange={handleChange}
+    min={0}
+    required
+  />
+
             {priceError && <small className="p-error">{priceError}</small>}
           </div>
 

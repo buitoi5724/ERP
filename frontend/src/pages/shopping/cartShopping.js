@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ⬅️ thêm dòng này
+import { useNavigate } from "react-router-dom";
 import "./cartShopping.css";
 import cartService from "../shopping/shoppingService";
 
@@ -8,7 +8,7 @@ const CartShopping = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [invoice, setInvoice] = useState(null);
-    const [successMessage, setSuccessMessage] = useState(""); // ⬅ thêm dòng này
+    const [successMessage, setSuccessMessage] = useState(""); 
 const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,61 +71,61 @@ const navigate = useNavigate();
       .reduce((sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 0), 0);
 
 
-
 const handlePlaceOrder = async () => {
-  if (!selectedItems.length) {
-    setSuccessMessage("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
-    return;
-  }
+if (!selectedItems.length) {
+setSuccessMessage("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
+return;
+}
 
-  const itemsToOrder = cartItems
-    .filter(item => selectedItems.includes(item.id))
-    .map(item => ({ productId: item.productId, quantity: item.quantity }));
+const itemsToOrder = cartItems
+.filter(item => selectedItems.includes(item.id))
+.map(item => ({ productId: item.productId, quantity: item.quantity }));
 
-  const orderPayload = {
-    customerName: "Khách hàng Test",
-    phone: "0912345678",
-    email: "test@gmail.com",
-    address: "123 Đường Test, Quận 1, TP. HCM",
-    note: "Giao hàng giờ hành chính.",
-    paymentMethod: "COD",
-    subtotal: getTotal(),
-    tax: 0,
-    shippingFee: 30000,
-    discount: 0,
-    items: itemsToOrder,
-  };
-
-  try {
-    // 1️⃣ Tạo order + invoice
-    const result = await cartService.placeOrder(orderPayload); 
-    setInvoice(result);
-
-    // 2️⃣ Xóa các sản phẩm đã chọn khỏi DB
-    await cartService.removeMultipleFromCart(selectedItems);
-
-    // 3️⃣ Xóa trên frontend luôn
-    setCartItems(cartItems.filter(item => !selectedItems.includes(item.id)));
-    setSelectedItems([]);
-
-    // 4️⃣ Hiển thị thông báo thành công
-    setSuccessMessage(`Đặt hàng thành công! Mã đơn hàng: ${result.id}`);
-
-    // 5️⃣ Điều hướng sang trang thanh toán (nếu cần)
-    navigate(`/invoice/${result.id}`, { state: { invoiceData: result } });
-
-  } catch (err) {
-    console.error(err);
-    const errorMessage = err.response?.data || "Đặt hàng thất bại! Vui lòng thử lại.";
-    setSuccessMessage(errorMessage);
-  }
+const orderPayload = {
+    userId: 1,
+  accountId: 1, // <-- tạm gán accountId giả
+customerName: "Khách hàng Test",
+phone: "0912345678",
+email: "test@gmail.com",
+address: "123 Đường Test, Quận 1, TP. HCM",
+note: "Giao hàng giờ hành chính.",
+paymentMethod: "COD",
+subtotal: getTotal(),
+tax: 0,
+shippingFee: 30000,
+discount: 0,
+items: itemsToOrder,
 };
 
+try {
+// 1️⃣ Tạo hóa đơn / đặt hàng
+const invoiceResult = await cartService.placeOrder(orderPayload);
+console.log("✅ Hóa đơn tạo thành công:", invoiceResult);
+
+// 2️⃣ Kiểm tra trạng thái thanh toán (chỉ xóa khi thành công)
+if (invoiceResult.paymentStatus === "PAID" || invoiceResult.status === "SUCCESS") {
+  await cartService.removeMultipleFromCart(selectedItems);
+  setCartItems(cartItems.filter(item => !selectedItems.includes(item.id)));
+  setSelectedItems([]);
+  setSuccessMessage(`Đặt hàng và thanh toán thành công! Mã đơn hàng: ${invoiceResult.id}`);
+} else {
+  setSuccessMessage(`Đặt hàng thành công nhưng chưa thanh toán. Mã đơn hàng: ${invoiceResult.id}`);
+}
+
+setInvoice(invoiceResult);
+navigate(`/invoice/${invoiceResult.id}`, { state: { invoiceData: invoiceResult } });
+
+} catch (err) {
+console.error("❌ Lỗi khi đặt hàng:", err);
+const errorMessage = err.response?.data || "Đặt hàng thất bại! Vui lòng thử lại.";
+setSuccessMessage(errorMessage);
+}
+};
 
   return (
     
     <div className="cart-container">
-      <h2>🛒 Giỏ hàng của bạn</h2>
+      <h2> Giỏ hàng của bạn</h2>
       {cartItems.length === 0 ? <p>Giỏ hàng trống</p> : (
         
         <table className="cart-table">
@@ -176,13 +176,13 @@ const handlePlaceOrder = async () => {
           <h3>Tổng tiền: {getTotal().toLocaleString()}đ</h3>
         </div>
         <button className="order-btn" disabled={!selectedItems.length} onClick={handlePlaceOrder}>
-          🛍️ Đặt hàng
+           Đặt hàng
         </button>
       </div>
 
       {invoice && (
         <div className="invoice-container">
-          <h2>🧾 Hóa đơn</h2>
+          <h2> Hóa đơn</h2>
           <p>Mã hóa đơn: {invoice.id || invoice.invoiceId}</p>
           <p>Tổng tiền: {(invoice.totalAmount ?? 0).toLocaleString()}đ</p>
           {invoice.items && invoice.items.length > 0 && (

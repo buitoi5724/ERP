@@ -6,7 +6,7 @@ import com.example.erp.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.erp.dto.OrderDTO;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,6 +66,13 @@ public class InvoiceController {
         	   e.printStackTrace(); // <-- thêm dòng này để xem lỗi thực tế
             return ResponseEntity.badRequest().body("Lỗi thanh toán: " + e.getMessage());
         }
+        
+    }
+    @PostMapping("/place-order")
+    public ResponseEntity<InvoiceDTO> placeOrder(@RequestBody OrderDTO orderDTO) {
+        Invoice invoice = invoiceService.createInvoiceFromOrder(orderDTO); // tạo hóa đơn
+        InvoiceDTO dto = invoiceService.convertToDTO(invoice);
+        return ResponseEntity.ok(dto);
     }
 }
 

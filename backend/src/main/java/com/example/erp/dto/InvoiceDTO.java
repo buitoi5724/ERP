@@ -22,7 +22,7 @@ public class InvoiceDTO {
     private Double discount;
     private String paymentMethod;
     private String note;
-
+    private String paymentStatus;  // <-- thêm trường này
     // Danh sách sản phẩm trong hóa đơn
     private List<InventoryDTO> items;
 
@@ -30,7 +30,21 @@ public class InvoiceDTO {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Long getOrderId() { return orderId; }
+    
+    
+    /**
+	 * @return the paymentStatus
+	 */
+	public String getPaymentStatus() {
+		return paymentStatus;
+	}
+	/**
+	 * @param paymentStatus the paymentStatus to set
+	 */
+	public void setPaymentStatus(String paymentStatus) {
+		this.paymentStatus = paymentStatus;
+	}
+	public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
 
     public String getOrderCode() { return orderCode; }

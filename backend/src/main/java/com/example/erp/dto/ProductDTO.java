@@ -15,6 +15,7 @@ public class ProductDTO {
     private String description;
     private String image;
     private CategoryDTO category;
+    private Integer quantity; // thêm quantity
     private List<PriceHistoryDTO> priceHistory;
 
     public ProductDTO(Product product) {
@@ -23,7 +24,6 @@ public class ProductDTO {
         this.price = product.getPrice();
         this.description = product.getDescription();
 
-        // ✅ Thêm xử lý URL ảnh đúng chuẩn
         this.image = (product.getImage() != null && !product.getImage().isEmpty())
                 ? "http://localhost:8080/api/products/image/" + product.getImage()
                 : null;
@@ -37,9 +37,30 @@ public class ProductDTO {
                     .mapToObj(i -> new PriceHistoryDTO(product.getPriceHistory().get(i), i + 1))
                     .collect(Collectors.toList());
         }
+
+        // ✅ Thêm map quantity
+        if (product.getInventory() != null) {
+            this.quantity = product.getInventory().getQuantity();
+        } else {
+            this.quantity = 0; // hoặc null nếu muốn
+        }
     }
 
-    public Long getId() { return id; }
+	/**
+	 * @param quantity the quantity to set
+	 */
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+
+	/**
+	 * @return the quantity
+	 */
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public Long getId() { return id; }
     public String getName() { return name; }
     public Double getPrice() { return price; }
     public String getDescription() { return description; }
