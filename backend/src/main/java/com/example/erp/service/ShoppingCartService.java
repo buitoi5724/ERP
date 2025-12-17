@@ -63,4 +63,8 @@ public class ShoppingCartService {
         if (cartIds == null || cartIds.isEmpty()) return;
         cartRepo.deleteAllById(cartIds);
     }
+    
+    public void deleteAllByProductId(long proudctId) {
+    	cartRepo.deleteAllByProductId(proudctId);
+    }
 }

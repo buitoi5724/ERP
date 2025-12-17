@@ -8,24 +8,31 @@ const CartShopping = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [invoice, setInvoice] = useState(null);
-    const [successMessage, setSuccessMessage] = useState(""); 
-const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState(""); 
+  const navigate = useNavigate();
+  const userId = 1;
 
+  // Load cart items
   useEffect(() => {
-    cartService.getCartByUser(1).then(async (items) => {
+    cartService.getCartByUser(userId).then(async (items) => {
       const updatedItems = await Promise.all(
         items.map(async (item) => {
           try {
             const product = await cartService.getProductById(item.productId);
+            // Lấy URL ảnh đầy đủ
+            const imageUrl = product.image
+              ? (product.image.startsWith("http") ? product.image : `http://localhost:8080${product.image}`)
+              : "/images/default-product.png";
+
             return {
               ...item,
               productName: product.name || "Sản phẩm không xác định",
               price: product.price || 0,
               description: product.description || "",
-              imageUrl: cartService.getProductImage(product.id),
+              imageUrl,
             };
           } catch {
-            return { ...item, productName: "Sản phẩm không xác định", price: 0 };
+            return { ...item, productName: "Sản phẩm không xác định", price: 0, imageUrl: "/images/default-product.png" };
           }
         })
       );
@@ -64,70 +71,63 @@ const navigate = useNavigate();
     setSelectAll(!selectAll);
   };
 
-  const getImageSrc = (productId) => cartService.getProductImage(productId);
-
   const getTotal = () =>
     cartItems.filter((item) => selectedItems.includes(item.id))
       .reduce((sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 0), 0);
 
+  const handlePlaceOrder = async () => {
+    if (!selectedItems.length) {
+      setSuccessMessage("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
+      return;
+    }
 
-const handlePlaceOrder = async () => {
-if (!selectedItems.length) {
-setSuccessMessage("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
-return;
-}
+    const itemsToOrder = cartItems
+      .filter(item => selectedItems.includes(item.id))
+      .map(item => ({ productId: item.productId, quantity: item.quantity }));
 
-const itemsToOrder = cartItems
-.filter(item => selectedItems.includes(item.id))
-.map(item => ({ productId: item.productId, quantity: item.quantity }));
+    const orderPayload = {
+      userId,
+      accountId: 1,
+      customerName: "Khách hàng Test",
+      phone: "0912345678",
+      email: "test@gmail.com",
+      address: "123 Đường Test, Quận 1, TP. HCM",
+      note: "Giao hàng giờ hành chính.",
+      paymentMethod: "COD",
+      subtotal: getTotal(),
+      tax: 0,
+      shippingFee: 30000,
+      discount: 0,
+      items: itemsToOrder,
+    };
 
-const orderPayload = {
-    userId: 1,
-  accountId: 1, // <-- tạm gán accountId giả
-customerName: "Khách hàng Test",
-phone: "0912345678",
-email: "test@gmail.com",
-address: "123 Đường Test, Quận 1, TP. HCM",
-note: "Giao hàng giờ hành chính.",
-paymentMethod: "COD",
-subtotal: getTotal(),
-tax: 0,
-shippingFee: 30000,
-discount: 0,
-items: itemsToOrder,
-};
+    try {
+      const invoiceResult = await cartService.placeOrder(orderPayload);
+      console.log("✅ Hóa đơn tạo thành công:", invoiceResult);
 
-try {
-// 1️⃣ Tạo hóa đơn / đặt hàng
-const invoiceResult = await cartService.placeOrder(orderPayload);
-console.log("✅ Hóa đơn tạo thành công:", invoiceResult);
+      if (invoiceResult.paymentStatus === "PAID" || invoiceResult.status === "SUCCESS") {
+        await cartService.removeMultipleFromCart(selectedItems);
+        setCartItems(cartItems.filter(item => !selectedItems.includes(item.id)));
+        setSelectedItems([]);
+        setSuccessMessage(`Đặt hàng và thanh toán thành công! Mã đơn hàng: ${invoiceResult.id}`);
+      } else {
+        setSuccessMessage(`Đặt hàng thành công nhưng chưa thanh toán. Mã đơn hàng: ${invoiceResult.id}`);
+      }
 
-// 2️⃣ Kiểm tra trạng thái thanh toán (chỉ xóa khi thành công)
-if (invoiceResult.paymentStatus === "PAID" || invoiceResult.status === "SUCCESS") {
-  await cartService.removeMultipleFromCart(selectedItems);
-  setCartItems(cartItems.filter(item => !selectedItems.includes(item.id)));
-  setSelectedItems([]);
-  setSuccessMessage(`Đặt hàng và thanh toán thành công! Mã đơn hàng: ${invoiceResult.id}`);
-} else {
-  setSuccessMessage(`Đặt hàng thành công nhưng chưa thanh toán. Mã đơn hàng: ${invoiceResult.id}`);
-}
+      setInvoice(invoiceResult);
+      navigate(`/invoice/${invoiceResult.id}`, { state: { invoiceData: invoiceResult } });
 
-setInvoice(invoiceResult);
-navigate(`/invoice/${invoiceResult.id}`, { state: { invoiceData: invoiceResult } });
-
-} catch (err) {
-console.error("❌ Lỗi khi đặt hàng:", err);
-const errorMessage = err.response?.data || "Đặt hàng thất bại! Vui lòng thử lại.";
-setSuccessMessage(errorMessage);
-}
-};
+    } catch (err) {
+      console.error("❌ Lỗi khi đặt hàng:", err);
+      const errorMessage = err.response?.data || "Đặt hàng thất bại! Vui lòng thử lại.";
+      setSuccessMessage(errorMessage);
+    }
+  };
 
   return (
-    
     <div className="cart-container">
-      <h2> Giỏ hàng của bạn</h2>
+      <h2>Giỏ hàng của bạn</h2>
       {cartItems.length === 0 ? <p>Giỏ hàng trống</p> : (
-        
         <table className="cart-table">
           <thead>
             <tr>
@@ -144,7 +144,7 @@ setSuccessMessage(errorMessage);
               <tr key={item.id}>
                 <td><input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => toggleSelectItem(item.id)} /></td>
                 <td className="product-info">
-                  <img src={getImageSrc(item.productId)} alt={item.productName} className="cart-img" />
+                  <img src={item.imageUrl} alt={item.productName} className="cart-img" onError={(e) => e.target.src="/images/default-product.png"} />
                   <span>{item.productName}</span>
                 </td>
                 <td>{Number(item.price ?? 0).toLocaleString()}đ</td>
@@ -164,7 +164,6 @@ setSuccessMessage(errorMessage);
                 <td>{(Number(item.price ?? 0) * Number(item.quantity ?? 0)).toLocaleString()}đ</td>
                 <td><button className="delete-btn" onClick={() => removeFromCart(item.id)}>Xóa</button></td>
               </tr>
-              
             ))}
           </tbody>
         </table>
@@ -176,13 +175,13 @@ setSuccessMessage(errorMessage);
           <h3>Tổng tiền: {getTotal().toLocaleString()}đ</h3>
         </div>
         <button className="order-btn" disabled={!selectedItems.length} onClick={handlePlaceOrder}>
-           Đặt hàng
+          Đặt hàng
         </button>
       </div>
 
       {invoice && (
         <div className="invoice-container">
-          <h2> Hóa đơn</h2>
+          <h2>Hóa đơn</h2>
           <p>Mã hóa đơn: {invoice.id || invoice.invoiceId}</p>
           <p>Tổng tiền: {(invoice.totalAmount ?? 0).toLocaleString()}đ</p>
           {invoice.items && invoice.items.length > 0 && (
@@ -209,8 +208,10 @@ setSuccessMessage(errorMessage);
           )}
         </div>
       )}
+
+      {successMessage && <div className="notification">{successMessage}</div>}
     </div>
   );
 };
 
-export default CartShopping;
+export default CartShopping

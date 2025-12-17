@@ -45,7 +45,7 @@ export const getPriceHistory = async (id) => {
 
 // 🧩 Lấy danh mục sản phẩm
 export const getCategories = async () => {
-  const response = await axios.get(CATEGORY_URL);
+  const response = await axios.get("http://localhost:8080/api/categories");
   return response.data;
 };
 
@@ -55,10 +55,10 @@ export const updateMainImage = (productId, imageUrl) => {
 };
 
 // 🧩 Hàm build URL ảnh dùng chung
-export const buildImageUrl = (img) => {
-  const baseUrl = "http://localhost:8080/api/products/image/";
-  return img?.startsWith("http") ? img : `${baseUrl}${encodeURIComponent(img)}`;
+export const buildImageUrl = (path) => {
+  if (!path) return "/images/default-product.png";
+  return `http://localhost:8080${path}`;
 };
-export const deleteProductImage = async (productId, filename) => {
-  return axios.delete(`http://localhost:8080/api/products/${productId}/gallery/${filename}`);
-};;
+export const deleteProductImage = async (imageId) => {
+  return axios.delete(`http://localhost:8080/api/galleries/${imageId}`);
+};

@@ -29,16 +29,17 @@ export default function Menu() {
             🛒 <FaChartLine /> Shopping
           </NavLink>
         </li>
-        <li>
-          <NavLink to="/employees" className={({ isActive }) => (isActive ? "active" : "")}>
-            <FaUsers /> Employees
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/downtime" className={({ isActive }) => (isActive ? "active" : "")}>
-            <FaClock /> Downtime
-          </NavLink>
-        </li>
+  <li>
+  <NavLink to="/inventory" className={({ isActive }) => (isActive ? "active" : "")}>
+    <FaUsers /> Inventory
+  </NavLink>
+</li>
+
+<li>
+  <NavLink to="/downtime" className={({ isActive }) => (isActive ? "active" : "")}>
+    <FaClock /> Downtime
+  </NavLink>
+</li>
         <li>
           <NavLink to="/scrap" className={({ isActive }) => (isActive ? "active" : "")}>
             <FaTools /> Scrap

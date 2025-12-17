@@ -1,0 +1,45 @@
+/* InventoryPages */
+.inventory-page { padding: 20px; }
+.inventory-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+.inventory-actions { margin-bottom: 20px; }
+.btn-import { background-color: #f97316; color: white; padding: 8px 16px; margin-right: 8px; border: none; cursor: pointer; }
+.btn-export { background-color: #ef4444; color: white; padding: 8px 16px; border: none; cursor: pointer; }
+.inventory-chart-section { margin-top: 20px; }
+.inventory-select { padding: 6px; margin-bottom: 12px; }
+.inventory-table-section { margin-top: 20px; }
+
+/*InventoryFrom*/
+.inventory-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-group label {
+  width: 140px;        /* chiều rộng cột label */
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group .w-full {
+  flex: 1;
+}
+
+.form-info {
+  margin-left: 140px;  /* căn thẳng với input */
+  font-size: 14px;
+  color: #555;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

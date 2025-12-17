@@ -1,67 +1,49 @@
 package com.example.erp.entity;
 
+import com.example.erp.util.BaseEntity;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "payments")
-public class Payment {
+@Table(name = "payment")
+public class Payment extends BaseEntity {
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+    @Column(nullable = false)
+    private Long invoiceId;  // Liên kết Invoice
 
-// Mã payment
-private String code;
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal amount; // Số tiền thanh toán
 
-// Số tiền thanh toán
-private double amount;
-private Long accountId;  // ai thanh toán
-// Ngày thanh toán
-private LocalDateTime paymentDate;
+    @Column(length = 50, nullable = false)
+    private String method;   // CASH, CARD, BANK_TRANSFER...
 
-// Phương thức thanh toán: cash / bank
-private String method;
+    @Column(length = 20, nullable = false)
+    private String status;   // PAID, PENDING, FAILED
 
-// Liên kết với Invoice
-@ManyToOne
-@JoinColumn(name = "invoice_id")
-private Invoice invoice;
-@Column(name = "payment_code")
-private String paymentCode;
+    @Column(name = "payment_date")
+    private LocalDateTime paymentDate;
 
-public String getPaymentCode() { return paymentCode; }
-public void setPaymentCode(String paymentCode) { this.paymentCode = paymentCode; }
-// ================= Getters & Setters =================
+    @Column(length = 255)
+    private String note;
 
-public Long getId() { return id; }
-/**
- * @return the accountId
- */
-public Long getAccountId() {
-	return accountId;
-}
-/**
- * @param accountId the accountId to set
- */
-public void setAccountId(Long accountId) {
-	this.accountId = accountId;
-}
-public void setId(Long id) { this.id = id; }
+    // ======== Getter / Setter ========
 
-public String getCode() { return code; }
-public void setCode(String code) { this.code = code; }
+    public Long getInvoiceId() { return invoiceId; }
+    public void setInvoiceId(Long invoiceId) { this.invoiceId = invoiceId; }
 
-public double getAmount() { return amount; }
-public void setAmount(double amount) { this.amount = amount; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-public LocalDateTime getPaymentDate() { return paymentDate; }
-public void setPaymentDate(LocalDateTime paymentDate) { this.paymentDate = paymentDate; }
+    public String getMethod() { return method; }
+    public void setMethod(String method) { this.method = method; }
 
-public String getMethod() { return method; }
-public void setMethod(String method) { this.method = method; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-public Invoice getInvoice() { return invoice; }
-public void setInvoice(Invoice invoice) { this.invoice = invoice; }
+    public LocalDateTime getPaymentDate() { return paymentDate; }
+    public void setPaymentDate(LocalDateTime paymentDate) { this.paymentDate = paymentDate; }
 
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 }

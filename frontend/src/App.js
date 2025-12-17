@@ -10,6 +10,9 @@ import ShoppingDetail from "./pages/shopping/shoppingDetail";
 import InvoiceShopping from "./pages/shopping/InvoiceShopping";
 import Header from './pages/login/Header';
 import LoginForm from './pages/login/LoginForm';
+import Inventory from "./pages/inventory/InventoryPage";
+import InventoryForm from "./pages/inventory/InventoryForm";
+
 
 import "./App.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
@@ -34,13 +37,15 @@ export default function App() {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/employees" element={<h1>Employees Page</h1>} />
 
-          {/* 🛍️ Shopping routes */}
+          {/* 🛍️ Shopping */}
           <Route path="/shopping" element={<Shopping />} />
           <Route path="/shopping/:id" element={<ShoppingDetail />} />
           <Route path="/cart" element={<CartShopping />} />
           <Route path="/invoice/:invoiceId" element={<InvoiceShopping />} />
 
-          {/* Trang mặc định */}
+          {/* 🧺 Inventory */}
+      <Route path="/inventory" element={<Inventory />} />
+
           <Route path="*" element={<h1>Welcome BuiToi</h1>} />
         </Routes>
       </div>

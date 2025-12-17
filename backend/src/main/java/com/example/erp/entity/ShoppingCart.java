@@ -3,13 +3,15 @@ package com.example.erp.entity;
 import jakarta.persistence.*;
 import java.io.Serializable;
 
+import com.example.erp.util.BaseEntity;
+
 @Entity
 @Table(name = "shopping_cart")
-public class ShoppingCart implements Serializable {
+public class ShoppingCart extends BaseEntity implements Serializable   {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

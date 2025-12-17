@@ -178,7 +178,7 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
           <Column field="name" header="Tên sản phẩm" sortable />
           <Column header="Ảnh" body={imageBodyTemplate} />
           <Column field="price" header="Giá" body={priceBodyTemplate} sortable />
-          <Column field="category.name" header="Loại" />
+          <Column header="Loại" body={(rowData) => rowData.categoryName || "Chưa có"} sortable />
           <Column header="Trạng thái" body={statusBodyTemplate} />
           <Column header="Hành động" body={actionBodyTemplate} />
         </DataTable>

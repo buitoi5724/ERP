@@ -13,40 +13,40 @@ import java.util.List;
 @Service
 public class ProductPriceService {
 
-    @Autowired
-    private ProductPriceRepository productPriceRepository;
+	@Autowired
+	private ProductPriceRepository productPriceRepository;
 
-    @Autowired
-    private ProductRepository productRepository;
+	@Autowired
+	private ProductRepository productRepository;
 
-    /**
-     * 📖 Lấy toàn bộ lịch sử giá của sản phẩm
-     */
-    public List<ProductPrice> getByProductId(Long productId) {
-        return productPriceRepository.findByProduct_IdOrderByStartDateDesc(productId);
-    }
+	/**
+	 * 📖 Lấy toàn bộ lịch sử giá của sản phẩm
+	 */
+	public List<ProductPrice> getByProductId(Long productId) {
+		return productPriceRepository.findByProductIdOrderByStartDateDesc(productId);
+	}
 
-    /**
-     * ➕ Thêm giá mới cho sản phẩm, đồng thời đóng giá cũ
-     */
-    public ProductPrice addNewPrice(Long productId, Double price) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+	/**
+	 * ➕ Thêm giá mới cho sản phẩm, đồng thời đóng giá cũ
+	 */
+	public ProductPrice addNewPrice(Long productId, Double price) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new RuntimeException("Product not found"));
 
-        // 🔹 Đóng giá cũ nếu còn hiệu lực
-        ProductPrice currentPrice = productPriceRepository
-                .findFirstByProduct_IdAndEndDateIsNull(productId);
-        if (currentPrice != null) {
-            currentPrice.setEndDate(LocalDateTime.now());
-            productPriceRepository.save(currentPrice);
-        }
+		// 🔹 Đóng giá cũ nếu còn hiệu lực
+		ProductPrice currentPrice = productPriceRepository
+				.findFirstByProductIdAndEndDateIsNull(productId);
+		if (currentPrice != null) {
+			currentPrice.setEndDate(LocalDateTime.now());
+			productPriceRepository.save(currentPrice);
+		}
 
-        // 🔹 Tạo giá mới
-        ProductPrice productPrice = new ProductPrice();
-        productPrice.setProduct(product);
-        productPrice.setPrice(price);
-        productPrice.setStartDate(LocalDateTime.now());
+		// 🔹 Tạo giá mới
+		ProductPrice productPrice = new ProductPrice();
+		productPrice.setProductId(product.getId());
+		productPrice.setPrice(price);
+		productPrice.setStartDate(LocalDateTime.now());
 
-        return productPriceRepository.save(productPrice);
-    }
+		return productPriceRepository.save(productPrice);
+	}
 }

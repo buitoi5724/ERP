@@ -1,25 +1,71 @@
 package com.example.erp.controller;
 
-import com.example.erp.entity.Order;
-import com.example.erp.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+import org.springframework.web.bind.annotation.*;
+
+import com.example.erp.dto.InventoryRequestDTO;
+import com.example.erp.dto.InventoryResponseDTO;
+import com.example.erp.service.InventoryService;
+
 @RestController
-@RequestMapping("/api/inventory")  // Thay đổi từ "/api/orders" thành "/api/inventory" để tránh trùng lặp
-@CrossOrigin
+@RequestMapping("/api/inventory")
+@CrossOrigin // Có thể cấu hình tập trung CORS
 public class InventoryController {
 
-    @Autowired 
-    private OrderService service;
+    private final InventoryService inventoryService;
 
-    @GetMapping  // Endpoint bây giờ là GET /api/inventory (lấy tất cả inventory)
-    public List<Order> all() { 
-        return service.getAll(); 
+    public InventoryController(InventoryService inventoryService) {
+        this.inventoryService = inventoryService;
     }
 
-    // Nếu bạn có thêm method khác (như create, update), hãy thêm vào đây và dùng mapping tương ứng, ví dụ:
-    // @PostMapping("/transaction")  // POST /api/inventory/transaction
-    // public Order create(@RequestBody Order order) { return service.create(order); }
+    // ================= INVENTORY OPERATIONS =================
+
+    @PostMapping("/add")
+    public InventoryResponseDTO addStock(@RequestBody InventoryRequestDTO dto) {
+        return inventoryService.addStock(dto);
+    }
+
+    @PostMapping("/remove")
+    public InventoryResponseDTO removeStock(@RequestBody InventoryRequestDTO dto) {
+        return inventoryService.removeStock(dto);
+    }
+
+    @PostMapping("/adjust")
+    public InventoryResponseDTO adjustStock(@RequestBody InventoryRequestDTO dto) {
+        return inventoryService.adjustStock(dto);
+    }
+
+    @PostMapping("/reserve")
+    public InventoryResponseDTO reserveStock(@RequestBody InventoryRequestDTO dto) {
+        return inventoryService.reserveStock(dto);
+    }
+
+    @PostMapping("/release")
+    public InventoryResponseDTO releaseReserved(@RequestBody InventoryRequestDTO dto) {
+        return inventoryService.releaseReserved(dto);
+    }
+
+    // ================= INVENTORY QUERY =================
+
+    // Lấy tồn kho của 1 sản phẩm theo warehouse
+    @GetMapping("/{productId}/{warehouse}")
+    public InventoryResponseDTO getByProductAndWarehouse(
+            @PathVariable Long productId,
+            @PathVariable String warehouse) {
+        return inventoryService.getByProductIdAndWarehouse(productId, warehouse);
+    }
+
+    // Lấy tất cả inventory theo product
+    @GetMapping("/all/{productId}")
+    public List<InventoryResponseDTO> getAllByProduct(@PathVariable Long productId) {
+        return inventoryService.getAllByProductId(productId);
+    }
+
+    // Lấy tất cả sản phẩm kèm inventory (quantity = 0 nếu chưa có)
+    @GetMapping("/all-with-products")
+    public List<InventoryResponseDTO> getAllProductsWithInventory(
+            @RequestParam(required = false) String warehouse) {
+        return inventoryService.getAllProductsWithInventory(warehouse);
+    }
 }
