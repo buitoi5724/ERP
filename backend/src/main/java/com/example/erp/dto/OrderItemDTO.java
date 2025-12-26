@@ -7,6 +7,7 @@ public class OrderItemDTO {
     private Long productId;
     private Integer quantity;
     private BigDecimal price;
+    private String productName;
 	/**
 	 * @return the productId
 	 */
@@ -24,6 +25,19 @@ public class OrderItemDTO {
 	 */
 	public Integer getQuantity() {
 		return quantity;
+	}
+	
+	/**
+	 * @return the productName
+	 */
+	public String getProductName() {
+		return productName;
+	}
+	/**
+	 * @param productName the productName to set
+	 */
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 	/**
 	 * @param quantity the quantity to set

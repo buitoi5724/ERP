@@ -74,6 +74,7 @@ public class OrderServiceImpl implements OrderService {
             OrderItem item = new OrderItem();
             item.setOrder(savedOrder);
             item.setProductId(i.getProductId());
+            item.setProductName(inventory.getProductName());
             item.setQuantity(i.getQuantity());
             item.setPrice(i.getPrice());
             return item;
@@ -147,6 +148,7 @@ public class OrderServiceImpl implements OrderService {
             OrderItem item = new OrderItem();
             item.setOrder(order);
             item.setProductId(i.getProductId());
+            item.setProductName(inventory.getProductName()); // ✅ QUAN TRỌNG
             item.setQuantity(i.getQuantity());
             item.setPrice(i.getPrice());
             return item;
@@ -203,6 +205,7 @@ public class OrderServiceImpl implements OrderService {
         dto.setItems(items.stream().map(i -> {
             OrderItemDTO itemDTO = new OrderItemDTO();
             itemDTO.setProductId(i.getProductId());
+            itemDTO.setProductName(i.getProductName());
             itemDTO.setQuantity(i.getQuantity());
             itemDTO.setPrice(i.getPrice());
             return itemDTO;

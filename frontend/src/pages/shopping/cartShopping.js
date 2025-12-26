@@ -1,168 +1,192 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./cartShopping.css";
-import cartService from "../shopping/shoppingService";
+import shoppingService from "../shopping/shoppingService";
 
 const CartShopping = () => {
+  const navigate = useNavigate();
+  const userId = 1; // giả lập customerId
+
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  const [invoice, setInvoice] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(""); 
-  const navigate = useNavigate();
-  const userId = 1;
+  const [successMessage, setSuccessMessage] = useState("");
 
-  // Load cart items
+  // =========================
+  // LOAD CART
+  // =========================
   useEffect(() => {
-    cartService.getCartByUser(userId).then(async (items) => {
-      const updatedItems = await Promise.all(
+    shoppingService.getCartByUser(userId).then(async (items) => {
+      const enriched = await Promise.all(
+        
         items.map(async (item) => {
           try {
-            const product = await cartService.getProductById(item.productId);
-            // Lấy URL ảnh đầy đủ
-            const imageUrl = product.image
-              ? (product.image.startsWith("http") ? product.image : `http://localhost:8080${product.image}`)
-              : "/images/default-product.png";
-
+            const product = await shoppingService.getProductById(item.productId);
+            return {
+              
+              ...item,
+              productName: product.name,
+              price: product.price,
+              imageUrl: product.image
+                ? `http://localhost:8080${product.image}`
+                : "/images/default-product.png",
+            };
+            
+          } catch {
             return {
               ...item,
-              productName: product.name || "Sản phẩm không xác định",
-              price: product.price || 0,
-              description: product.description || "",
-              imageUrl,
+              productName: "Sản phẩm không xác định",
+              price: 0,
+              imageUrl: "/images/default-product.png",
             };
-          } catch {
-            return { ...item, productName: "Sản phẩm không xác định", price: 0, imageUrl: "/images/default-product.png" };
           }
         })
       );
-      setCartItems(updatedItems);
-    }).catch(console.error);
+      setCartItems(enriched);
+    });
   }, []);
 
+  // =========================
+  // SELECT ALL
+  // =========================
   useEffect(() => {
-    setSelectAll(cartItems.length > 0 && selectedItems.length === cartItems.length);
+    setSelectAll(
+      cartItems.length > 0 && selectedItems.length === cartItems.length
+    );
   }, [selectedItems, cartItems]);
 
-  const removeFromCart = (cartId) => {
-    cartService.removeFromCart(cartId).then(() => {
-      setCartItems(cartItems.filter((item) => item.id !== cartId));
-      setSelectedItems(selectedItems.filter((id) => id !== cartId));
-    }).catch(console.error);
-  };
-
-  const handleQuantityChange = (cartId, quantity) => {
-    const newQuantity = quantity === "" ? "" : Number(quantity);
-    setCartItems(cartItems.map((item) => item.id === cartId ? { ...item, quantity: newQuantity } : item));
-  };
-
-  const submitQuantityUpdate = (cartId, quantity) => {
-    const newQuantity = Number(quantity) > 0 ? Number(quantity) : 1;
-    setCartItems(cartItems.map((item) => item.id === cartId ? { ...item, quantity: newQuantity } : item));
-    cartService.updateCartQuantity(cartId, newQuantity).catch(console.error);
-  };
-
+  // =========================
+  // CART ACTIONS
+  // =========================
   const toggleSelectItem = (id) => {
-    setSelectedItems(prev => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+    setSelectedItems((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   };
 
   const toggleSelectAll = () => {
-    setSelectedItems(selectAll ? [] : cartItems.map((item) => item.id));
+    setSelectedItems(selectAll ? [] : cartItems.map((i) => i.id));
     setSelectAll(!selectAll);
   };
 
-  const getTotal = () =>
-    cartItems.filter((item) => selectedItems.includes(item.id))
-      .reduce((sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 0), 0);
+  const removeFromCart = async (cartId) => {
+    await shoppingService.removeFromCart(cartId);
+    setCartItems(cartItems.filter((i) => i.id !== cartId));
+    setSelectedItems(selectedItems.filter((id) => id !== cartId));
+  };
 
+  const updateQuantity = async (cartId, quantity) => {
+    const q = quantity > 0 ? quantity : 1;
+    setCartItems(
+      cartItems.map((i) => (i.id === cartId ? { ...i, quantity: q } : i))
+    );
+    await shoppingService.updateCartQuantity(cartId, q);
+  };
+
+  // =========================
+  // TOTAL
+  // =========================
+  const getTotal = () =>
+    cartItems
+      .filter((i) => selectedItems.includes(i.id))
+      .reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  // =========================
+  // PLACE ORDER (ERP CHUẨN)
+  // =========================
   const handlePlaceOrder = async () => {
     if (!selectedItems.length) {
-      setSuccessMessage("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
+      setSuccessMessage("Vui lòng chọn ít nhất 1 sản phẩm");
+      
       return;
     }
 
-    const itemsToOrder = cartItems
-      .filter(item => selectedItems.includes(item.id))
-      .map(item => ({ productId: item.productId, quantity: item.quantity }));
-
     const orderPayload = {
-      userId,
-      accountId: 1,
-      customerName: "Khách hàng Test",
-      phone: "0912345678",
-      email: "test@gmail.com",
-      address: "123 Đường Test, Quận 1, TP. HCM",
-      note: "Giao hàng giờ hành chính.",
-      paymentMethod: "COD",
-      subtotal: getTotal(),
-      tax: 0,
-      shippingFee: 30000,
-      discount: 0,
-      items: itemsToOrder,
+      customerId: userId, // 🔴 BẮT BUỘC
+      paymentMethod: "cash",
+      items: cartItems
+        .filter((i) => selectedItems.includes(i.id))
+        .map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          price: i.price,
+        })),
     };
 
     try {
-      const invoiceResult = await cartService.placeOrder(orderPayload);
-      console.log("✅ Hóa đơn tạo thành công:", invoiceResult);
+      const order = await shoppingService.placeOrder(orderPayload);
 
-      if (invoiceResult.paymentStatus === "PAID" || invoiceResult.status === "SUCCESS") {
-        await cartService.removeMultipleFromCart(selectedItems);
-        setCartItems(cartItems.filter(item => !selectedItems.includes(item.id)));
-        setSelectedItems([]);
-        setSuccessMessage(`Đặt hàng và thanh toán thành công! Mã đơn hàng: ${invoiceResult.id}`);
-      } else {
-        setSuccessMessage(`Đặt hàng thành công nhưng chưa thanh toán. Mã đơn hàng: ${invoiceResult.id}`);
-      }
+      await shoppingService.removeMultipleFromCart(selectedItems);
+      setCartItems(cartItems.filter((i) => !selectedItems.includes(i.id)));
+      setSelectedItems([]);
 
-      setInvoice(invoiceResult);
-      navigate(`/invoice/${invoiceResult.id}`, { state: { invoiceData: invoiceResult } });
-
+      navigate(`/invoice/${order.id}`);
     } catch (err) {
-      console.error("❌ Lỗi khi đặt hàng:", err);
-      const errorMessage = err.response?.data || "Đặt hàng thất bại! Vui lòng thử lại.";
-      setSuccessMessage(errorMessage);
+      console.error(err);
+      setSuccessMessage(
+        err.response?.data || "Đặt hàng thất bại, vui lòng thử lại"
+      );
     }
   };
 
+  // =========================
+  // RENDER
+  // =========================
   return (
     <div className="cart-container">
-      <h2>Giỏ hàng của bạn</h2>
-      {cartItems.length === 0 ? <p>Giỏ hàng trống</p> : (
+      <h2>🛒 Giỏ hàng</h2>
+
+      {cartItems.length === 0 ? (
+        <p>Giỏ hàng trống</p>
+      ) : (
         <table className="cart-table">
           <thead>
             <tr>
-              <th><input type="checkbox" checked={selectAll} onChange={toggleSelectAll} /></th>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={toggleSelectAll}
+                />
+              </th>
               <th>Sản phẩm</th>
               <th>Đơn giá</th>
               <th>Số lượng</th>
               <th>Thành tiền</th>
-              <th>Thao tác</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            {cartItems.map(item => (
+            {cartItems.map((item) => (
               <tr key={item.id}>
-                <td><input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => toggleSelectItem(item.id)} /></td>
-                <td className="product-info">
-                  <img src={item.imageUrl} alt={item.productName} className="cart-img" onError={(e) => e.target.src="/images/default-product.png"} />
-                  <span>{item.productName}</span>
-                </td>
-                <td>{Number(item.price ?? 0).toLocaleString()}đ</td>
                 <td>
-                  <div className="quantity-control">
-                    <button onClick={() => submitQuantityUpdate(item.id, Number(item.quantity) - 1)}>-</button>
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => handleQuantityChange(item.id, e.target.value)}
-                      onBlur={(e) => submitQuantityUpdate(item.id, e.target.value)}
-                    />
-                    <button onClick={() => submitQuantityUpdate(item.id, Number(item.quantity) + 1)}>+</button>
-                  </div>
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(item.id)}
+                    onChange={() => toggleSelectItem(item.id)}
+                  />
                 </td>
-                <td>{(Number(item.price ?? 0) * Number(item.quantity ?? 0)).toLocaleString()}đ</td>
-                <td><button className="delete-btn" onClick={() => removeFromCart(item.id)}>Xóa</button></td>
+                <td className="product-info">
+                  <img src={item.imageUrl} alt="" className="cart-img" />
+                  {item.productName}
+                </td>
+                <td>{item.price.toLocaleString()}đ</td>
+                <td>
+                  <input
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) =>
+                      updateQuantity(item.id, Number(e.target.value))
+                    }
+                  />
+                </td>
+                <td>
+                  {(item.price * item.quantity).toLocaleString()}đ
+                </td>
+                <td>
+                  <button onClick={() => removeFromCart(item.id)}>Xóa</button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -170,48 +194,15 @@ const CartShopping = () => {
       )}
 
       <div className="cart-footer">
-        <div>
-          <span>Đã chọn {selectedItems.length} sản phẩm</span>
-          <h3>Tổng tiền: {getTotal().toLocaleString()}đ</h3>
-        </div>
-        <button className="order-btn" disabled={!selectedItems.length} onClick={handlePlaceOrder}>
+        <h3>Tổng tiền: {getTotal().toLocaleString()}đ</h3>
+        <button disabled={!selectedItems.length} onClick={handlePlaceOrder}>
           Đặt hàng
         </button>
       </div>
-
-      {invoice && (
-        <div className="invoice-container">
-          <h2>Hóa đơn</h2>
-          <p>Mã hóa đơn: {invoice.id || invoice.invoiceId}</p>
-          <p>Tổng tiền: {(invoice.totalAmount ?? 0).toLocaleString()}đ</p>
-          {invoice.items && invoice.items.length > 0 && (
-            <table className="invoice-table">
-              <thead>
-                <tr>
-                  <th>Sản phẩm</th>
-                  <th>Số lượng</th>
-                  <th>Đơn giá</th>
-                  <th>Thành tiền</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoice.items.map((item, idx) => (
-                  <tr key={item.productId || idx}>
-                    <td>{item.productName}</td>
-                    <td>{item.quantity}</td>
-                    <td>{Number(item.price ?? 0).toLocaleString()}đ</td>
-                    <td>{(Number(item.price ?? 0) * Number(item.quantity ?? 0)).toLocaleString()}đ</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
 
       {successMessage && <div className="notification">{successMessage}</div>}
     </div>
   );
 };
 
-export default CartShopping
+export default CartShopping;

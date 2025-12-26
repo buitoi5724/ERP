@@ -15,6 +15,9 @@ public class OrderItem extends BaseEntity {
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
+    @Column(name = "product_name", length = 255)
+    private String productName;
+    
     @Column(nullable = false)
     private Integer quantity;
 
@@ -35,4 +38,14 @@ public class OrderItem extends BaseEntity {
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    
+	}
+    
 }

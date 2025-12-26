@@ -123,20 +123,48 @@ export const getProductImage = (productId) => {
   return `${PRODUCT_URL}/get-image/${productId}`;
 };
 
-// =====================================================
-// 🛒 ĐẶT HÀNG
-// =====================================================
-export const placeOrder = async (order) => {
-  const payload = { ...order, orderDate: new Date().toISOString() };
-  const res = await axios.post(`${ORDER_URL}`, payload);
+// 📦 ĐƠN HÀNG (ORDER)
+// =====================
+export const getOrderById = async (orderId) => {
+  const res = await axios.get(`${ORDER_URL}/${orderId}`);
   return res.data;
 };
+// =====================================================
+// 🛒 ĐẶT HÀNG (ERP chuẩn)
+// =====================================================
+export const placeOrder = async ({ customerId, paymentMethod, items }) => {
+  if (!customerId) {
+    throw new Error("customerId là bắt buộc");
+  }
+
+  const payload = {
+    customerId,
+    paymentMethod: paymentMethod || "cash",
+    items,
+  };
+
+  const res = await axios.post("http://localhost:8080/api/orders", payload);
+  return res.data;
+};
+
+// =====================================================
+// 💰 THANH TOÁN HÓA ĐƠN
+// =====================================================
 export const payInvoice = async (data) => {
   const res = await axios.post(`${INVOICE_URL}/pay`, data);
   return res.data;
 };
+
 export const removeMultipleFromCart = async (cartIds) =>
   axios.delete(`${CART_URL}/remove-multiple`, { data: cartIds });
+
+
+// ✅ CONFIRM ORDER
+// =====================
+export const confirmOrder = async (orderId) => {
+  return axios.post(`${ORDER_URL}/${orderId}/confirm`);
+};
+
 
 // =====================================================
 // ✅ EXPORT DEFAULT
@@ -147,6 +175,7 @@ const shoppingService = {
   updateProduct,
   deleteProduct,
   createProduct,
+    getOrderById,
   getPriceHistory,
   getCategories,
   getShoppingProductById,
@@ -158,8 +187,8 @@ const shoppingService = {
   getProductImage,
   placeOrder,
   getInvoiceById,
-  payInvoice,
+  confirmOrder,  
+  payInvoice,            
   removeMultipleFromCart,
 };
-
 export default shoppingService;
