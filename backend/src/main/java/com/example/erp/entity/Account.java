@@ -33,7 +33,8 @@ public class Account extends BaseEntity  implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
+    @Column(name = "supplier_id")
+    private Long supplierId; // 👉 Liên kết Supplier bằng ID
     // --- CÁC TRƯỜNG DỮ LIỆU THÔNG THƯỜNG ---
     // Các trường này sẽ được tự động ánh xạ (map) thành các cột trong bảng "account".
 
@@ -63,6 +64,10 @@ public class Account extends BaseEntity  implements Serializable {
     // hoặc thay đổi (set) giá trị của các trường dữ liệu (vốn là private).
     // Các thư viện như Spring và Jackson (xử lý JSON) cũng dùng chúng rất nhiều.
 
+    public Long getSupplierId() { return supplierId; }
+    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
+    
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

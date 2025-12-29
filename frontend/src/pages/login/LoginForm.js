@@ -10,6 +10,7 @@ const handleSubmit = (e) => {
   e.preventDefault();
   if (!username.trim()) return;
 
+
   // Giả lập danh sách user
   const users = [
     { username: "admin", password: "123", role: "admin" },
@@ -17,6 +18,7 @@ const handleSubmit = (e) => {
     { username: "user2", password: "123", role: "user" }
   ];
 
+  
   // Tìm user hợp lệ
   const foundUser = users.find(
     (u) => u.username === username && u.password === password

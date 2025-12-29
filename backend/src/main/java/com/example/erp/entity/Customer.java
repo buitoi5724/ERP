@@ -1,0 +1,56 @@
+package com.example.erp.entity;
+
+import com.example.erp.util.BaseEntity;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "customers")
+public class Customer extends BaseEntity {
+
+    @Column(nullable = false, length = 150)
+    private String name;
+
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(length = 15)
+    private String phone;
+
+    @Column(length = 255)
+    private String address;
+
+    private Long accountId;
+    private Long groupId;
+    private Long provinceId;
+    private Long districtId;
+    private Long wardId;
+
+    public Customer() {}
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public Long getAccountId() { return accountId; }
+    public void setAccountId(Long accountId) { this.accountId = accountId; }
+
+    public Long getGroupId() { return groupId; }
+    public void setGroupId(Long groupId) { this.groupId = groupId; }
+
+    public Long getProvinceId() { return provinceId; }
+    public void setProvinceId(Long provinceId) { this.provinceId = provinceId; }
+
+    public Long getDistrictId() { return districtId; }
+    public void setDistrictId(Long districtId) { this.districtId = districtId; }
+
+    public Long getWardId() { return wardId; }
+    public void setWardId(Long wardId) { this.wardId = wardId; }
+}

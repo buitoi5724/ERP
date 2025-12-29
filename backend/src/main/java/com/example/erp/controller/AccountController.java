@@ -113,4 +113,10 @@ public class AccountController {
         // Trả về mã 204 No Content. Đây là mã tiêu chuẩn báo rằng "Tôi đã xóa thành công và không có gì để gửi lại cho bạn cả".
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/supplier/{supplierId}")
+    public ResponseEntity<Account> getBySupplierId(@PathVariable Long supplierId) {
+        Optional<Account> account = accountService.getBySupplierId(supplierId);
+        return account.map(ResponseEntity::ok)
+                      .orElse(ResponseEntity.notFound().build());
+    }
 }

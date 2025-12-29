@@ -11,7 +11,7 @@ import InvoiceShopping from "./pages/shopping/InvoiceShopping";
 import Header from './pages/login/Header';
 import LoginForm from './pages/login/LoginForm';
 import Inventory from "./pages/inventory/InventoryPage";
-
+import SupplierPage from "./pages/supplier/SupplierPage";
 import "./App.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primeflex/primeflex.css";
@@ -66,18 +66,19 @@ const handleLogout = () => {
               <Route path="/products" element={<Product />} />
               <Route path="/products/:id" element={<ProductDetail />} />
               <Route path="/inventory" element={<Inventory />} />
+               <Route path="/suppliers" element={<SupplierPage />} />
             </>
           )}
 
           {/* Shopping (user + admin) */}
-          {user && (
-            <>
-              <Route path="/shopping" element={<Shopping />} />
-              <Route path="/shopping/:id" element={<ShoppingDetail />} />
-              <Route path="/cart" element={<CartShopping />} />
-              <Route path="/invoice/:orderId" element={<InvoiceShopping />} />
-            </>
-          )}
+    {user && (
+      <>
+        <Route path="/shopping" element={<Shopping />} />
+        <Route path="/shopping/:id" element={<ShoppingDetail />} />
+        <Route path="/cart" element={<CartShopping />} />
+        <Route path="/invoice/:orderId" element={<InvoiceShopping />} />
+      </>
+    )}
 
           {/* Fallback */}
           <Route path="*" element={<h1>Welcome BuiToi</h1>} />

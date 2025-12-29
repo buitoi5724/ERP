@@ -22,6 +22,11 @@ export default function Menu({ user, onLogout }) {
                 <FaUsers /> Accounts
               </NavLink>
             </li>
+                <li>
+      <NavLink to="/suppliers" className={({ isActive }) => (isActive ? "active" : "")}>
+        <FaUsers /> Suppliers
+      </NavLink>
+    </li>
             <li>
               <NavLink to="/products" className={({ isActive }) => (isActive ? "active" : "")}>
                 <FaChartLine /> Products
