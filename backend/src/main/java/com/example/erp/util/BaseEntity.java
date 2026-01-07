@@ -30,6 +30,11 @@ public abstract class BaseEntity {
 
     @LastModifiedBy
     protected String updatedBy;
+    
+    
+    @Column(nullable = false)
+    protected Boolean deleted = false;
+    
 
     // Getters & Setters
     public Long getId() {
@@ -50,5 +55,8 @@ public abstract class BaseEntity {
 
     public String getUpdatedBy() {
         return updatedBy;
+    }
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 }

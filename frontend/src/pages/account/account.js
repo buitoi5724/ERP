@@ -1,253 +1,232 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { ToastContainer, toast } from 'react-toastify';
-import { Dialog } from 'primereact/dialog';
-import { Card } from 'primereact/card';
+import { Toast } from 'primereact/toast';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { Toolbar } from 'primereact/toolbar';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
 
-import 'react-toastify/dist/ReactToastify.css';
+import accountService from './accountService';
+
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
-import accountService from './accountService';
-
 export default function AccountComponent() {
   const [accounts, setAccounts] = useState([]);
-  const [account, setAccount] = useState({ email: '', name: '', password: '', username: '' });
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedAccounts, setSelectedAccounts] = useState([]);
+  const [formVisible, setFormVisible] = useState(false);
+const [globalSearch, setGlobalSearch] = useState("");
+  // Khởi tạo filters chuẩn cho PrimeReact
+const emptyFilters = {
+  global: { value: '', matchMode: 'startsWith' }, // <-- đây
+  email: { value: '', matchMode: 'startsWith' },
+  name: { value: '', matchMode: 'startsWith' },
+  username: { value: '', matchMode: 'startsWith' },
+};
+
+const filteredAccounts = accounts.filter(acc => {
+  const value = globalSearch.toLowerCase();
+  if (!value) return true; // nếu ô tìm kiếm rỗng => hiển thị tất cả
+  return (
+    acc.email?.toLowerCase().startsWith(value) ||
+    acc.name?.toLowerCase().startsWith(value) ||
+    acc.username?.toLowerCase().startsWith(value)
+  );
+});
+  const [filters, setFilters] = useState(emptyFilters);
+
+  const toast = useRef(null);
+
+  // Load danh sách account
+  const loadAccounts = async () => {
+    try {
+      const data = await accountService.getAccounts();
+      setAccounts(data || []);
+    } catch {
+      toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Không thể load accounts' });
+    }
+  };
 
   useEffect(() => {
     loadAccounts();
   }, []);
 
-  const loadAccounts = () => {
-    accountService.getAccounts()
-      .then(data => setAccounts(data))
-      .catch(() => toast.error("Lỗi tải danh sách account"));
-  };
+  // Validate account
+  const validateAccount = (acc) => {
+    if (!acc?.email?.trim()) { toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Bạn chưa nhập email' }); return false; }
+    if (!acc?.name?.trim()) { toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Bạn chưa nhập name' }); return false; }
+    if (!acc?.password?.trim()) { toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Bạn chưa nhập password' }); return false; }
+    if (!acc?.username?.trim()) { toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Bạn chưa nhập username' }); return false; }
 
-  const validateAccount = (acc, isEdit = false) => {
-    if (!acc.email.trim()) return toast.error('Bạn chưa nhập email'), false;
-    if (!acc.name.trim()) return toast.error('Bạn chưa nhập name'), false;
-    if (!acc.password.trim()) return toast.error('Bạn chưa nhập password'), false;
-    if (!acc.username.trim()) return toast.error('Bạn chưa nhập username'), false;
+    const duplicateEmail = accounts.find(a => a.id !== (acc.id || null) && a.email === acc.email);
+    if (duplicateEmail) { toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Email đã tồn tại' }); return false; }
 
-    const duplicateEmail = accounts.find(a => a.id !== (isEdit ? acc.id : null) && a.email === acc.email);
-    if (duplicateEmail) return toast.error('Email đã tồn tại'), false;
+    const duplicateUsername = accounts.find(a => a.id !== (acc.id || null) && a.username === acc.username);
+    if (duplicateUsername) { toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Username đã tồn tại' }); return false; }
 
-    const duplicateUsername = accounts.find(a => a.id !== (isEdit ? acc.id : null) && a.username === acc.username);
-    if (duplicateUsername) return toast.error('Username đã tồn tại'), false;
-
-    const duplicateName = accounts.find(a => a.id !== (isEdit ? acc.id : null) && a.name === acc.name);
-    if (duplicateName) return toast.error('Name đã tồn tại'), false;
+    const duplicateName = accounts.find(a => a.id !== (acc.id || null) && a.name === acc.name);
+    if (duplicateName) { toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Name đã tồn tại' }); return false; }
 
     return true;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateAccount(account)) return;
+  // Lưu account (create hoặc update)
+  const saveAccount = async () => {
+    if (!validateAccount(selectedAccount)) return;
 
-    accountService.createAccount(account)
-      .then(() => {
-        toast.success('Thêm account thành công');
-        setAccount({ email: '', name: '', password: '', username: '' });
-        setShowAddForm(false);
+    try {
+      if (selectedAccount.id) {
+        await accountService.updateAccount(selectedAccount.id, selectedAccount);
+      } else {
+        await accountService.createAccount(selectedAccount);
+      }
+
+      toast.current.show({ severity: 'success', summary: 'Thành công', detail: 'Lưu account thành công' });
+      setFormVisible(false);
+      setSelectedAccount(null);
+      loadAccounts();
+    } catch {
+      toast.current.show({ severity: 'error', summary: 'Lỗi', detail: 'Không thể lưu account' });
+    }
+  };
+
+  // Xóa account
+  const removeAccount = (id) => {
+    confirmDialog({
+      message: 'Bạn có chắc muốn xóa account này?',
+      acceptLabel: 'Có',
+      rejectLabel: 'Không',
+      accept: async () => {
+        await accountService.deleteAccount(id);
         loadAccounts();
-      })
-      .catch((err) => {
-        if (err.response?.data?.message) toast.error(err.response.data.message);
-        else toast.error("Đã xảy ra lỗi");
-      });
+        toast.current.show({ severity: 'success', summary: 'Đã xóa thành công' });
+      },
+    });
   };
 
-  const deleteAccount = (id) => {
-    if (!window.confirm("Bạn chắc chắn xoá account này?")) return;
-
-    accountService.deleteAccount(id)
-      .then(() => {
-        toast.success('Xoá account thành công');
+  const removeSelectedAccounts = () => {
+    confirmDialog({
+      message: `Bạn có chắc muốn xóa ${selectedAccounts.length} account đã chọn?`,
+      acceptLabel: 'Có',
+      rejectLabel: 'Không',
+      accept: async () => {
+        await Promise.all(selectedAccounts.map(a => accountService.deleteAccount(a.id)));
+        setSelectedAccounts([]);
         loadAccounts();
-      })
-      .catch(() => toast.error('Lỗi khi xoá account'));
+        toast.current.show({ severity: 'success', summary: 'Đã xóa thành công' });
+      },
+    });
   };
 
-  const editAccount = (id) => {
-    accountService.getAccountById(id)
-      .then((data) => {
-        setSelectedAccount(data);
-        setShowEditForm(true);
-      })
-      .catch(() => toast.error('Lỗi khi lấy dữ liệu account'));
-  };
+  // Toolbar
+  const leftToolbarTemplate = () => (
+    <Button
+      label="➕ Thêm mới"
+      icon="pi pi-plus"
+      onClick={() => { setSelectedAccount({ email:'', name:'', password:'', username:'' }); setFormVisible(true); }}
+    />
+  );
 
-  const saveAccount = () => {
-    if (!validateAccount(selectedAccount, true)) return;
 
-    accountService.updateAccount(selectedAccount.id, selectedAccount)
-      .then(() => {
-        toast.success('Cập nhật account thành công');
-        loadAccounts();
-        setShowEditForm(false);
-      })
-      .catch(() => toast.error('Lỗi khi cập nhật account'));
-  };
+  
+  const rightToolbarTemplate = () => (
+    <Button
+      label="🗑 Xóa đã chọn"
+      icon="pi pi-trash"
+      className="p-button-danger"
+      disabled={!selectedAccounts.length}
+      onClick={removeSelectedAccounts}
+    />
+  );
 
   const actionBodyTemplate = (rowData) => (
-    <>
-      <Button label="Edit" icon="pi pi-pencil" className="p-button-sm p-button-text" onClick={() => editAccount(rowData.id)} />
-      <Button label="Xoá" icon="pi pi-trash" className="p-button-sm p-button-danger p-button-text" onClick={() => deleteAccount(rowData.id)} />
-    </>
+    <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+      <Button icon="pi pi-pencil" rounded text tooltip="Sửa" onClick={() => { setSelectedAccount(rowData); setFormVisible(true); }} />
+      <Button icon="pi pi-trash" rounded text severity="danger" tooltip="Xóa" onClick={() => removeAccount(rowData.id)} />
+    </div>
   );
 
   return (
-    <div className="p-4 space-y-6">
-      {/* Danh sách tài khoản + nút thêm */}
-<Card>
-  <div className="flex justify-between items-center mb-3">
-    <h1 className="text-xl font-bold">Danh sách Accounts</h1>
-    <div className="ml-auto">   {/* đẩy nút sang phải */}
-      <Button
-        label="Thêm Account"
-        icon="pi pi-plus"
-        className="p-button-success"
-        onClick={() => setShowAddForm(true)}
-      />
-    </div>
-  </div>
+    <div className="p-4">
+      <Toast ref={toast} />
+      <ConfirmDialog />
 
-  <DataTable value={accounts} paginator rows={5} responsiveLayout="scroll">
-    <Column field="id" header="ID" sortable />
-    <Column field="email" header="Email" sortable />
-    <Column field="name" header="Name" sortable />
-    <Column field="password" header="Password" />
-    <Column field="username" header="Username" sortable />
-    <Column header="Thao tác" body={actionBodyTemplate} />
-  </DataTable>
-</Card>
+      <h2>Quản lý Accounts</h2>
+<Toolbar className="mb-3" left={leftToolbarTemplate} right={rightToolbarTemplate}>
+  <span className="p-input-icon-left">
+    <i className="pi pi-search" />
+<InputText
+  placeholder="Tìm kiếm theo chữ cái đầu..."
+  value={globalSearch}
+  onChange={(e) => setGlobalSearch(e.target.value)}
+/>
+  </span>
+</Toolbar>
 
-      {/* Dialog thêm account */}
-<Dialog
-  header="Thêm Account mới"
-  visible={showAddForm}
-  style={{ width: '30vw' }}
-  onHide={() => setShowAddForm(false)}
-  modal
+<DataTable
+  value={accounts}
+  paginator
+  rows={10}
+  selection={selectedAccounts}
+  onSelectionChange={(e) => setSelectedAccounts(e.value)}
+  selectionMode="checkbox"
+  stripedRows
+  responsiveLayout="scroll"
+  filters={filters}
+  onFilter={(e) => setFilters(prev => ({
+    ...prev,
+    ...e.filters,
+    global: e.filters.global || prev.global
+  }))}
+  globalFilterFields={['email','name','username']}
+  filterDisplay="row"
+  emptyMessage="Không có account"
 >
-  <form onSubmit={handleSubmit} className="p-fluid grid formgrid">
-    <div className="field col-12 md:col-6">
-      <label>Email</label>
-      <InputText value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
-    </div>
-    <div className="field col-12 md:col-6">
-      <label>Name</label>
-      <InputText value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
-    </div>
-    <div className="field col-12 md:col-6">
-      <label>Password</label>
-      <InputText type="password" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
-    </div>
-    <div className="field col-12 md:col-6">
-      <label>Username</label>
-      <InputText value={account.username} onChange={(e) => setAccount({ ...account, username: e.target.value })} />
-    </div>
+        <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
+        <Column field="email" header="Email" sortable filter filterPlaceholder="Tìm email..." />
+        <Column field="name" header="Name" sortable filter filterPlaceholder="Tìm name..." />
+        <Column field="username" header="Username" sortable filter filterPlaceholder="Tìm username..." />
+        <Column field="password" header="Password" />
+        <Column header="Thao tác" body={actionBodyTemplate} />
+      </DataTable>
 
-    <div className="flex justify-end gap-2 mt-3">
-      <Button type="button" label="Hủy" icon="pi pi-times" className="p-button-secondary p-button-sm" onClick={() => setShowAddForm(false)} />
-      <Button type="submit" label="Lưu" icon="pi pi-check" className="p-button-primary p-button-sm" />
-    </div>
-  </form>
-</Dialog>
+      <Dialog
+        header={selectedAccount?.id ? "Chỉnh sửa Account" : "Thêm Account mới"}
+        visible={formVisible}
+        style={{ width: '30vw' }}
+        onHide={() => setFormVisible(false)}
+        modal
+      >
+        {selectedAccount && (
+          <div className="p-fluid grid formgrid">
+            <div className="field col-12 md:col-6">
+              <label>Email</label>
+              <InputText value={selectedAccount.email || ""} onChange={(e) => setSelectedAccount({ ...selectedAccount, email: e.target.value })} />
+            </div>
+            <div className="field col-12 md:col-6">
+              <label>Name</label>
+              <InputText value={selectedAccount.name || ""} onChange={(e) => setSelectedAccount({ ...selectedAccount, name: e.target.value })} />
+            </div>
+            <div className="field col-12 md:col-6">
+              <label>Password</label>
+              <InputText type="password" value={selectedAccount.password || ""} onChange={(e) => setSelectedAccount({ ...selectedAccount, password: e.target.value })} />
+            </div>
+            <div className="field col-12 md:col-6">
+              <label>Username</label>
+              <InputText value={selectedAccount.username || ""} onChange={(e) => setSelectedAccount({ ...selectedAccount, username: e.target.value })} />
+            </div>
 
-{/* Dialog chỉnh sửa account */}
-<Dialog
-  header="Chỉnh sửa Account"
-  visible={showEditForm}
-  style={{ width: '30vw' }}
-  onHide={() => setShowEditForm(false)}
-  modal
->
-  {selectedAccount && (
-    <div className="p-fluid grid formgrid">
-      <div className="field col-12 md:col-6">
-        <label>Email</label>
-        <InputText value={selectedAccount.email} onChange={(e) => setSelectedAccount({ ...selectedAccount, email: e.target.value })} />
-      </div>
-      <div className="field col-12 md:col-6">
-        <label>Name</label>
-        <InputText value={selectedAccount.name} onChange={(e) => setSelectedAccount({ ...selectedAccount, name: e.target.value })} />
-      </div>
-      <div className="field col-12 md:col-6">
-        <label>Password</label>
-        <InputText type="password" value={selectedAccount.password} onChange={(e) => setSelectedAccount({ ...selectedAccount, password: e.target.value })} />
-      </div>
-      <div className="field col-12 md:col-6">
-        <label>Username</label>
-        <InputText value={selectedAccount.username} onChange={(e) => setSelectedAccount({ ...selectedAccount, username: e.target.value })} />
-      </div>
-
-      <div className="flex justify-end gap-2 mt-3">
-        <Button type="button" label="Hủy" icon="pi pi-times" className="p-button-secondary p-button-sm" onClick={() => setShowEditForm(false)} />
-        <Button type="button" label="Lưu" icon="pi pi-check" className="p-button-primary p-button-sm" onClick={saveAccount} />
-      </div>
-    </div>
-  )}
-</Dialog>
-
-
-{/* Dialog chỉnh sửa */}
-<Dialog
-  header="Thêm Account mới"
-  visible={showAddForm}
-  style={{ width: '30vw' }}
-  onHide={() => setShowAddForm(false)}
-  modal
-  footer={
-    <div className="flex justify-end gap-2">
-      <Button
-        type="button"
-        label="Hủy"
-        icon="pi pi-times"
-        className="p-button-secondary p-button-sm"
-        onClick={() => setShowAddForm(false)}
-      />
-      <Button
-        type="submit"
-        label="Lưu"
-        icon="pi pi-check"
-        className="p-button-primary p-button-sm"
-        onClick={handleSubmit}
-      />
-    </div>
-  }
->
-  <form onSubmit={handleSubmit} className="p-fluid grid formgrid">
-    <div className="field col-12 md:col-6">
-      <label>Email</label>
-      <InputText value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
-    </div>
-    <div className="field col-12 md:col-6">
-      <label>Name</label>
-      <InputText value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
-    </div>
-    <div className="field col-12 md:col-6">
-      <label>Password</label>
-      <InputText type="password" value={account.password} onChange={(e) => setAccount({ ...account, password: e.target.value })} />
-    </div>
-    <div className="field col-12 md:col-6">
-      <label>Username</label>
-      <InputText value={account.username} onChange={(e) => setAccount({ ...account, username: e.target.value })} />
-    </div>
-  </form>
-</Dialog>
-
-
-      <ToastContainer />
+            <div className="flex justify-end gap-2 mt-3">
+              <Button label="Hủy" icon="pi pi-times" className="p-button-secondary" onClick={() => setFormVisible(false)} />
+              <Button label="Lưu" icon="pi pi-check" className="p-button-primary" onClick={saveAccount} />
+            </div>
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 }

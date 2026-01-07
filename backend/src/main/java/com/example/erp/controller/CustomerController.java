@@ -3,6 +3,9 @@ package com.example.erp.controller;
 import com.example.erp.dto.CustomerRequestDTO;
 import com.example.erp.dto.CustomerResponseDTO;
 import com.example.erp.service.CustomerService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,27 +21,37 @@ public class CustomerController {
     }
 
     @PostMapping
-    public CustomerResponseDTO create(@RequestBody CustomerRequestDTO dto) {
-        return service.create(dto);
+    public ResponseEntity<CustomerResponseDTO> create(@RequestBody CustomerRequestDTO dto) {
+        return ResponseEntity.ok(service.create(dto));
     }
 
     @PutMapping("/{id}")
-    public CustomerResponseDTO update(@PathVariable Long id, @RequestBody CustomerRequestDTO dto) {
-        return service.update(id, dto);
+    public ResponseEntity<CustomerResponseDTO> update(
+            @PathVariable Long id,
+            @RequestBody CustomerRequestDTO dto) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    public CustomerResponseDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+    public ResponseEntity<CustomerResponseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getById(id));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<CustomerResponseDTO>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping
-    public List<CustomerResponseDTO> getAll() {
-        return service.getAll();
+    public ResponseEntity<Page<CustomerResponseDTO>> search(
+            @RequestParam(defaultValue = "") String keyword,
+            Pageable pageable) {
+        return ResponseEntity.ok(service.search(keyword, pageable));
     }
 }

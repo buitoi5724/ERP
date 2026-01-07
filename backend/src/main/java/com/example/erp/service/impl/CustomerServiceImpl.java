@@ -2,69 +2,100 @@ package com.example.erp.service.impl;
 
 import com.example.erp.dto.CustomerRequestDTO;
 import com.example.erp.dto.CustomerResponseDTO;
+import com.example.erp.entity.Account;
 import com.example.erp.entity.Customer;
+import com.example.erp.mapper.CustomerMapper;
+import com.example.erp.repository.AccountRepository;
 import com.example.erp.repository.CustomerRepository;
 import com.example.erp.service.CustomerService;
-import org.springframework.beans.BeanUtils;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class CustomerServiceImpl implements CustomerService {
 
-    private final CustomerRepository repository;
+    private final CustomerRepository customerRepository;
+    private final AccountRepository accountRepository;
 
-    public CustomerServiceImpl(CustomerRepository repository) {
-        this.repository = repository;
+    public CustomerServiceImpl(CustomerRepository customerRepository,
+                               AccountRepository accountRepository) {
+        this.customerRepository = customerRepository;
+        this.accountRepository = accountRepository;
     }
 
     @Override
     public CustomerResponseDTO create(CustomerRequestDTO dto) {
-        Customer customer = new Customer();
-        BeanUtils.copyProperties(dto, customer);
-        Customer saved = repository.save(customer);
+        Account account = accountRepository.findById(dto.getAccountId())
+                .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        CustomerResponseDTO response = new CustomerResponseDTO();
-        BeanUtils.copyProperties(saved, response);
-        return response;
+        if (customerRepository.existsByAccountIdAndDeletedFalse(dto.getAccountId()))
+            throw new RuntimeException("Account already linked");
+
+        if (customerRepository.existsByPhoneAndDeletedFalse(dto.getPhone()))
+            throw new RuntimeException("Phone already exists");
+
+        Customer c = new Customer();
+        c.setAccountId(dto.getAccountId());
+        c.setName(dto.getName());
+        c.setPhone(dto.getPhone());
+        c.setEmail(account.getEmail()); 
+        c.setAddress(dto.getAddress());
+        c.setStatus(dto.getStatus());
+        c.setGroupId(dto.getGroupId());
+        c.setProvinceId(dto.getProvinceId());
+        c.setDistrictId(dto.getDistrictId());
+        c.setWardId(dto.getWardId());
+
+        Customer saved = customerRepository.save(c);
+        saved.setAccount(account); // ⭐ set account để mapper lấy
+        return CustomerMapper.toDTO(saved);
     }
 
     @Override
     public CustomerResponseDTO update(Long id, CustomerRequestDTO dto) {
-        Customer customer = repository.findById(id)
+        Customer c = customerRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        BeanUtils.copyProperties(dto, customer);
-        Customer updated = repository.save(customer);
+        if (dto.getName() != null) c.setName(dto.getName());
+        if (dto.getPhone() != null) c.setPhone(dto.getPhone());
+        if (dto.getAddress() != null) c.setAddress(dto.getAddress());
+        if (dto.getStatus() != null) c.setStatus(dto.getStatus());
 
-        CustomerResponseDTO response = new CustomerResponseDTO();
-        BeanUtils.copyProperties(updated, response);
-        return response;
+        Customer saved = customerRepository.save(c);
+        return CustomerMapper.toDTO(saved);
     }
 
     @Override
     public void delete(Long id) {
-        repository.deleteById(id);
+        Customer c = customerRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        c.setDeleted(true);
+        customerRepository.save(c);
     }
 
     @Override
     public CustomerResponseDTO getById(Long id) {
-        Customer customer = repository.findById(id)
+        Customer c = customerRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        CustomerResponseDTO response = new CustomerResponseDTO();
-        BeanUtils.copyProperties(customer, response);
-        return response;
+        return CustomerMapper.toDTO(c);
     }
 
     @Override
     public List<CustomerResponseDTO> getAll() {
-        return repository.findAll().stream().map(customer -> {
-            CustomerResponseDTO response = new CustomerResponseDTO();
-            BeanUtils.copyProperties(customer, response);
-            return response;
-        }).collect(Collectors.toList());
+        return customerRepository.findAllWithAccount()
+                .stream()
+                .map(CustomerMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public Page<CustomerResponseDTO> search(String keyword, Pageable pageable) {
+        return customerRepository.searchWithAccount(keyword, pageable)
+                .map(CustomerMapper::toDTO);
     }
 }

@@ -9,40 +9,54 @@ import { v4 as uuidv4 } from "uuid";
 import InventoryService from "./inventoryService";
 import "./inventory.css";
 
-const InventoryForm = ({ visible, actionType, onClose, products }) => {
-
+const InventoryForm = ({ visible, actionType, onClose }) => {
   const [form, setForm] = useState({
-    // ===== PRODUCT =====
     selectedProduct: null,
     warehouse: "DEFAULT",
-
-    // ===== QUANTITY & PRICE =====
     quantity: null,
     costPrice: null,
     salePrice: null,
-
-    // ===== STOCK RULE =====
     minStock: 0,
     maxStock: null,
-
-    // ===== STATUS =====
     status: "ACTIVE",
     note: "",
-
-    // ===== IMPORT INFO =====
     date: new Date(),
     batchCode: "",
     mfgDate: null,
     expDate: null,
     receiptCode: "",
-    supplier: "",
-    createdBy: ""
+    supplier: null,
+    createdBy: "",
+    customer: null // chỉ xuất kho liên quan khách hàng
   });
+
+  const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [customers, setCustomers] = useState([]);
 
   const updateForm = (key, value) =>
     setForm(prev => ({ ...prev, [key]: value }));
 
-  // Auto fill price when choose product
+  // Load dữ liệu khi mở form
+  useEffect(() => {
+  // Products
+  InventoryService.getAllProducts()
+    .then(res => setProducts(Array.isArray(res) ? res : res.content || []))
+    .catch(err => console.error("Lỗi load products:", err));
+
+  // Suppliers
+  fetch("http://localhost:8080/api/suppliers") // URL backend đầy đủ
+    .then(res => res.json())
+    .then(data => setSuppliers(data)) // đã là array
+    .catch(err => console.error("Lỗi load suppliers fetch:", err));
+
+  // Customers
+  InventoryService.getAllCustomers()
+    .then(res => setCustomers(Array.isArray(res) ? res : res.content || []))
+    .catch(err => console.error("Lỗi load customers:", err));
+}, []);
+
+  // Auto fill giá và kho khi chọn sản phẩm
   useEffect(() => {
     if (form.selectedProduct) {
       updateForm("costPrice", form.selectedProduct.costPrice || form.selectedProduct.price);
@@ -51,78 +65,59 @@ const InventoryForm = ({ visible, actionType, onClose, products }) => {
     }
   }, [form.selectedProduct]);
 
-  // ================= SUBMIT =================
-  const handleSubmit = async () => {
-    const {
-      selectedProduct,
-      quantity,
-      costPrice,
-      salePrice,
-      warehouse,
-      minStock,
-      maxStock,
-      status,
-      note,
-      date,
-      batchCode,
-      receiptCode,
-      mfgDate,
-      expDate,
-      supplier,
-      createdBy
-    } = form;
+ const handleSubmit = async () => {
+  if (!form.selectedProduct) return alert("Chọn sản phẩm");
+  if (!form.quantity || form.quantity <= 0) return alert("Số lượng không hợp lệ");
+  if (actionType === "import" && (!form.costPrice || form.costPrice <= 0))
+    return alert("Giá vốn không hợp lệ");
 
-    if (!selectedProduct) return alert("Vui lòng chọn sản phẩm");
-    if (!quantity || quantity <= 0) return alert("Số lượng không hợp lệ");
-    if (actionType === "import" && (!costPrice || costPrice <= 0))
-      return alert("Giá vốn không hợp lệ");
+  console.log("FORM SUBMIT:", form); // 🔍 log kiểm tra
 
-    const finalBatchId = batchCode || uuidv4();
-    const finalReceiptCode = receiptCode || "PN-" + Date.now();
+  const batchId = form.batchCode || uuidv4();
+  const receiptCode = form.receiptCode || `PN-${Date.now()}`;
 
-    try {
-      if (actionType === "import") {
-        await InventoryService.addInventory({
-          productId: selectedProduct.productId,
-          productCode: selectedProduct.productCode,
-          productName: selectedProduct.productName,
+  try {
+    if (actionType === "import") {
+      await InventoryService.addInventory({
+        productId: form.selectedProduct.id,          // ✅ SỬA
+        productName: form.selectedProduct.name,      // ✅ SỬA
+        warehouse: form.warehouse,
+        quantity: form.quantity,
+        costPrice: form.costPrice,
+        salePrice: form.salePrice,
+        minStock: form.minStock,
+        maxStock: form.maxStock,
+        status: form.status,
+        note: form.note,
+        date: form.date,
+        batchId,
+        receiptCode,
+        mfgDate: form.mfgDate,
+        expDate: form.expDate,
+        supplierId: form.supplier?.id || null,       // ✅ tránh null crash
+        createdBy: form.createdBy || "admin"
+      });
 
-          warehouse,
-          quantity,
+      alert("Nhập kho thành công!");
+    } else {
+      await InventoryService.removeInventory({
+        productId: form.selectedProduct.id,          // ✅ SỬA
+        warehouse: form.warehouse,
+        quantity: form.quantity,
+        customerId: form.customer?.id || null,
+        date: form.date
+      });
 
-          costPrice,
-          salePrice,
-          minStock,
-          maxStock,
-          status,
-          note,
-
-          date,
-          batchId: finalBatchId,
-          receiptCode: finalReceiptCode,
-          mfgDate,
-          expDate,
-          supplier,
-          createdBy
-        });
-        alert("Nhập kho thành công");
-      } else {
-        await InventoryService.removeInventory({
-          productId: selectedProduct.productId,
-          warehouse,
-          quantity,
-          date
-        });
-        alert("Xuất kho thành công");
-      }
-
-      resetForm();
-      onClose();
-    } catch (err) {
-      console.error(err);
-      alert(actionType === "import" ? "Nhập kho thất bại" : "Xuất kho thất bại");
+      alert("Xuất kho thành công!");
     }
-  };
+
+    resetForm();
+    onClose();
+  } catch (err) {
+    console.error("LỖI SUBMIT:", err);
+    alert(actionType === "import" ? "Nhập kho thất bại" : "Xuất kho thất bại");
+  }
+};
 
   const resetForm = () => {
     setForm({
@@ -140,8 +135,9 @@ const InventoryForm = ({ visible, actionType, onClose, products }) => {
       mfgDate: null,
       expDate: null,
       receiptCode: "",
-      supplier: "",
-      createdBy: ""
+      supplier: null,
+      createdBy: "",
+      customer: null
     });
   };
 
@@ -155,128 +151,96 @@ const InventoryForm = ({ visible, actionType, onClose, products }) => {
     >
       <div className="inventory-form-container">
 
-        {/* PRODUCT */}
+        {/* Sản phẩm */}
         <div className="form-group">
           <label>Sản phẩm</label>
-          <Dropdown
-            value={form.selectedProduct}
-            options={products}
-            optionLabel="productName"
-            placeholder="-- Chọn sản phẩm --"
-            onChange={(e) => updateForm("selectedProduct", e.value)}
-            className="w-full"
-          />
+   <Dropdown
+  value={form.selectedProduct}
+  options={products}
+  optionLabel="name"
+  placeholder="-- Chọn sản phẩm --"
+  onChange={e => updateForm("selectedProduct", e.value)}
+  className="w-full"
+/>
         </div>
 
-        {/* WAREHOUSE */}
+        {/* Kho */}
         <div className="form-group">
           <label>Kho</label>
           <InputText
             value={form.warehouse}
-            onChange={(e) => updateForm("warehouse", e.target.value)}
+            onChange={e => updateForm("warehouse", e.target.value)}
             className="w-full"
           />
         </div>
 
-        {/* IMPORT ONLY */}
+        {/* Nhập kho */}
         {actionType === "import" && (
           <>
             <div className="form-group">
-              <label>Mã phiếu nhập</label>
-              <InputText
-                value={form.receiptCode}
-                onChange={(e) => updateForm("receiptCode", e.target.value)}
-                className="w-full"
-              />
+              <label>Nhà cung cấp</label>
+        <Dropdown
+  value={form.supplier}
+  options={suppliers} // ✅ chắc chắn là array
+  optionLabel="name"   // tên hiển thị
+  placeholder="-- Chọn nhà cung cấp --"
+  onChange={e => updateForm("supplier", e.value)}
+  className="w-full"
+/>
             </div>
-
+            <div className="form-group">
+              <label>Mã phiếu nhập</label>
+              <InputText value={form.receiptCode} onChange={e => updateForm("receiptCode", e.target.value)} className="w-full"/>
+            </div>
             <div className="form-group">
               <label>Mã lô</label>
-              <InputText
-                value={form.batchCode}
-                onChange={(e) => updateForm("batchCode", e.target.value)}
-                className="w-full"
-              />
+              <InputText value={form.batchCode} onChange={e => updateForm("batchCode", e.target.value)} className="w-full"/>
             </div>
-
             <div className="form-group">
               <label>NSX</label>
-              <Calendar value={form.mfgDate} onChange={(e) => updateForm("mfgDate", e.value)} showIcon />
+              <Calendar value={form.mfgDate} onChange={e => updateForm("mfgDate", e.value)} showIcon/>
             </div>
-
             <div className="form-group">
               <label>HSD</label>
-              <Calendar value={form.expDate} onChange={(e) => updateForm("expDate", e.value)} showIcon />
-            </div>
-
-            <div className="form-group">
-              <label>Nhà cung cấp</label>
-              <InputText value={form.supplier} onChange={(e) => updateForm("supplier", e.target.value)} />
-            </div>
-
-            <div className="form-group">
-              <label>Người thực hiện</label>
-              <InputText value={form.createdBy} onChange={(e) => updateForm("createdBy", e.target.value)} />
+              <Calendar value={form.expDate} onChange={e => updateForm("expDate", e.value)} showIcon/>
             </div>
           </>
         )}
 
-        {/* PRICE */}
-        <div className="form-group">
-          <label>Giá vốn</label>
-          <InputNumber value={form.costPrice} onValueChange={(e) => updateForm("costPrice", e.value)} min={0} />
-        </div>
+        {/* Xuất kho */}
+        {actionType === "export" && (
+          <div className="form-group">
+            <label>Khách hàng</label>
+            <Dropdown
+              value={form.customer}
+              options={customers}
+              optionLabel="name"
+              placeholder="-- Chọn khách hàng --"
+              onChange={e => updateForm("customer", e.value)}
+              className="w-full"
+            />
+          </div>
+        )}
 
-        <div className="form-group">
-          <label>Giá bán</label>
-          <InputNumber value={form.salePrice} onValueChange={(e) => updateForm("salePrice", e.value)} min={0} />
-        </div>
-
-        {/* STOCK */}
+        {/* Số lượng, giá vốn, giá bán */}
         <div className="form-group">
           <label>Số lượng</label>
-          <InputNumber value={form.quantity} onValueChange={(e) => updateForm("quantity", e.value)} min={1} />
+          <InputNumber value={form.quantity} onValueChange={e => updateForm("quantity", e.value)} min={1} className="w-full"/>
         </div>
-
         <div className="form-group">
-          <label>Tồn tối thiểu</label>
-          <InputNumber value={form.minStock} onValueChange={(e) => updateForm("minStock", e.value)} min={0} />
+          <label>Giá vốn</label>
+          <InputNumber value={form.costPrice} onValueChange={e => updateForm("costPrice", e.value)} min={0} className="w-full"/>
         </div>
-
         <div className="form-group">
-          <label>Tồn tối đa</label>
-          <InputNumber value={form.maxStock} onValueChange={(e) => updateForm("maxStock", e.value)} min={0} />
-        </div>
-
-        {/* STATUS */}
-        <div className="form-group">
-          <label>Trạng thái</label>
-          <Dropdown
-            value={form.status}
-            options={[
-              { label: "Hoạt động", value: "ACTIVE" },
-              { label: "Ngừng", value: "INACTIVE" }
-            ]}
-            onChange={(e) => updateForm("status", e.value)}
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Ghi chú</label>
-          <InputText value={form.note} onChange={(e) => updateForm("note", e.target.value)} />
-        </div>
-
-        {/* DATE */}
-        <div className="form-group">
-          <label>Ngày thực hiện</label>
-          <Calendar value={form.date} onChange={(e) => updateForm("date", e.value)} showIcon />
+          <label>Giá bán</label>
+          <InputNumber value={form.salePrice} onValueChange={e => updateForm("salePrice", e.value)} min={0} className="w-full"/>
         </div>
 
         <div className="form-actions">
           <Button
             label={actionType === "import" ? "Nhập kho" : "Xuất kho"}
-            className={`p-button-${actionType === "import" ? "success" : "danger"}`}
             onClick={handleSubmit}
+            className={`p-button-${actionType === "import" ? "success" : "danger"}`}
           />
           <Button label="Hủy" className="p-button-secondary" onClick={onClose} />
         </div>

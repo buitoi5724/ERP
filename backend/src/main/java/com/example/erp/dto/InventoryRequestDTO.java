@@ -13,7 +13,7 @@ public class InventoryRequestDTO {
     // ===== PRICE =====
     private BigDecimal costPrice;
     private BigDecimal salePrice;
-
+    private Long id;  
     // ===== STOCK RULE =====
     private Integer minStock;
     private Integer maxStock;
@@ -27,8 +27,21 @@ public class InventoryRequestDTO {
 
     // ===== GETTER / SETTER =====
 
+    
     public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
+    /**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public void setProductId(Long productId) { this.productId = productId; }
 
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }

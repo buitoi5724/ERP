@@ -15,11 +15,12 @@ import SupplierPage from "./pages/supplier/SupplierPage";
 import "./App.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primeflex/primeflex.css";
-
+import CustomersPage from "./pages/customers/CustomersPage";
+import InventoryEntryPage from "./pages/inventory/InventoryEntryPage";
 export default function App() {
   // trạng thái login
   const [user, setUser] = useState(null);
-  const [loginVisible, setLoginVisible] = useState(false);
+  const [loginVisible, setLoginVisible] = useState(false)
 
   // hiển thị dialog login
   const handleLoginClick = () => setLoginVisible(true);
@@ -66,6 +67,7 @@ const handleLogout = () => {
               <Route path="/products" element={<Product />} />
               <Route path="/products/:id" element={<ProductDetail />} />
               <Route path="/inventory" element={<Inventory />} />
+               <Route path="/inventory-entry" element={<InventoryEntryPage />} />
                <Route path="/suppliers" element={<SupplierPage />} />
             </>
           )}
@@ -77,6 +79,7 @@ const handleLogout = () => {
         <Route path="/shopping/:id" element={<ShoppingDetail />} />
         <Route path="/cart" element={<CartShopping />} />
         <Route path="/invoice/:orderId" element={<InvoiceShopping />} />
+  <Route path="/customers" element={<CustomersPage />} />
       </>
     )}
 

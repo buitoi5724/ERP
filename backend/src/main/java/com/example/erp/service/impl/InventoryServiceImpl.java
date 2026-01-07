@@ -121,7 +121,7 @@ public class InventoryServiceImpl implements InventoryService {
         if (dto.getCostPrice() != null) {
             inv.setCostPrice(dto.getCostPrice());
         }
-
+        
         inv.setQuantity(inv.getQuantity() + dto.getQuantity());
         inv.setLastImportDate(LocalDateTime.now());
 
