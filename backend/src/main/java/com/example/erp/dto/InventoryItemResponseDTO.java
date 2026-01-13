@@ -1,5 +1,6 @@
 package com.example.erp.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -10,17 +11,21 @@ public class InventoryItemResponseDTO {
     private Long inventoryId;
     private Long productId;
     private String productName;
-
+    private BigDecimal unitPrice;
+    private BigDecimal totalPrice;
+    
+    
     // ===== KHO =====
     private String warehouse;
-
+    private String warehouseName;   // mới
+    
     // ===== NHẬP / XUẤT =====
     private Integer quantity;              // số lượng nhập
     private Integer remainingQuantity;     // còn lại (FIFO)
-
     private Long supplierId;
     private Long customerId;
-
+    private String supplierName;    // mới
+    
     // ===== THÔNG TIN LÔ =====
     private String serialNumber;
     private String batchNumber;
@@ -39,7 +44,58 @@ public class InventoryItemResponseDTO {
         return itemId;
     }
 
-    public void setItemId(Long itemId) {
+    
+    /**
+	 * @return the warehouseName
+	 */
+	public String getWarehouseName() {
+		return warehouseName;
+	}
+
+
+	/**
+	 * @param warehouseName the warehouseName to set
+	 */
+	public void setWarehouseName(String warehouseName) {
+		this.warehouseName = warehouseName;
+	}
+
+
+	public BigDecimal getUnitPrice() {
+	    return unitPrice;
+	}
+
+	public void setUnitPrice(BigDecimal unitPrice) {
+	    this.unitPrice = unitPrice;
+	}
+
+	public BigDecimal getTotalPrice() {
+	    return totalPrice;
+	}
+
+	public void setTotalPrice(BigDecimal totalPrice) {
+	    this.totalPrice = totalPrice;
+	}
+
+
+
+	/**
+	 * @return the supplierName
+	 */
+	public String getSupplierName() {
+		return supplierName;
+	}
+
+
+	/**
+	 * @param supplierName the supplierName to set
+	 */
+	public void setSupplierName(String supplierName) {
+		this.supplierName = supplierName;
+	}
+
+
+	public void setItemId(Long itemId) {
         this.itemId = itemId;
     }
 

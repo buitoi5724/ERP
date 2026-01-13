@@ -2,16 +2,40 @@ package com.example.erp.repository;
 
 import com.example.erp.entity.InventoryItem;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 public interface InventoryItemRepository extends JpaRepository<InventoryItem, Long> {
 
-    List<InventoryItem> findByRemainingQuantityGreaterThanAndDeletedFalse(int qty);
+    // Tồn kho chung
+    List<InventoryItem>
+    findByRemainingQuantityGreaterThanAndDeletedFalse(int qty);
 
-    List<InventoryItem> findByCustomerId(Long customerId);
+    // Theo customer
+    List<InventoryItem>
+    findByCustomerIdAndDeletedFalse(Long customerId);
 
-    List<InventoryItem> findByInventoryIdAndRemainingQuantityGreaterThanOrderByReceivedDateAsc(
+    // FIFO theo phiếu nhập
+    List<InventoryItem>
+    findByInventoryIdAndRemainingQuantityGreaterThanAndDeletedFalseOrderByReceivedDateAsc(
             Long inventoryId,
             Integer remainingQty
     );
+
+    // FIFO theo sản phẩm (QUAN TRỌNG)
+    List<InventoryItem>
+    findByProductIdAndRemainingQuantityGreaterThanAndDeletedFalseOrderByReceivedDateAsc(
+            Long productId,
+            Integer remainingQty
+    );
+
+    // Tổng tồn kho theo sản phẩm
+    @Query("""
+        SELECT SUM(i.remainingQuantity)
+        FROM InventoryItem i
+        WHERE i.productId = :productId
+          AND i.deleted = false
+    """)
+    Integer getTotalStockByProduct(@Param("productId") Long productId);
 }

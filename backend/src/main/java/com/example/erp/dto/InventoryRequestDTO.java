@@ -1,6 +1,7 @@
 package com.example.erp.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class InventoryRequestDTO {
@@ -9,11 +10,12 @@ public class InventoryRequestDTO {
     private Long productId;
     private Integer quantity;
     private String warehouse;
+    private Long id; // optional, giữ nguyên
 
     // ===== PRICE =====
     private BigDecimal costPrice;
     private BigDecimal salePrice;
-    private Long id;  
+
     // ===== STOCK RULE =====
     private Integer minStock;
     private Integer maxStock;
@@ -25,23 +27,17 @@ public class InventoryRequestDTO {
     // ===== TIME (OPTIONAL) =====
     private LocalDateTime actionDate;
 
+    // ===== INVENTORY ITEM INFO (MỚI) =====
+    private Long supplierId;         // Nhà cung cấp
+    private String batchNumber;      // Lô hàng
+    private String serialNumber;     // Serial
+    private LocalDate expirationDate; // Hạn dùng
+    private boolean createItem;      // Flag: có tạo InventoryItem không
+
     // ===== GETTER / SETTER =====
 
-    
     public Long getProductId() { return productId; }
-    /**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public void setProductId(Long productId) { this.productId = productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
 
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
@@ -69,4 +65,24 @@ public class InventoryRequestDTO {
 
     public LocalDateTime getActionDate() { return actionDate; }
     public void setActionDate(LocalDateTime actionDate) { this.actionDate = actionDate; }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    // ===== INVENTORY ITEM GETTER / SETTER =====
+    public Long getSupplierId() { return supplierId; }
+    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
+
+    public String getBatchNumber() { return batchNumber; }
+    public void setBatchNumber(String batchNumber) { this.batchNumber = batchNumber; }
+
+    public String getSerialNumber() { return serialNumber; }
+    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
+
+    public LocalDate getExpirationDate() { return expirationDate; }
+    public void setExpirationDate(LocalDate expirationDate) { this.expirationDate = expirationDate; }
+
+    public boolean isCreateItem() { return createItem; }
+    public void setCreateItem(boolean createItem) { this.createItem = createItem; }
+    
 }

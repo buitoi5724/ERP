@@ -1,45 +1,219 @@
-/* InventoryPages */
-.inventory-page { padding: 20px; }
-.inventory-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; }
-.inventory-actions { margin-bottom: 20px; }
-.btn-import { background-color: #f97316; color: white; padding: 8px 16px; margin-right: 8px; border: none; cursor: pointer; }
-.btn-export { background-color: #ef4444; color: white; padding: 8px 16px; border: none; cursor: pointer; }
-.inventory-chart-section { margin-top: 20px; }
-.inventory-select { padding: 6px; margin-bottom: 12px; }
-.inventory-table-section { margin-top: 20px; }
+/* ===============================
+   DIALOG – RỘNG HƠN
+================================ */
+.inventory-dialog {
+  width: 100vw !important;
+  max-width: 2000px;
+}
 
-/*InventoryFrom*/
+/* ===============================
+   FORM – THÔNG TIN CHUNG
+================================ */
+/* ===============================
+   FORM – THÔNG TIN CHUNG (ERP)
+================================ */
+
 .inventory-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* 2 cột form */
+  gap: 14px 32px;
+  width: 100%;
+  margin-bottom: 16px;
 }
 
-.form-group {
-  display: flex;
+/* Mỗi dòng: Label trái – Input phải */
+.inventory-form-container .form-group {
+  display: grid;
+  grid-template-columns: 120px 1fr; /* LABEL | INPUT */
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
 }
 
-.form-group label {
-  width: 140px;        /* chiều rộng cột label */
+/* Label bên trái */
+.inventory-form-container .form-group label {
   font-weight: 600;
-  color: #333;
+  font-size: 13px;
+  color: #374151;
+  text-align: left;
+  white-space: nowrap;
 }
 
-.form-group .w-full {
-  flex: 1;
+/* Input bên phải full width */
+.inventory-form-container .p-inputtext,
+.inventory-form-container .p-dropdown,
+.inventory-form-container .p-calendar,
+.inventory-form-container .p-inputnumber {
+  width: 100%;
 }
 
-.form-info {
-  margin-left: 140px;  /* căn thẳng với input */
-  font-size: 14px;
-  color: #555;
+/* ===============================
+   MOBILE
+================================ */
+@media (max-width: 768px) {
+  .inventory-form-container {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-form-container .form-group {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-form-container .form-group label {
+    margin-bottom: 4px;
+  }
 }
 
-.form-actions {
-  margin-top: 20px;
+
+/* ===============================
+   SECTION TITLE
+================================ */
+.section-title {
+  margin-top: 10px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #374151;
+}
+
+/* ===============================
+   ADD ITEM BUTTON
+================================ */
+.p-button-text {
+  padding-left: 0;
+  margin-bottom: 6px;
+}
+
+/* ===============================
+   ITEM HEADER + ITEM ROW
+   👉 ÉP 1 DÒNG – KHÔNG WRAP
+================================ */
+.inventory-item-header,
+.inventory-item-row {
+  display: grid;
+  grid-template-columns:
+    2.9fr    /* Sản phẩm */
+    2.9fr    /* Nhà cung cấp */ 
+    1.5fr       /* Giá */
+    1.5fr       /* Số lượng */
+    1.5fr       /* Batch */
+    2.2fr       /* Ngày SX */
+    2.2fr       /* Hạn SD */
+    1.4fr;      /* Xóa */
+
+  gap: 10px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* ===============================
+   ITEM ROW RIÊNG
+================================ */
+.inventory-item-row {
+  margin-bottom: 8px;
+}
+
+/* Input trong row */
+.inventory-item-row .p-dropdown,
+.inventory-item-row .p-inputnumber,
+.inventory-item-row .p-inputtext,
+.inventory-item-row .p-calendar {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Thu gọn input cho thoáng */
+.inventory-item-row .p-inputtext,
+.inventory-item-row .p-inputnumber input {
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+/* ===============================
+   NÚT XÓA – KHÔNG BỊ ÉP
+================================ */
+
+
+/* ===============================
+   ACTION BUTTONS – LUÔN 1 DÒNG
+================================ */
+.action-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 14px;
+  margin-top: 22px;
+  flex-wrap: nowrap; /* ⛔ không cho xuống hàng */
+}
+.add-item-wrapper {
+  display: flex;
+  margin-left: -713px;   /* căn ngang */
+
+  height: 60px;          /* 🔼 tăng chiều cao khung */
+  align-items: center;  /* căn nút giữa theo chiều dọc */
+}
+
+/*  Tổng tiền  */
+.inventory-total {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.total-label {
+  margin-right: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.total-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #dc2626; /* đỏ tiền */
+}
+
+/*  Nhập and hủy */
+/* ===============================
+   ACTION BUTTONS – GÓC PHẢI
+================================ */
+
+.inventory-dialog {
+  position: relative; /* bắt buộc để absolute ăn theo dialog */
+}
+
+.action-buttons {
+  position: absolute;
+
+  right: 24px;   /* 👉 chỉnh số theo ý */
+  bottom: 16px;  /* 👉 chỉnh số theo ý */
+
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+/* Nút gọn gàng hơn */
+
+
+.inventory-dialog {
+  position: relative; /* bắt buộc để absolute ăn theo dialog */
+}
+
+.action-buttons {
+  position: absolute;
+
+  right: 24px;   /* 👉 chỉnh số theo ý */
+  bottom: 16px;  /* 👉 chỉnh số theo ý */
+
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+/* Nút gọn gàng hơn */
+.action-buttons .p-button {
+  min-width: 110px;
 }

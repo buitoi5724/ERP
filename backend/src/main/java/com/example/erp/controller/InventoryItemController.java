@@ -47,4 +47,5 @@ public class InventoryItemController {
     public List<InventoryItemResponseDTO> getByCustomer(@PathVariable Long customerId) {
         return service.getItemsByCustomer(customerId);
     }
+    
 }

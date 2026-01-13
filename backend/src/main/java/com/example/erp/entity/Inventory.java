@@ -2,10 +2,10 @@ package com.example.erp.entity;
 
 import com.example.erp.util.BaseEntity;
 import jakarta.persistence.*;
-
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -17,70 +17,69 @@ import java.math.BigDecimal;
 public class Inventory extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    // ====== Liên kết sản phẩm ======
-    @Column(name = "product_id", nullable = false)
+    @Column(name = "product_id")
     private Long productId;
+    
+   
+    // ===== Phiếu nhập kho =====
+    @Column(name = "receipt_code")
+    private String receiptCode;
 
-    // ====== Snapshot thông tin sản phẩm (THÊM) ======
+    // ===== Snapshot thông tin sản phẩm =====
     @Column(name = "product_code")
     private String productCode;
 
     @Column(name = "product_name")
     private String productName;
 
-    // ====== Số lượng ======
+    // ===== Số lượng =====
     @Column(nullable = false)
     private Integer quantity = 0;
 
-    @Transient
-    public BigDecimal getInventoryValue() {
-        if (costPrice == null || quantity == null) return BigDecimal.ZERO;
-        return costPrice.multiply(BigDecimal.valueOf(quantity));
-    }
-    
     @Column(name = "reserved_quantity", nullable = false)
     private Integer reservedQuantity = 0;
 
-    // GIỮ NGUYÊN – KHÔNG ĐỔI LOGIC
     @Column(name = "available_quantity", nullable = false)
     private Integer availableQuantity = 0;
 
-    // ====== Giá (THÊM) ======
+    // ===== Giá =====
     @Column(name = "cost_price")
     private BigDecimal costPrice;
 
     @Column(name = "sale_price")
     private BigDecimal salePrice;
 
-    // ====== Cảnh báo tồn ======
+    // ===== Cảnh báo tồn =====
     @Column(name = "min_stock")
     private Integer minStock = 0;
 
     @Column(name = "max_stock")
     private Integer maxStock;
 
-    // ====== Kho ======
+    // ===== Kho =====
     @Column(nullable = false)
     private String warehouse = "DEFAULT";
 
-    // ====== Thời điểm nghiệp vụ ======
+    // ===== Thời điểm nghiệp vụ =====
     @Column(name = "last_import_date")
     private LocalDateTime lastImportDate;
 
     @Column(name = "last_export_date")
     private LocalDateTime lastExportDate;
 
-    // ====== Trạng thái & ghi chú (THÊM) ======
+    // ===== Trạng thái & ghi chú =====
     @Column
     private String status;
 
     @Column(columnDefinition = "NVARCHAR(500)")
     private String note;
 
-    // ====== Getter / Setter ======
+    // ===== Getter / Setter =====
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
+   
+    public String getReceiptCode() { return receiptCode; }
+    public void setReceiptCode(String receiptCode) { this.receiptCode = receiptCode; }
 
     public String getProductCode() { return productCode; }
     public void setProductCode(String productCode) { this.productCode = productCode; }
@@ -91,13 +90,13 @@ public class Inventory extends BaseEntity implements Serializable {
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
-        recalcAvailable(); // GIỮ NGUYÊN
+        recalcAvailable();
     }
 
     public Integer getReservedQuantity() { return reservedQuantity; }
     public void setReservedQuantity(Integer reservedQuantity) {
         this.reservedQuantity = reservedQuantity;
-        recalcAvailable(); // GIỮ NGUYÊN
+        recalcAvailable();
     }
 
     public Integer getAvailableQuantity() { return availableQuantity; }
@@ -129,12 +128,25 @@ public class Inventory extends BaseEntity implements Serializable {
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
 
-    // ====== BUSINESS LOGIC (GIỮ NGUYÊN 100%) ======
+    // ===== Giá trị tồn kho =====
+    @Transient
+    public BigDecimal getInventoryValue() {
+        if (costPrice == null || quantity == null) return BigDecimal.ZERO;
+        return costPrice.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    // ===== Logic tính availableQuantity =====
     private void recalcAvailable() {
         this.availableQuantity = Math.max(
-            (quantity != null ? quantity : 0)
-          - (reservedQuantity != null ? reservedQuantity : 0),
-            0
+            (quantity != null ? quantity : 0) - (reservedQuantity != null ? reservedQuantity : 0), 0
         );
     }
+	public void setCreatedDate(LocalDate now) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void setUpdatedDate(LocalDate now) {
+		// TODO Auto-generated method stub
+		
+	}
 }

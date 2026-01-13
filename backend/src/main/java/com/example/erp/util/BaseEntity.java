@@ -48,7 +48,9 @@ public abstract class BaseEntity {
     public String getCreatedBy() {
         return createdBy;
     }
-
+    public Boolean getDeleted() {
+        return deleted;
+    }
     public LocalDateTime getUpdatedDate() {
         return updatedDate;
     }

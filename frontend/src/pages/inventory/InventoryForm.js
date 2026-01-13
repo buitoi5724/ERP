@@ -1,250 +1,368 @@
-import React, { useState, useEffect } from "react";
-import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
+import React, { useEffect, useState } from "react";
 import { Dialog } from "primereact/dialog";
-import { v4 as uuidv4 } from "uuid";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { InputNumber } from "primereact/inputnumber";
+import { Calendar } from "primereact/calendar";
+import { Button } from "primereact/button";
 import InventoryService from "./inventoryService";
 import "./inventory.css";
 
-const InventoryForm = ({ visible, actionType, onClose }) => {
-  const [form, setForm] = useState({
-    selectedProduct: null,
+/* =======================
+   CONSTANT
+======================= */
+const EMPTY_ITEM = {
+  productId: null,
+  supplierId: null,     // ✅ NCC theo item
+  quantity: 1,
+  price: 0,
+  batchNumber: "",
+  manufactureDate: null,
+  expirationDate: null
+};
+
+const InventoryForm = ({ visible, onClose, type = "IMPORT" }) => {
+  const isImport = type === "IMPORT";
+
+  /* =======================
+     STATE
+  ======================= */
+  const [common, setCommon] = useState({
     warehouse: "DEFAULT",
-    quantity: null,
-    costPrice: null,
-    salePrice: null,
-    minStock: 0,
-    maxStock: null,
-    status: "ACTIVE",
-    note: "",
-    date: new Date(),
-    batchCode: "",
-    mfgDate: null,
-    expDate: null,
     receiptCode: "",
-    supplier: null,
-    createdBy: "",
-    customer: null // chỉ xuất kho liên quan khách hàng
+    actionDate: new Date(),
+    note: "",
+ 
+    customerId: null // chỉ dùng cho EXPORT
   });
 
+  const [items, setItems] = useState([{ ...EMPTY_ITEM }]);
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [customers, setCustomers] = useState([]);
 
-  const updateForm = (key, value) =>
-    setForm(prev => ({ ...prev, [key]: value }));
-
-  // Load dữ liệu khi mở form
+  /* =======================
+     LOAD DATA
+  ======================= */
   useEffect(() => {
-  // Products
-  InventoryService.getAllProducts()
-    .then(res => setProducts(Array.isArray(res) ? res : res.content || []))
-    .catch(err => console.error("Lỗi load products:", err));
+    const load = async () => {
+      try {
+        const [p, s, c] = await Promise.all([
+          InventoryService.getAllProducts(),
+          InventoryService.getAllSuppliers(),
+          InventoryService.getAllCustomers()
+        ]);
 
-  // Suppliers
-  fetch("http://localhost:8080/api/suppliers") // URL backend đầy đủ
-    .then(res => res.json())
-    .then(data => setSuppliers(data)) // đã là array
-    .catch(err => console.error("Lỗi load suppliers fetch:", err));
+        setProducts(p?.data || p || []);
+        setSuppliers(s?.data || s || []);
+        setCustomers(c?.data || c || []);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    load();
+  }, []);
 
-  // Customers
-  InventoryService.getAllCustomers()
-    .then(res => setCustomers(Array.isArray(res) ? res : res.content || []))
-    .catch(err => console.error("Lỗi load customers:", err));
-}, []);
+  /* =======================
+     HANDLER
+  ======================= */
+  const updateCommon = (key, value) =>
+    setCommon(prev => ({ ...prev, [key]: value }));
 
-  // Auto fill giá và kho khi chọn sản phẩm
-  useEffect(() => {
-    if (form.selectedProduct) {
-      updateForm("costPrice", form.selectedProduct.costPrice || form.selectedProduct.price);
-      updateForm("salePrice", form.selectedProduct.salePrice || null);
-      updateForm("warehouse", form.selectedProduct.warehouse || "DEFAULT");
-    }
-  }, [form.selectedProduct]);
-
- const handleSubmit = async () => {
-  if (!form.selectedProduct) return alert("Chọn sản phẩm");
-  if (!form.quantity || form.quantity <= 0) return alert("Số lượng không hợp lệ");
-  if (actionType === "import" && (!form.costPrice || form.costPrice <= 0))
-    return alert("Giá vốn không hợp lệ");
-
-  console.log("FORM SUBMIT:", form); // 🔍 log kiểm tra
-
-  const batchId = form.batchCode || uuidv4();
-  const receiptCode = form.receiptCode || `PN-${Date.now()}`;
-
-  try {
-    if (actionType === "import") {
-      await InventoryService.addInventory({
-        productId: form.selectedProduct.id,          // ✅ SỬA
-        productName: form.selectedProduct.name,      // ✅ SỬA
-        warehouse: form.warehouse,
-        quantity: form.quantity,
-        costPrice: form.costPrice,
-        salePrice: form.salePrice,
-        minStock: form.minStock,
-        maxStock: form.maxStock,
-        status: form.status,
-        note: form.note,
-        date: form.date,
-        batchId,
-        receiptCode,
-        mfgDate: form.mfgDate,
-        expDate: form.expDate,
-        supplierId: form.supplier?.id || null,       // ✅ tránh null crash
-        createdBy: form.createdBy || "admin"
-      });
-
-      alert("Nhập kho thành công!");
-    } else {
-      await InventoryService.removeInventory({
-        productId: form.selectedProduct.id,          // ✅ SỬA
-        warehouse: form.warehouse,
-        quantity: form.quantity,
-        customerId: form.customer?.id || null,
-        date: form.date
-      });
-
-      alert("Xuất kho thành công!");
-    }
-
-    resetForm();
-    onClose();
-  } catch (err) {
-    console.error("LỖI SUBMIT:", err);
-    alert(actionType === "import" ? "Nhập kho thất bại" : "Xuất kho thất bại");
-  }
-};
-
-  const resetForm = () => {
-    setForm({
-      selectedProduct: null,
-      warehouse: "DEFAULT",
-      quantity: null,
-      costPrice: null,
-      salePrice: null,
-      minStock: 0,
-      maxStock: null,
-      status: "ACTIVE",
-      note: "",
-      date: new Date(),
-      batchCode: "",
-      mfgDate: null,
-      expDate: null,
-      receiptCode: "",
-      supplier: null,
-      createdBy: "",
-      customer: null
+  const updateItem = (index, key, value) => {
+    setItems(prev => {
+      const clone = [...prev];
+      clone[index] = { ...clone[index], [key]: value };
+      return clone;
     });
   };
 
+  const addItem = () =>
+    setItems(prev => [...prev, { ...EMPTY_ITEM }]);
+
+  const removeItem = index => {
+    if (items.length === 1) return;
+    setItems(prev => prev.filter((_, i) => i !== index));
+  };
+
+  /* =======================
+     VALIDATE
+  ======================= */
+  const validateForm = () => {
+    if (!isImport && !common.customerId) {
+      alert("Vui lòng chọn khách hàng");
+      return false;
+    }
+
+    for (const item of items) {
+      if (!item.productId) {
+        alert("Chưa chọn sản phẩm");
+        return false;
+      }
+
+      if (!item.quantity || item.quantity <= 0) {
+        alert("Số lượng không hợp lệ");
+        return false;
+      }
+
+      if (isImport) {
+        if (!item.supplierId) {
+          alert("Mỗi sản phẩm cần chọn nhà cung cấp");
+          return false;
+        }
+
+        if (!item.manufactureDate || !item.expirationDate) {
+          alert("Cần nhập ngày sản xuất và hạn dùng");
+          return false;
+        }
+
+        if (item.expirationDate <= item.manufactureDate) {
+          alert("Hạn dùng phải sau ngày sản xuất");
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  /* =======================
+     SUBMIT
+  ======================= */
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+  const payload = {
+  receiptCode: common.receiptCode,     // Mã phiếu nhập
+  warehouse: common.warehouse,         // Kho
+  date: common.actionDate
+          .toISOString()
+          .slice(0, 10),              // Ngày nhập kho YYYY-MM-DD
+  note: common.note,                   // Ghi chú
+
+  items: items.map(item => ({
+    productId: item.productId,         // ID sản phẩm
+    quantity: Number(item.quantity),   // Số lượng
+    supplierId: item.supplierId,       // Nhà cung cấp
+    importPrice: Number(item.price),   // Giá nhập
+    batchNumber: item.batchNumber,     // Số lô
+    manufactureDate: item.manufactureDate
+                     ?.toISOString()
+                     .slice(0, 10),   // Ngày sản xuất
+    expirationDate: item.expirationDate
+                     ?.toISOString()
+                     .slice(0, 10)    // Hạn sử dụng
+  }))
+};
+
+    try {
+      isImport
+        ? await InventoryService.importInventory(payload)
+        : await InventoryService.exportInventory(payload);
+
+      alert(isImport ? "Nhập kho thành công" : "Xuất kho thành công");
+      onClose();
+    } catch (e) {
+      console.error(e);
+      alert("Thao tác thất bại");
+    }
+  };
+
+  /**Tính Tổng   */
+const totalAmount = items.reduce((sum, item) => {
+  const qty = Number(item.quantity) || 0;
+  const price = Number(item.price) || 0;
+  return sum + qty * price;
+}, 0);
+
+
+  /* =======================
+     UI
+  ======================= */
   return (
     <Dialog
-      header={actionType === "import" ? "Nhập kho" : "Xuất kho"}
+      header={isImport ? "Nhập kho" : "Xuất kho"}
       visible={visible}
       modal
       className="inventory-dialog"
       onHide={onClose}
     >
+      {/* ===== THÔNG TIN CHUNG ===== */}
       <div className="inventory-form-container">
 
-        {/* Sản phẩm */}
-        <div className="form-group">
-          <label>Sản phẩm</label>
-   <Dropdown
-  value={form.selectedProduct}
-  options={products}
-  optionLabel="name"
-  placeholder="-- Chọn sản phẩm --"
-  onChange={e => updateForm("selectedProduct", e.value)}
-  className="w-full"
-/>
-        </div>
-
-        {/* Kho */}
-        <div className="form-group">
-          <label>Kho</label>
-          <InputText
-            value={form.warehouse}
-            onChange={e => updateForm("warehouse", e.target.value)}
-            className="w-full"
-          />
-        </div>
-
-        {/* Nhập kho */}
-        {actionType === "import" && (
-          <>
-            <div className="form-group">
-              <label>Nhà cung cấp</label>
-        <Dropdown
-  value={form.supplier}
-  options={suppliers} // ✅ chắc chắn là array
-  optionLabel="name"   // tên hiển thị
-  placeholder="-- Chọn nhà cung cấp --"
-  onChange={e => updateForm("supplier", e.value)}
-  className="w-full"
-/>
-            </div>
-            <div className="form-group">
-              <label>Mã phiếu nhập</label>
-              <InputText value={form.receiptCode} onChange={e => updateForm("receiptCode", e.target.value)} className="w-full"/>
-            </div>
-            <div className="form-group">
-              <label>Mã lô</label>
-              <InputText value={form.batchCode} onChange={e => updateForm("batchCode", e.target.value)} className="w-full"/>
-            </div>
-            <div className="form-group">
-              <label>NSX</label>
-              <Calendar value={form.mfgDate} onChange={e => updateForm("mfgDate", e.value)} showIcon/>
-            </div>
-            <div className="form-group">
-              <label>HSD</label>
-              <Calendar value={form.expDate} onChange={e => updateForm("expDate", e.value)} showIcon/>
-            </div>
-          </>
-        )}
-
-        {/* Xuất kho */}
-        {actionType === "export" && (
+        {!isImport && (
           <div className="form-group">
             <label>Khách hàng</label>
             <Dropdown
-              value={form.customer}
+              value={common.customerId}
               options={customers}
               optionLabel="name"
-              placeholder="-- Chọn khách hàng --"
-              onChange={e => updateForm("customer", e.value)}
-              className="w-full"
+              optionValue="id"
+              placeholder="Chọn khách hàng"
+              onChange={e =>
+                updateCommon("customerId", e.value)
+              }
             />
           </div>
         )}
 
-        {/* Số lượng, giá vốn, giá bán */}
         <div className="form-group">
-          <label>Số lượng</label>
-          <InputNumber value={form.quantity} onValueChange={e => updateForm("quantity", e.value)} min={1} className="w-full"/>
-        </div>
-        <div className="form-group">
-          <label>Giá vốn</label>
-          <InputNumber value={form.costPrice} onValueChange={e => updateForm("costPrice", e.value)} min={0} className="w-full"/>
-        </div>
-        <div className="form-group">
-          <label>Giá bán</label>
-          <InputNumber value={form.salePrice} onValueChange={e => updateForm("salePrice", e.value)} min={0} className="w-full"/>
-        </div>
-
-        <div className="form-actions">
-          <Button
-            label={actionType === "import" ? "Nhập kho" : "Xuất kho"}
-            onClick={handleSubmit}
-            className={`p-button-${actionType === "import" ? "success" : "danger"}`}
+          <label>Kho</label>
+          <InputText
+            value={common.warehouse}
+            onChange={e =>
+              updateCommon("warehouse", e.target.value)
+            }
           />
-          <Button label="Hủy" className="p-button-secondary" onClick={onClose} />
         </div>
 
+        <div className="form-group">
+          <label>Mã phiếu</label>
+          <InputText
+            value={common.receiptCode}
+            onChange={e =>
+              updateCommon("receiptCode", e.target.value)
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Ngày</label>
+          <Calendar
+            value={common.actionDate}
+            showIcon
+            onChange={e =>
+              updateCommon("actionDate", e.value)
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Ghi chú</label>
+          <InputText
+            value={common.note}
+            onChange={e =>
+              updateCommon("note", e.target.value)
+            }
+          />
+        </div>
+      </div>
+
+      {/* ===== ITEMS ===== */}
+      <h4 className="section-title">Danh sách sản phẩm</h4>
+
+ <div className="add-item-wrapper">
+  <Button
+    label="Thêm sản phẩm"
+    icon="pi pi-plus"
+    className="add-item-btn"
+    onClick={addItem}
+  />
+</div>
+
+      {items.map((item, index) => (
+        <div className="inventory-item-row">
+
+          <Dropdown
+            value={item.productId}
+            options={products}
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Sản phẩm"
+            onChange={e =>
+              updateItem(index, "productId", e.value)
+            }
+          />
+
+          {isImport && (
+            <Dropdown
+              value={item.supplierId}
+              options={suppliers}
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Nhà cung cấp"
+              onChange={e =>
+                updateItem(index, "supplierId", e.value)
+              }
+            />
+          )}
+
+          <InputNumber
+            value={item.quantity}
+            min={1}
+            placeholder="SL"
+            onValueChange={e =>
+              updateItem(index, "quantity", e.value)
+            }
+          />
+
+          {isImport && (
+            <>
+              <InputNumber
+                value={item.price}
+                placeholder="Giá nhập"
+                onValueChange={e =>
+                  updateItem(index, "price", e.value)
+                }
+              />
+
+              <InputText
+                value={item.batchNumber}
+                placeholder="Batch"
+                onChange={e =>
+                  updateItem(index, "batchNumber", e.target.value)
+                }
+              />
+
+              <Calendar
+                value={item.manufactureDate}
+                placeholder="Ngày SX"
+                showIcon
+                onChange={e =>
+                  updateItem(index, "manufactureDate", e.value)
+                }
+              />
+
+              <Calendar
+                value={item.expirationDate}
+                placeholder="Hạn SD"
+                showIcon
+                onChange={e =>
+                  updateItem(index, "expirationDate", e.value)
+                }
+              />
+            </>
+          )}
+
+          <Button
+            icon="pi pi-trash"
+            className="p-button-danger"
+            onClick={() => removeItem(index)}
+          />
+        </div>
+      ))}
+{isImport && (
+  <div className="inventory-total">
+    <span className="total-label">Tổng tiền:</span>
+    <span className="total-value">
+      {totalAmount.toLocaleString("vi-VN")} ₫
+    </span>
+  </div>
+)}
+      <div className="action-buttons">
+        <Button
+          label={isImport ? "Nhập kho" : "Xuất kho"}
+          className={isImport ? "p-button-success" : "p-button-warning"}
+          onClick={handleSubmit}
+        />
+
+        
+        <Button
+          label="Hủy"
+          className="p-button-secondary"
+          onClick={onClose}
+        />
+        
       </div>
     </Dialog>
   );
