@@ -10,37 +10,80 @@ import ShoppingDetail from "./pages/shopping/shoppingDetail";
 import InvoiceShopping from "./pages/shopping/InvoiceShopping";
 import Header from './pages/login/Header';
 import LoginForm from './pages/login/LoginForm';
-
+import Inventory from "./pages/inventory/InventoryPage";
+import SupplierPage from "./pages/supplier/SupplierPage";
 import "./App.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primeflex/primeflex.css";
-
+import CustomersPage from "./pages/customers/CustomersPage";
+import InventoryEntryPage from "./pages/inventory/InventoryEntryPage";
 export default function App() {
-  const [loginVisible, setLoginVisible] = useState(false);
+  // trạng thái login
+  const [user, setUser] = useState(null);
+  const [loginVisible, setLoginVisible] = useState(false)
 
+  // hiển thị dialog login
   const handleLoginClick = () => setLoginVisible(true);
   const handleLoginClose = () => setLoginVisible(false);
 
+  // khi login thành công
+  const handleLoginSuccess = (userData) => {
+    setUser(userData); // { username, role }
+    setLoginVisible(false);
+  };
+
+  // logout
+const handleLogout = () => {
+  setUser(null);       // xóa user → menu/admin/shopping ẩn hết
+  setLoginVisible(false); // không mở LoginForm tự động
+};
+
   return (
     <div className="app-container">
-      <Header onLoginClick={handleLoginClick} />
-      <Menu />
-      <LoginForm visible={loginVisible} onClose={handleLoginClose} />
+<Header
+  onLoginClick={handleLoginClick}
+  user={user}
+  onLogoutClick={handleLogout} // khớp với Header
+/>
+
+      {/* menu truyền user + logout */}
+      <Menu user={user} onLogout={handleLogout} />
+
+      {/* Login dialog */}
+      {!user && (
+        <LoginForm
+          visible={loginVisible}
+          onClose={handleLoginClose}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      )}
 
       <div className="content">
         <Routes>
-          <Route path="/accounts" element={<AccountComponent />} />
-          <Route path="/products" element={<Product />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          <Route path="/employees" element={<h1>Employees Page</h1>} />
+          {/* Admin pages */}
+          {user?.role === "admin" && (
+            <>
+              <Route path="/accounts" element={<AccountComponent />} />
+              <Route path="/products" element={<Product />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/inventory" element={<Inventory />} />
+               <Route path="/inventory-entry" element={<InventoryEntryPage />} />
+               <Route path="/suppliers" element={<SupplierPage />} />
+            </>
+          )}
 
-          {/* 🛍️ Shopping routes */}
-          <Route path="/shopping" element={<Shopping />} />
-          <Route path="/shopping/:id" element={<ShoppingDetail />} />
-          <Route path="/cart" element={<CartShopping />} />
-          <Route path="/invoice/:invoiceId" element={<InvoiceShopping />} />
+          {/* Shopping (user + admin) */}
+    {user && (
+      <>
+        <Route path="/shopping" element={<Shopping />} />
+        <Route path="/shopping/:id" element={<ShoppingDetail />} />
+        <Route path="/cart" element={<CartShopping />} />
+        <Route path="/invoice/:orderId" element={<InvoiceShopping />} />
+  <Route path="/customers" element={<CustomersPage />} />
+      </>
+    )}
 
-          {/* Trang mặc định */}
+          {/* Fallback */}
           <Route path="*" element={<h1>Welcome BuiToi</h1>} />
         </Routes>
       </div>

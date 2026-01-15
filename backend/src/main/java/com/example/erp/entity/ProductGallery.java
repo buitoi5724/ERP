@@ -1,49 +1,36 @@
 package com.example.erp.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.hibernate.annotations.BatchSize;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "product_gallery")
-public class ProductGallery {
+public class ProductGallery implements Serializable {
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+  
+	private static final long serialVersionUID = 1L;
 
-@Column(name = "image_url", nullable = false)
-private String imageUrl;
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "product_id", nullable = false)
-@JsonIgnoreProperties({"galleries", "priceHistory", "category", "sizes", "colors", "description"})
-@BatchSize(size = 20) // gom batch khi lazy load
-private Product product;
+    private String fileName;   // vd: 169999999_sp1.jpg
+    private String filePath;   // vd: uploads/products/
 
-// --- Getter & Setter ---
-public Long getId() {
-    return id;
-}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-public void setId(Long id) {
-    this.id = id;
-}
+    /* ===== GETTERS / SETTERS ===== */
 
-public String getImageUrl() {
-    return imageUrl;
-}
+    public Long getId() { return id; }
 
-public void setImageUrl(String imageUrl) {
-    this.imageUrl = imageUrl;
-}
+    public String getFileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
 
-public Product getProduct() {
-    return product;
-}
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
 
-public void setProduct(Product product) {
-    this.product = product;
-}
-
+    public Product getProduct() { return product; }
+    public void setProduct(Product product) { this.product = product; }
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "primereact/button";
-import "./Header.css"; // import CSS
+import "./Header.css";
 
 const Header = ({ user, onLoginClick, onLogoutClick }) => {
   return (
@@ -9,7 +9,10 @@ const Header = ({ user, onLoginClick, onLogoutClick }) => {
         <Button label="Đăng nhập" onClick={onLoginClick} />
       ) : (
         <>
-          <span>Xin chào, {user}</span>
+          <span>
+            Xin chào, {user.username}{" "}
+            {user.role === "admin" && <strong>(Admin)</strong>}
+          </span>
           <Button label="Đăng xuất" onClick={onLogoutClick} />
         </>
       )}

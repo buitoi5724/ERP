@@ -1,5 +1,9 @@
 package com.example.erp.entity;
 
+import java.io.Serializable;
+
+import com.example.erp.util.BaseEntity;
+
 import jakarta.persistence.*; // Import các công cụ để làm việc với database.
 
 /*
@@ -15,9 +19,12 @@ import jakarta.persistence.*; // Import các công cụ để làm việc với 
 // 📝 @Entity: Annotation quan trọng nhất, báo cho JPA biết "Đây là một bản thiết kế
 // cho một bảng trong database". Tên bảng thường sẽ được tự động suy ra từ tên class (ví dụ: "account").
 @Entity
-public class Account {
+public class Account extends BaseEntity  implements Serializable {
 
-    // 🔑 @Id: Đánh dấu trường "id" này là khóa chính (primary key) của bảng.
+	private static final long serialVersionUID = 1L;
+
+
+	// 🔑 @Id: Đánh dấu trường "id" này là khóa chính (primary key) của bảng.
     // Khóa chính là một giá trị độc nhất, không trùng lặp, dùng để xác định từng dòng.
     @Id
     // 🚀 @GeneratedValue: Cấu hình cách tạo ra giá trị cho khóa chính.
@@ -26,7 +33,8 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
+    @Column(name = "supplier_id")
+    private Long supplierId; // 👉 Liên kết Supplier bằng ID
     // --- CÁC TRƯỜNG DỮ LIỆU THÔNG THƯỜNG ---
     // Các trường này sẽ được tự động ánh xạ (map) thành các cột trong bảng "account".
 
@@ -56,6 +64,10 @@ public class Account {
     // hoặc thay đổi (set) giá trị của các trường dữ liệu (vốn là private).
     // Các thư viện như Spring và Jackson (xử lý JSON) cũng dùng chúng rất nhiều.
 
+    public Long getSupplierId() { return supplierId; }
+    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
+    
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

@@ -1,58 +1,51 @@
-// File: src/main/java/com/example/erp/entity/OrderItem.java
 package com.example.erp.entity;
 
+import com.example.erp.util.BaseEntity;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "order_items") 
-public class OrderItem {
+@Table(name = "order_item")
+public class OrderItem extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    // Thông tin sản phẩm (lưu trữ tại thời điểm mua)
-    @Column(nullable = false)
-    private Long productId; // SỬA TỪ String THÀNH Long
-
-    @Column(columnDefinition = "NVARCHAR(MAX)")
-    private String productName; 
-    
-    @Column(nullable = false)
-    private int quantity; 
-    
-    @Column(nullable = false)
-    private double price; // (Cái này là double nguyên thủy cũng được,
-                         // vì nó sẽ không bao giờ null khi tạo)
-
-    // Liên kết ngược về Order
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    // === GETTERS AND SETTERS ===
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Column(name = "product_name", length = 255)
+    private String productName;
+    
+    @Column(nullable = false)
+    private Integer quantity;
 
-    // --- ĐÃ SỬA KIỂU DỮ LIỆU ---
-    public Long getProductId() { 
-        return productId; 
-    }
-    public void setProductId(Long productId) { 
-        this.productId = productId; 
-    }
-    // ---------------------------
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal price; // giá tại thời điểm tạo đơn hàng
 
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public OrderItem() {}
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
-
+    // ===== GETTERS / SETTERS =====
     public Order getOrder() { return order; }
     public void setOrder(Order order) { this.order = order; }
+
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
+
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    
+	}
+    
 }

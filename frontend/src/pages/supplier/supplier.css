@@ -1,0 +1,21 @@
+.supplier-header {
+  display: flex;
+  justify-content: center; /* căn giữa tiêu đề */
+  align-items: center;
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.supplier-header h2 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+/* Nút thêm mới sang bên phải, nhưng thấp hơn tiêu đề */
+.supplier-add-btn {
+  position: absolute;
+  right: 0;
+  top: 60%;              /* đặt khoảng cách từ trên */
+  transform: translateY(25%); /* hạ nút xuống thêm một chút */
+}

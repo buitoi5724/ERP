@@ -1,14 +1,16 @@
 package com.example.erp.entity;
 
+import com.example.erp.util.BaseEntity;
 import com.example.erp.util.InventoryAction;
 import jakarta.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "inventory_transactions")
-public class InventoryTransaction {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Table(name = "inventory_transaction")
+public class InventoryTransaction extends BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String productName;
     private int quantity;
@@ -17,75 +19,27 @@ public class InventoryTransaction {
     @Enumerated(EnumType.STRING)
     private InventoryAction action;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    public InventoryTransaction() {}
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public InventoryTransaction(String productName, int quantity, LocalDateTime transactionDate, InventoryAction action) {
+        this.productName = productName;
+        this.quantity = quantity;
+        this.transactionDate = transactionDate;
+        this.action = action;
+    }
 
-	/**
-	 * @return the productName
-	 */
-	public String getProductName() {
-		return productName;
-	}
+    // ===== GETTERS / SETTERS =====
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
 
-	/**
-	 * @param productName the productName to set
-	 */
-	public void setProductName(String productName) {
-		this.productName = productName;
-	}
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 
-	/**
-	 * @return the quantity
-	 */
-	public int getQuantity() {
-		return quantity;
-	}
+    public LocalDateTime getTransactionDate() { return transactionDate; }
+    public void setTransactionDate(LocalDateTime transactionDate) { this.transactionDate = transactionDate; }
 
-	/**
-	 * @param quantity the quantity to set
-	 */
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
+    public InventoryAction getAction() { return action; }
+    public void setAction(InventoryAction action) { this.action = action; }
 
-	/**
-	 * @return the transactionDate
-	 */
-	public LocalDateTime getTransactionDate() {
-		return transactionDate;
-	}
-
-	/**
-	 * @param transactionDate the transactionDate to set
-	 */
-	public void setTransactionDate(LocalDateTime transactionDate) {
-		this.transactionDate = transactionDate;
-	}
-
-	/**
-	 * @return the action
-	 */
-	public InventoryAction getAction() {
-		return action;
-	}
-
-	/**
-	 * @param action the action to set
-	 */
-	public void setAction(InventoryAction action) {
-		this.action = action;
-	}
-
-    // Getters & Setters
+    // id đã có sẵn từ BaseEntity
 }

@@ -60,3 +60,8 @@
   border-color: #007ad9;
   transform: scale(1.05);
 }
+
+.product-add-wrapper {
+  margin-top: 20px;   /* chỉnh lên xuống */
+  margin-bottom: 20px;
+}

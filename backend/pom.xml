@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- ================= PARENT ================= -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -12,38 +14,51 @@
         <relativePath/>
     </parent>
 
+    <!-- ================= PROJECT INFO ================= -->
     <groupId>com.example.erp</groupId>
     <artifactId>ERP</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ERP</name>
     <description>Spring Boot project for managing products (ERP system)</description>
 
+    <!-- ================= PROPERTIES ================= -->
     <properties>
-        <!-- Nếu bạn đang dùng Java 21 -->
         <java.version>21</java.version>
     </properties>
 
+    <!-- ================= DEPENDENCIES ================= -->
     <dependencies>
-        <!-- ✅ Spring Web -->
+
+        <!-- Spring Web (REST API) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
-        <!-- ✅ Spring Data JPA -->
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <scope>provided</scope>
+</dependency>
+        <!-- Spring Data JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- ✅ SQL Server JDBC driver (bản phù hợp cho Java 21) -->
-   <dependency>
-    <groupId>com.microsoft.sqlserver</groupId>
-    <artifactId>mssql-jdbc</artifactId>
-    <version>12.8.1.jre11</version>
-</dependency>
+        <!-- ✅ VALIDATION (BẮT BUỘC cho @NotNull, @NotBlank) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
 
-        <!-- ✅ DevTools (reload nhanh khi code thay đổi) -->
+        <!-- SQL Server JDBC (OK cho Java 21) -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>12.8.1.jre11</version>
+        </dependency>
+
+        <!-- DevTools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -51,21 +66,28 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- ✅ Test -->
+        <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+        	<groupId>com.example</groupId>
+        	<artifactId>demo</artifactId>
+        	<version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
+    <!-- ================= BUILD ================= -->
     <build>
         <plugins>
-            <!-- ✅ Plugin để build và chạy Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
+
 </project>

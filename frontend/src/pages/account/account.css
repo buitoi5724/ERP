@@ -1,0 +1,35 @@
+/* Search box container */
+.search-box {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.25rem 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Icon */
+.search-box .pi-search {
+  color: #6b7280;
+  margin-left: 0.5rem;
+}
+
+/* Input */
+.search-box .p-inputtext {
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 2rem !important;
+  font-size: 0.95rem;
+  width: 220px;
+}
+
+/* Focus effect */
+.search-box:focus-within {
+  box-shadow: 0 0 0 2px #6366f1;
+}
+
+/* Hover */
+.search-box:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}

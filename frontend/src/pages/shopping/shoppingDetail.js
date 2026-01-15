@@ -16,8 +16,13 @@ function ShoppingDetail() {
   useEffect(() => {
     getShoppingProductById(id)
       .then((data) => {
-        setProduct(data);
-        setSelectedImage(data.fullImageUrls?.[0]);
+        // Ghép image + imageUrls thành fullImageUrls
+        const images = [data.image, ...(data.imageUrls || [])]
+          .filter(Boolean)
+          .map((img) => (img.startsWith("http") ? img : `http://localhost:8080${img}`));
+        
+        setProduct({ ...data, fullImageUrls: images });
+        setSelectedImage(images[0] || "/images/default-product.png");
       })
       .catch((err) => {
         console.error("❌ Lỗi khi tải chi tiết sản phẩm:", err);
@@ -56,6 +61,7 @@ function ShoppingDetail() {
 
       <div className="detail-container">
         <div className="image-section">
+          {/* Ảnh chính */}
           <img
             src={selectedImage}
             alt={product.name}
@@ -63,6 +69,7 @@ function ShoppingDetail() {
             onError={(e) => (e.target.src = "/images/default-product.png")}
           />
 
+          {/* Thumbnails */}
           <div className="thumbnails">
             {product.fullImageUrls?.map((imgUrl, index) => (
               <img
@@ -71,6 +78,7 @@ function ShoppingDetail() {
                 alt={`Ảnh ${index + 1}`}
                 className={`thumbnail ${selectedImage === imgUrl ? "active" : ""}`}
                 onMouseEnter={() => setSelectedImage(imgUrl)}
+                onClick={() => setSelectedImage(imgUrl)}
                 onError={(e) => (e.target.src = "/images/default-product.png")}
               />
             ))}

@@ -1,283 +1,82 @@
 package com.example.erp.controller;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import com.example.erp.entity.Product;
-import com.example.erp.entity.ProductCategory;
-import com.example.erp.entity.ProductGallery;
-import com.example.erp.entity.ProductPrice;
-import com.example.erp.repository.ProductCategoryRepository;
-import com.example.erp.service.ProductService;
-import com.example.erp.service.ProductPriceService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.example.erp.dto.ProductRequestDTO;
+import com.example.erp.dto.ProductResponseDTO;
+import com.example.erp.service.ProductService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "http://localhost:3000")
+@Validated
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    private final ProductService productService;
 
-    @Autowired
-    private ProductCategoryRepository productCategoryRepository;
-
-    @Autowired
-    private ProductPriceService productPriceService;
-
-    private String uploadFolder = "D:/uploads/product/";
-
-    // =================================================================================
-    // DTO CLASSES
-    // =================================================================================
-
-    public static class PriceHistoryDTO {
-        private int stt;
-        private Long id;
-        private Double price;
-        private boolean active;
-        private LocalDateTime createdAt;
-
-        public PriceHistoryDTO(ProductPrice priceEntity, int stt) {
-            this.stt = stt;
-            this.id = priceEntity.getId();
-            this.price = priceEntity.getPrice();
-            this.active = priceEntity.isActive();
-            this.createdAt = priceEntity.getCreatedAt();
-        }
-
-        public int getStt() { return stt; }
-        public Long getId() { return id; }
-        public Double getPrice() { return price; }
-        public boolean isActive() { return active; }
-        public LocalDateTime getCreatedAt() { return createdAt; }
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
-    public static class ProductDTO {
-        private Long id;
-        private String name;
-        private Double price;
-        private String description;
-        private String image;
-        private List<String> imageUrls;
-        private CategoryDTO category;
-        private List<PriceHistoryDTO> priceHistory;
+    /* ================= CREATE ================= */
 
-        public ProductDTO(Product product) {
-            this.id = product.getId();
-            this.name = product.getName();
-            this.price = product.getPrice();
-            this.description = product.getDescription();
-            this.image = product.getImage();
+    @PostMapping(consumes = { "multipart/form-data" })
+    public ResponseEntity<ProductResponseDTO> create(
+            @RequestPart("product") @Valid ProductRequestDTO dto,
+            @RequestPart(value = "images", required = false) MultipartFile[] images) {
 
-            if (product.getGalleries() != null) {
-                this.imageUrls = product.getGalleries().stream()
-                        .map(ProductGallery::getImageUrl)
-                        .collect(Collectors.toList());
-            }
-
-            if (product.getCategory() != null) {
-                this.category = new CategoryDTO(product.getCategory());
-            }
-
-            if (product.getPriceHistory() != null) {
-                this.priceHistory = IntStream.range(0, product.getPriceHistory().size())
-                        .mapToObj(i -> new PriceHistoryDTO(product.getPriceHistory().get(i), i + 1))
-                        .collect(Collectors.toList());
-            }
-        }
-
-        public Long getId() { return id; }
-        public String getName() { return name; }
-        public Double getPrice() { return price; }
-        public String getDescription() { return description; }
-        public String getImage() { return image; }
-        public List<String> getImageUrls() { return imageUrls; }
-        public CategoryDTO getCategory() { return category; }
-        public List<PriceHistoryDTO> getPriceHistory() { return priceHistory; }
+        ProductResponseDTO response = productService.create(dto, images);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    /* ================= UPDATE ================= */
 
-    public static class CategoryDTO {
-        private Long id;
-        private String name;
 
-        public CategoryDTO(ProductCategory category) {
-            this.id = category.getId();
-            this.name = category.getName();
-        }
+@PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
+public ResponseEntity<ProductResponseDTO> update(
+        @PathVariable Long id,
+        @RequestPart("product") @Valid ProductRequestDTO dto,
+        @RequestPart(value = "images", required = false) MultipartFile[] images) {
 
-        public Long getId() { return id; }
-        public String getName() { return name; }
-    }
+    ProductResponseDTO response = productService.update(id, dto, images);
+    return ResponseEntity.ok(response);
+}
 
-    // =================================================================================
-    // API ENDPOINTS
-    // =================================================================================
-
-    @GetMapping
-    public List<ProductDTO> getAll() {
-        return productService.getAll()
-                .stream()
-                .map(ProductDTO::new)
-                .collect(Collectors.toList());
-    }
+    /* ================= GET BY ID ================= */
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getById(@PathVariable Long id) {
-        return productService.getById(id)
-                .map(ProductDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProductResponseDTO> getById(
+            @PathVariable Long id) {
+
+        ProductResponseDTO response = productService.getById(id);
+        return ResponseEntity.ok(response);
     }
-
-    @GetMapping("/get-image/{id}")
-    public ResponseEntity<byte[]> getImage(@PathVariable Long id) throws IOException {
-        byte[] image = productService.getImage(id);
-        if (image == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(image);
+    /* ================= GET ALL ================= */
+    @GetMapping
+    public ResponseEntity<List<ProductResponseDTO>> getAll() {
+        List<ProductResponseDTO> products = productService.getAllProducts();
+        return ResponseEntity.ok(products);
     }
-
-    // =================================================================================
-    // CREATE PRODUCT (Hỗ trợ nhiều ảnh, xử lý tên file an toàn)
-    // =================================================================================
-    @PostMapping(consumes = {"multipart/form-data"})
-    public ProductDTO create(
-            @RequestPart("product") Product product,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @RequestParam(value = "quantity", required = false) Integer quantity // 🔥 nhận quantity riêng
-    ) throws IOException {
-
-        if (product.getCategory() != null && product.getCategory().getId() != null) {
-            ProductCategory category = productCategoryRepository
-                    .findById(product.getCategory().getId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            product.setCategory(category);
-        }
-
-        if (images != null && !images.isEmpty()) {
-            Files.createDirectories(Paths.get(uploadFolder));
-
-            List<ProductGallery> galleries = new ArrayList<>();
-            for (MultipartFile file : images) {
-                String originalName = file.getOriginalFilename()
-                        .replaceAll("[^a-zA-Z0-9._-]", "_");
-
-                String fileName = UUID.randomUUID().toString() + "-" + originalName;
-                Path filePath = Paths.get(uploadFolder, fileName);
-                file.transferTo(filePath.toFile());
-
-                ProductGallery gallery = new ProductGallery();
-                gallery.setImageUrl(fileName);
-                gallery.setProduct(product);
-                galleries.add(gallery);
-            }
-            if (!galleries.isEmpty()) {
-                product.setImage(galleries.get(0).getImageUrl());
-            }
-            product.setGalleries(galleries);
-        }
-
-        // 🔥 Nếu quantity null thì mặc định 0
-        if (quantity == null) quantity = 0;
-
-        Product saved = productService.save(product);
-        return new ProductDTO(saved);
-    }
-    // =================================================================================
-    // UPDATE PRODUCT
-    // =================================================================================
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ProductDTO update(
+    @PutMapping("/{id}/main-image")
+    public ResponseEntity<ProductResponseDTO> updateMainImage(
             @PathVariable Long id,
-            @RequestPart("product") Product updatedProduct,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @RequestPart(value = "existingImages", required = false) String existingImagesJson
-    ) throws IOException {
-        Product updated = productService.updateProductKeepExisting(id, updatedProduct, images, existingImagesJson);
-        return new ProductDTO(updated);
+            @RequestBody Map<String, String> payload) {
+
+        String imageUrl = payload.get("imageUrl");
+        ProductResponseDTO updated = productService.updateMainImage(id, imageUrl);
+        return ResponseEntity.ok(updated);
     }
-    // =================================================================================
-    // DELETE PRODUCT
-    // =================================================================================
+    /* ================= DELETE ================= */
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
-    }
-
-    // =================================================================================
-    // PRICE HISTORY
-    // =================================================================================
-    @GetMapping("/{id}/price-history")
-    public List<PriceHistoryDTO> getPriceHistory(@PathVariable Long id) {
-        List<ProductPrice> prices = productPriceService.getByProductId(id);
-        return IntStream.range(0, prices.size())
-                .mapToObj(i -> new PriceHistoryDTO(prices.get(i), i + 1))
-                .collect(Collectors.toList());
-    }
-
-    @PostMapping("/{id}/price-history")
-    public PriceHistoryDTO addPrice(@PathVariable Long id, @RequestParam Double price) {
-        ProductPrice newPrice = productPriceService.addNewPrice(id, price);
-        return new PriceHistoryDTO(newPrice, 1);
-    }
-
-    // =================================================================================
-    // TRẢ VỀ FILE ẢNH THỰC TẾ
-    // =================================================================================
-    @GetMapping("/image/{filename}")
-    public ResponseEntity<byte[]> getProductImage(@PathVariable String filename) throws IOException {
-        Path path = Paths.get(uploadFolder, filename);
-        if (!Files.exists(path)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        String contentType = Files.probeContentType(path);
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        byte[] imageBytes = Files.readAllBytes(path);
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(imageBytes);
-    }
-
-    // =================================================================================
-    // ĐẶT ẢNH ĐẠI DIỆN CHÍNH
-    // =================================================================================
-    @PutMapping("/{productId}/set-main-image/{galleryId}")
-    public ResponseEntity<String> setMainImage(
-            @PathVariable Long productId,
-            @PathVariable Long galleryId) {
-        productService.setMainImage(productId, galleryId);
-        return ResponseEntity.ok("Cập nhật ảnh đại diện thành công!");
-    }
-    
-    //xóa từng cái ảnh 
-    
-    @DeleteMapping("/{productId}/gallery/{filename}")
-    public ResponseEntity<String> deleteGalleryImage(
-            @PathVariable Long productId,
-            @PathVariable String filename) {
-        productService.deleteGalleryImage(productId, filename);
-        return ResponseEntity.ok("Xóa ảnh thành công!");
+        return ResponseEntity.noContent().build();
     }
 }

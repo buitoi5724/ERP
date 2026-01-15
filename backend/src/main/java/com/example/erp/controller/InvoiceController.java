@@ -1,93 +1,50 @@
 package com.example.erp.controller;
 
-import com.example.erp.dto.InvoiceDTO;
-import com.example.erp.entity.Invoice;
-import com.example.erp.service.InvoiceService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.erp.dto.OrderDTO;
+import com.example.erp.dto.InvoiceRequestDTO;
+import com.example.erp.dto.InvoiceResponseDTO;
+import com.example.erp.service.InvoiceService;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/invoices")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 public class InvoiceController {
 
-    @Autowired
-    private InvoiceService invoiceService;
+    private final InvoiceService invoiceService;
 
-    // === Lấy tất cả hóa đơn ===
-    @GetMapping
-    public ResponseEntity<List<InvoiceDTO>> getAllInvoices() {
-        List<Invoice> invoices = invoiceService.getAll();
-        List<InvoiceDTO> dtos = invoices.stream()
-                .map(invoiceService::convertToDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+    public InvoiceController(InvoiceService invoiceService) {
+        this.invoiceService = invoiceService;
     }
 
-    // === Lấy hóa đơn theo ID ===
-    @GetMapping("/{id}")
-    public ResponseEntity<InvoiceDTO> getInvoiceById(@PathVariable Long id) {
-        Invoice invoice = invoiceService.getInvoiceById(id);
-        if (invoice == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(invoiceService.convertToDTO(invoice));
-    }
-
-    // === Tạo hóa đơn mới (nếu cần) ===
     @PostMapping
-    public ResponseEntity<InvoiceDTO> createInvoice(@RequestBody Invoice invoice) {
-        Invoice newInvoice = invoiceService.createInvoice(invoice);
-        return ResponseEntity.ok(invoiceService.convertToDTO(newInvoice));
+    public InvoiceResponseDTO create(@RequestBody InvoiceRequestDTO dto) {
+        return invoiceService.createInvoice(dto);
     }
 
-    // === Lấy hóa đơn theo OrderId (liên kết) ===
-    @GetMapping("/by-order/{orderId}")
-    public ResponseEntity<InvoiceDTO> getInvoiceByOrder(@PathVariable Long orderId) {
-        Invoice invoice = invoiceService.getByOrderId(orderId);
-        if (invoice == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(invoiceService.convertToDTO(invoice));
+    @GetMapping("/{id}")
+    public InvoiceResponseDTO getById(@PathVariable Long id) {
+        return invoiceService.getInvoiceById(id);
     }
 
-    // === Thanh toán invoice (rút gọn) ===
-    @PostMapping("/pay")
-    public ResponseEntity<String> payInvoice(@RequestBody PayInvoiceRequest request) {
-    	  System.out.println("Frontend gửi invoiceId: " + request.getInvoiceId());
-        try {
-            invoiceService.payInvoice(
-                    request.getInvoiceId(), 
-                    request.getPaymentMethod(), 
-                    request.getAccountId()
-            );
-            return ResponseEntity.ok("Thanh toán hóa đơn thành công!");
-        } catch (Exception e) {
-        	   e.printStackTrace(); // <-- thêm dòng này để xem lỗi thực tế
-            return ResponseEntity.badRequest().body("Lỗi thanh toán: " + e.getMessage());
-        }
-        
+    @GetMapping
+    public List<InvoiceResponseDTO> getAll() {
+        return invoiceService.getAllInvoices();
     }
-    @PostMapping("/place-order")
-    public ResponseEntity<InvoiceDTO> placeOrder(@RequestBody OrderDTO orderDTO) {
-        Invoice invoice = invoiceService.createInvoiceFromOrder(orderDTO); // tạo hóa đơn
-        InvoiceDTO dto = invoiceService.convertToDTO(invoice);
-        return ResponseEntity.ok(dto);
+
+    @PutMapping("/{id}")
+    public InvoiceResponseDTO update(@PathVariable Long id, @RequestBody InvoiceRequestDTO dto) {
+        return invoiceService.updateInvoice(id, dto);
     }
-}
 
-// DTO rút gọn cho frontend chỉ gửi ID + phương thức thanh toán
-class PayInvoiceRequest {
-    private Long invoiceId;
-    private String paymentMethod;
-    private Long accountId;
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        invoiceService.deleteInvoice(id);
+    }
 
-    public Long getInvoiceId() { return invoiceId; }
-    public void setInvoiceId(Long invoiceId) { this.invoiceId = invoiceId; }
-
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-
-    public Long getAccountId() { return accountId; }
-    public void setAccountId(Long accountId) { this.accountId = accountId; }
+    @PostMapping("/{id}/pay")
+    public void pay(@PathVariable Long id) {
+        invoiceService.markAsPaid(id);
+    }
 }

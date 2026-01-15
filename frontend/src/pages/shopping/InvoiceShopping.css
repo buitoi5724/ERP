@@ -85,12 +85,14 @@ h2 {
 
 .total-section p {
   font-size: 17px;
+   text-align: right;
   margin: 6px 0;
 }
 
 .total-section .total-amount {
   font-size: 20px;
   font-weight: bold;
+    text-align: right;
   color: #000;
   margin-top: 10px;
 }
@@ -268,4 +270,8 @@ h2 {
   background-color: #dc3545;
   color: white;
   margin-bottom: 10px;
+}
+.invoice-table th.number,
+.invoice-table td.number {
+  text-align: right;
 }

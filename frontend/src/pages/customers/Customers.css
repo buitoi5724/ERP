@@ -1,0 +1,127 @@
+/* =========================
+   Container chính
+========================= */
+.cust-page {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* =========================
+   Header + nút tạo mới
+========================= */
+.cust-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* chữ bên trái, nút bên phải */
+  margin-bottom: 1.5rem;
+}
+
+/* tạo 1 div trung gian để căn giữa chữ */
+.cust-header h2 {
+  margin: 0 auto; /* căn giữa chữ CUSTOMERS trong flex */
+  color: #333;
+  font-size: 2rem;
+}
+
+/* nút Tạo Customer */
+.cust-header .p-button {
+  background-color: #6996db;
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+.cust-header .p-button:hover {
+  background-color: #0b5ed7;
+}
+
+/* =========================
+   DataTable
+========================= */
+.cust-datatable .p-datatable-thead > tr > th {
+  background-color: #d6dde7;
+  color: #333;
+  font-weight: 600;
+}
+
+.cust-datatable .p-datatable-tbody > tr > td {
+  color: #333;
+}
+
+.cust-datatable .p-datatable-tbody > tr:hover {
+  background-color: #e6f0ff;
+}
+
+.cust-action-btn {
+  margin-right: 0.5rem;
+}
+
+/* =========================
+   Dialog Form
+========================= */
+.cust-dialog .p-dialog-header {
+  background-color: #d8dce1;
+  color: rgb(4, 6, 18);
+  font-weight: 600;
+}
+
+.cust-dialog .p-fluid label {
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+/* Nút Huỷ và Lưu sang góc phải */
+.cust-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.cust-dialog .p-button {
+  min-width: 80px;
+  color: white;
+  font-weight: 600;
+}
+
+/* Huỷ màu xám */
+.cust-dialog .p-button-secondary {
+  background-color: #6c757d !important;
+  color: white !important;
+}
+
+/* Lưu màu xanh */
+.cust-dialog .p-button-primary {
+  background-color: #0d6efd !important;
+  color: white !important;
+}
+
+.cust-dialog .p-button:hover {
+  opacity: 0.9;
+}
+/* =========================
+   Form row (label + input ngang hàng)
+========================= */
+.cust-form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 0.5rem; /* khoảng cách giữa label và input */
+}
+
+.cust-form-row label {
+  width: 120px; /* cố định chiều rộng label */
+  text-align: right; /* chữ label canh bên phải */
+  font-weight: 500;
+  color: #333;
+}
+
+.cust-form-row .p-inputtext {
+  flex: 1; /* input chiếm phần còn lại */
+}
+.export-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}

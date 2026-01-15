@@ -1,86 +1,96 @@
 package com.example.erp.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.erp.util.BaseEntity;
+import com.example.erp.util.ProductStatus;
+
+/**
+ * Product Entity
+ */
 @Entity
-@Table(name = "product")
-public class Product implements Serializable {
+@Table(
+    name = "product",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = "code")
+    }
+)
+public class Product extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties({"product"})
-    private Inventory inventory;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
+    /* ================= BASIC INFO ================= */
+
+    @Column(nullable = false, length = 50, unique = true)
+    private String code;
+
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(nullable = false)
-    private Double price;
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal price;
 
     private String image;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    /* ================= ATTRIBUTES ================= */
     private String sizes;
-
-    @Column(columnDefinition = "NVARCHAR(255)")
     private String colors;
-    @Transient
-    private Integer quantity;
 
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    @Column(length = 50)
+    private String unit;
+
+    /* ================= STATUS ================= */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ProductStatus status = ProductStatus.ACTIVE;
+
+    /* ================= CATEGORY ================= */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    @JsonIgnoreProperties({"createDate", "createBy", "updateDate", "updateBy"})
-    private ProductCategory category;
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
-    // ⚡ Fix N+1 query cho priceHistory
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Fetch(FetchMode.SUBSELECT)
-    @JsonIgnoreProperties({"product"})
-    private List<ProductPrice> priceHistory = new ArrayList<>();
-
-    // ⚡ Fix N+1 query cho gallery
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Fetch(FetchMode.SUBSELECT)
-    @JsonIgnoreProperties({"product"})
+    /* ================= GALLERIES ================= */
+    @OneToMany(
+        mappedBy = "product",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
     private List<ProductGallery> galleries = new ArrayList<>();
-    
-    // --- Getters & Setters ---
-    
-    public Long getId() { return id; }
-    /**
-	 * @return the inventory
-	 */
-	public Inventory getInventory() {
-		return inventory;
-	}
-	/**
-	 * @param inventory the inventory to set
-	 */
-	public void setInventory(Inventory inventory) {
-		this.inventory = inventory;
-	}
-	public void setId(Long id) { this.id = id; }
+
+    /* ================= CONSTRUCTOR ================= */
+    public Product() {
+        // JPA & Mapper
+    }
+
+    /* ================= BUSINESS METHODS ================= */
+    public void activate() { this.status = ProductStatus.ACTIVE; }
+    public void deactivate() { this.status = ProductStatus.INACTIVE; }
+    public void discontinue() { this.status = ProductStatus.DISCONTINUED; }
+
+    /* ================= GETTERS / SETTERS ================= */
+
+
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) {
+        if (price == null || price.signum() < 0) {
+            throw new IllegalArgumentException("Price must be >= 0");
+        }
+        this.price = price;
+    }
 
     public String getImage() { return image; }
     public void setImage(String image) { this.image = image; }
@@ -94,12 +104,21 @@ public class Product implements Serializable {
     public String getColors() { return colors; }
     public void setColors(String colors) { this.colors = colors; }
 
-    public ProductCategory getCategory() { return category; }
-    public void setCategory(ProductCategory category) { this.category = category; }
+    public String getUnit() { return unit; }
+    public void setUnit(String unit) { this.unit = unit; }
 
-    public List<ProductPrice> getPriceHistory() { return priceHistory; }
-    public void setPriceHistory(List<ProductPrice> priceHistory) { this.priceHistory = priceHistory; }
+    public ProductStatus getStatus() { return status; }
+    public void setStatus(ProductStatus status) {
+        if (status == null) throw new IllegalArgumentException("Status must not be null");
+        this.status = status;
+    }
+
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 
     public List<ProductGallery> getGalleries() { return galleries; }
-    public void setGalleries(List<ProductGallery> galleries) { this.galleries = galleries; }
+    public void addGallery(ProductGallery gallery) {
+        galleries.add(gallery);
+        gallery.setProduct(this);
+    }
 }

@@ -1,14 +1,14 @@
 package com.example.erp.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.example.erp.util.BaseEntity;
+
 @Entity
 @Table(name = "product_price")
-public class ProductPrice implements Serializable {
+public class ProductPrice extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,10 +27,9 @@ public class ProductPrice implements Serializable {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt; // Ngày giờ bản ghi được tạo
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "priceHistory"})
-    private Product product;
+    // --- Chỉ lưu productId thay vì liên kết Product entity ---
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
     // --- Lifecycle callback ---
     @PrePersist
@@ -51,15 +50,16 @@ public class ProductPrice implements Serializable {
     public LocalDateTime getEndDate() { return endDate; }
     public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
 
-    public Product getProduct() { return product; }
-    public void setProduct(Product product) { this.product = product; }
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     // --- Helper method ---
     public boolean isActive() {
-        return (endDate == null || endDate.isAfter(LocalDateTime.now())) // chưa hết hạn
-                && (startDate.isBefore(LocalDateTime.now()) || startDate.isEqual(LocalDateTime.now())); // đã bắt đầu
+        LocalDateTime now = LocalDateTime.now();
+        return (endDate == null || endDate.isAfter(now))
+                && (startDate.isBefore(now) || startDate.isEqual(now));
     }
 }
