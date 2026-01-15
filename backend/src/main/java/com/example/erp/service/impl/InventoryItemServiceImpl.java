@@ -1,5 +1,7 @@
 package com.example.erp.service.impl;
 
+import com.example.erp.dto.ExportItemDTO;
+import com.example.erp.dto.InventoryExportRequestDTO;
 import com.example.erp.dto.InventoryImportRequestDTO;
 import com.example.erp.dto.InventoryItemRequestDTO;
 import com.example.erp.dto.InventoryItemResponseDTO;
@@ -59,6 +61,7 @@ public class InventoryItemServiceImpl implements InventoryItemService {
 
         InventoryItem item = new InventoryItem();
         item.setInventoryId(inventory.getId());
+        
         item.setProductId(dto.getProductId());
         item.setSupplierId(dto.getSupplierId());
         item.setBatchNumber(dto.getBatchNumber());
@@ -191,9 +194,52 @@ public class InventoryItemServiceImpl implements InventoryItemService {
         request.setTotalAmount(totalAmount);
     }
 
+    @Override
+    @Transactional
+    public void exportInventory(InventoryExportRequestDTO request) {
 
+        for (ExportItemDTO exportItem : request.getItems()) {
 
+            int need = exportItem.getQuantity();
 
+            List<InventoryItem> items =
+                itemRepository.findFIFOByWarehouseAndProduct(
+                    request.getWarehouse(),
+                    exportItem.getProductId()
+                );
+
+            if (items.isEmpty()) {
+                throw new IllegalStateException(
+                    "Kho " + request.getWarehouse()
+                    + " không còn sản phẩm " + exportItem.getProductId()
+                );
+            }
+
+            for (InventoryItem item : items) {
+                if (need <= 0) break;
+
+                int available = item.getRemainingQuantity();
+
+                if (available <= need) {
+                    item.setRemainingQuantity(0);
+                    item.setStatus("SOLD");
+                    need -= available;
+                } else {
+                    item.setRemainingQuantity(available - need);
+                    need = 0;
+                }
+
+                item.setCustomerId(request.getCustomerId());
+                itemRepository.save(item);
+            }
+
+            if (need > 0) {
+                throw new IllegalStateException(
+                    "Không đủ tồn cho sản phẩm " + exportItem.getProductId()
+                );
+            }
+        }
+    }
     // =====================================================
     // QUERY
     // =====================================================

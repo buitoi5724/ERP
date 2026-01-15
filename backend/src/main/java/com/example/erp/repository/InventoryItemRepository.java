@@ -38,4 +38,28 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, Lo
           AND i.deleted = false
     """)
     Integer getTotalStockByProduct(@Param("productId") Long productId);
+ // FIFO theo KHO + SẢN PHẨM (BẮT BUỘC)
+    List<InventoryItem>
+    findByInventoryIdAndProductIdAndRemainingQuantityGreaterThanAndDeletedFalseOrderByReceivedDateAsc(
+            Long inventoryId,
+            Long productId,
+            Integer remainingQty
+    );
+
+
+    @Query("""
+        SELECT ii
+        FROM InventoryItem ii
+        JOIN Inventory i ON ii.inventoryId = i.id
+        WHERE i.warehouse = :warehouse
+          AND ii.productId = :productId
+          AND ii.remainingQuantity > 0
+          AND ii.deleted = false
+        ORDER BY ii.receivedDate ASC
+    """)
+    List<InventoryItem> findFIFOByWarehouseAndProduct(
+        @Param("warehouse") String warehouse,
+        @Param("productId") Long productId
+    );
+	
 }

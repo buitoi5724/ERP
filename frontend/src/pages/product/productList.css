@@ -153,3 +153,32 @@
   object-fit: cover;
   border-radius: 6px;
 }
+.productlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.productlist-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-add-product {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.btn-add-product {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+.btn-add-product:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}

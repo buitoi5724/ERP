@@ -21,26 +21,24 @@ export default function CustomersPage() {
   const [selectedCustomers, setSelectedCustomers] = useState([]);
   const [formVisible, setFormVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState("");
 
   const toast = useRef(null);
 
-  // Filter
-  const emptyFilters = {
-    global: { value: '', matchMode: 'contains' },
-    name: { value: '', matchMode: 'contains' },
-    phone: { value: '', matchMode: 'contains' },
-    address: { value: '', matchMode: 'contains' },
-    accountDisplay: { value: '', matchMode: 'contains' } // filter tài khoản
-  };
-  const [filters, setFilters] = useState(emptyFilters);
+  const normalize = (val) =>
+    String(val ?? "").toLowerCase().trim();
 
-  // Load data
+  // ================= LOAD DATA =================
   const loadAccounts = async () => {
     try {
       const data = await accountService.getAccounts();
       setAccounts(data || []);
     } catch {
-      toast.current.show({ severity: "error", summary: "Lỗi", detail: "Không thể load accounts" });
+      toast.current.show({
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Không thể load accounts",
+      });
     }
   };
 
@@ -49,18 +47,21 @@ export default function CustomersPage() {
     try {
       const customerData = await customersService.getAll();
 
-      // Tạo accountDisplay để filter
-      const customersWithAccount = customerData.map(c => {
-        const acc = accounts.find(a => a.id === c.accountId);
+      const customersWithAccount = customerData.map((c) => {
+        const acc = accounts.find((a) => a.id === c.accountId);
         return {
           ...c,
-          accountDisplay: acc ? `${acc.username} | ${acc.email}` : "Chưa liên kết"
+          accountDisplay: acc ? `${acc.username} | ${acc.email}` : "",
         };
       });
 
       setCustomers(customersWithAccount);
     } catch {
-      toast.current.show({ severity: "error", summary: "Lỗi", detail: "Không thể load customers" });
+      toast.current.show({
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Không thể load customers",
+      });
     } finally {
       setLoading(false);
     }
@@ -70,14 +71,24 @@ export default function CustomersPage() {
     loadAccounts();
   }, []);
 
-  // Khi accounts load xong, load customers để accountDisplay chính xác
   useEffect(() => {
-    if (accounts.length > 0) {
-      loadCustomers();
-    }
+    if (accounts.length) loadCustomers();
   }, [accounts]);
 
-  // Open form
+  // ================= SEARCH =================
+  const filteredCustomers = customers.filter((c) => {
+    if (!globalSearch.trim()) return true;
+    const keyword = normalize(globalSearch);
+
+    return (
+      normalize(c.name).includes(keyword) ||
+      normalize(c.phone).includes(keyword) ||
+      normalize(c.address).includes(keyword) ||
+      normalize(c.accountDisplay).includes(keyword)
+    );
+  });
+
+  // ================= CRUD =================
   const openNew = () => {
     setSelectedCustomer(null);
     setFormVisible(true);
@@ -101,8 +112,11 @@ export default function CustomersPage() {
       accept: async () => {
         await customersService.remove(id);
         loadCustomers();
-        toast.current.show({ severity: "success", summary: "Đã xóa thành công!" });
-      }
+        toast.current.show({
+          severity: "success",
+          summary: "Đã xóa thành công",
+        });
+      },
     });
   };
 
@@ -112,11 +126,16 @@ export default function CustomersPage() {
       acceptLabel: "Có",
       rejectLabel: "Không",
       accept: async () => {
-        await Promise.all(selectedCustomers.map(c => customersService.remove(c.id)));
+        await Promise.all(
+          selectedCustomers.map((c) => customersService.remove(c.id))
+        );
         setSelectedCustomers([]);
         loadCustomers();
-        toast.current.show({ severity: "success", summary: "Đã xóa thành công!" });
-      }
+        toast.current.show({
+          severity: "success",
+          summary: "Đã xóa thành công",
+        });
+      },
     });
   };
 
@@ -127,12 +146,20 @@ export default function CustomersPage() {
 
       setFormVisible(false);
       loadCustomers();
-      toast.current.show({ severity: "success", summary: "Lưu thành công!" });
+      toast.current.show({
+        severity: "success",
+        summary: "Lưu thành công",
+      });
     } catch {
-      toast.current.show({ severity: "error", summary: "Lỗi", detail: "Không thể lưu dữ liệu!" });
+      toast.current.show({
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Không thể lưu dữ liệu",
+      });
     }
   };
 
+  // ================= EXPORT =================
   const exportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(customers);
     const workbook = XLSX.utils.book_new();
@@ -140,24 +167,34 @@ export default function CustomersPage() {
     XLSX.writeFile(workbook, "customers.xlsx");
   };
 
+  // ================= TOOLBAR =================
   const leftToolbarTemplate = () => (
     <Button label="➕ Thêm mới" icon="pi pi-plus" onClick={openNew} />
   );
 
   const rightToolbarTemplate = () => (
-    <Button
-      label="🗑 Xóa đã chọn"
-      icon="pi pi-trash"
-      className="p-button-danger"
-      disabled={!selectedCustomers.length}
-      onClick={removeSelectedCustomers}
-    />
+    <div className="flex align-items-center gap-2">
+      <span className="p-input-icon-left">
+        <i className="pi pi-search" />
+        <InputText
+          placeholder="Tìm tên, SĐT, địa chỉ, tài khoản..."
+          value={globalSearch}
+          onChange={(e) => setGlobalSearch(e.target.value)}
+          style={{ width: "280px" }}
+        />
+      </span>
+
+      <Button
+        label="🗑 Xóa đã chọn"
+        icon="pi pi-trash"
+        className="p-button-danger"
+        disabled={!selectedCustomers.length}
+        onClick={removeSelectedCustomers}
+      />
+    </div>
   );
 
-  const accountTemplate = (row) => {
-    return row.accountDisplay; // đã map khi loadCustomers
-  };
-
+  // ================= RENDER =================
   return (
     <div className="customers-container">
       <Toast ref={toast} />
@@ -165,98 +202,56 @@ export default function CustomersPage() {
 
       <h2>Quản lý Customers</h2>
 
-      <Toolbar className="mb-3" left={leftToolbarTemplate} right={rightToolbarTemplate}>
-        <span className="p-input-icon-left">
-          <i className="pi pi-search" />
-          <InputText
-            placeholder="Tìm kiếm toàn cục..."
-            value={filters.global?.value || ""}
-            onChange={(e) =>
-              setFilters(prev => ({
-                ...prev,
-                global: { ...prev.global, value: e.target.value }
-              }))
-            }
-          />
-        </span>
-      </Toolbar>
+      <Toolbar
+        className="mb-3"
+        left={leftToolbarTemplate}
+        right={rightToolbarTemplate}
+      />
 
       <DataTable
-        value={customers}
+        value={filteredCustomers}
+        dataKey="id"          
         paginator
         rows={10}
-        rowsPerPageOptions={[10, 20, 50]}
         selection={selectedCustomers}
         onSelectionChange={(e) => setSelectedCustomers(e.value)}
         selectionMode="checkbox"
         stripedRows
-        responsiveLayout="scroll"
         loading={loading}
-        filters={filters}
-        onFilter={(e) => setFilters(e.filters)}
-        globalFilterFields={['name', 'phone', 'address', 'accountDisplay']}
         emptyMessage="Không có khách hàng"
-        filterDisplay="row"
       >
-        <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
+        <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
+        <Column field="name" header="Tên" sortable />
+        <Column field="phone" header="SĐT" sortable />
+        <Column field="address" header="Địa chỉ" sortable />
+        <Column header="Tài khoản" body={(row) => row.accountDisplay || "—"} />
 
-        <Column
-          field="name"
-          header="Tên"
-          sortable
-          filter
-          filterPlaceholder="Tìm tên..."
-          filterMatchMode="contains"
-          style={{ minWidth: '200px' }}
-        />
-        <Column
-          field="phone"
-          header="SĐT"
-          sortable
-          filter
-          filterPlaceholder="Tìm SĐT..."
-          filterMatchMode="contains"
-          style={{ minWidth: '150px' }}
-        />
-        <Column
-          field="address"
-          header="Địa chỉ"
-          sortable
-          filter
-          filterPlaceholder="Tìm địa chỉ..."
-          filterMatchMode="contains"
-          style={{ minWidth: '250px' }}
-        />
-        <Column
-          header="Tài khoản"
-          body={accountTemplate}
-          sortable
-          filter
-          filterField="accountDisplay"
-          filterPlaceholder="Tìm tài khoản..."
-          filterMatchMode="contains"
-          style={{ minWidth: '200px' }}
-        />
         <Column
           header="Hành động"
           body={(row) => (
-            <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
-              <Button icon="pi pi-eye" rounded text tooltip="Xem chi tiết" onClick={() => viewCustomer(row)} />
-              <Button icon="pi pi-pencil" rounded text tooltip="Sửa" onClick={() => editCustomer(row)} />
-              <Button icon="pi pi-trash" rounded text severity="danger" tooltip="Xóa" onClick={() => removeCustomer(row.id)} />
+            <div style={{ display: "flex", gap: "0.25rem", justifyContent: "center" }}>
+              <Button icon="pi pi-eye" rounded text onClick={() => viewCustomer(row)} />
+              <Button icon="pi pi-pencil" rounded text onClick={() => editCustomer(row)} />
+              <Button
+                icon="pi pi-trash"
+                rounded
+                text
+                severity="danger"
+                onClick={() => removeCustomer(row.id)}
+              />
             </div>
           )}
-          style={{ width: '150px', textAlign: 'center' }}
         />
       </DataTable>
 
-  <div className="export-button-container">
-  <Button
-    label="📥 Xuất Excel"
-    icon="pi pi-file-excel"
-    onClick={exportExcel}
-  />
-</div>
+      <div className="export-button-container">
+        <Button
+          label="📥 Xuất Excel"
+          icon="pi pi-file-excel"
+          onClick={exportExcel}
+        />
+      </div>
+
       <CustomersForm
         visible={formVisible}
         onHide={() => setFormVisible(false)}

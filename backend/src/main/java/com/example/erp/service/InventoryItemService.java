@@ -1,5 +1,6 @@
 package com.example.erp.service;
 
+import com.example.erp.dto.InventoryExportRequestDTO;
 import com.example.erp.dto.InventoryImportRequestDTO;
 import com.example.erp.dto.InventoryItemRequestDTO;
 import com.example.erp.dto.InventoryItemResponseDTO;
@@ -30,5 +31,9 @@ public interface InventoryItemService {
     void deleteItem(Long itemId);
     
     void importInventory(InventoryImportRequestDTO request);
+    
+    // ================== XUẤT KHO ==================
+    void exportInventory(InventoryExportRequestDTO request); // 👈 THÊM DÒNG NÀY
+    
 
 }

@@ -11,7 +11,7 @@ import { Galleria } from "primereact/galleria";
 import "./productList.css";
 import { updateMainImage, buildImageUrl } from "./productService";
 
-const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
+const ProductList = ({ products = [], onEdit, onDelete, onDetail ,onAdd  }) => {
   const [filters, setFilters] = useState({ name: "", priceFrom: "", priceTo: "" });
   const [visible, setVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -110,28 +110,59 @@ const ProductList = ({ products = [], onEdit, onDelete, onDetail }) => {
     </div>
   );
 
-  const header = (
-    <div className="flex justify-content-between align-items-center gap-2">
-      <h3 className="mt-0 mb-0">Danh sách sản phẩm</h3>
-      <div className="flex align-items-center gap-2">
-        <InputText value={filters.name} onChange={handleInputChange} placeholder="Tìm sản phẩm / Loại..." />
-        <Dropdown
-          value={filters.priceFrom ? `${filters.priceFrom}-${filters.priceTo}` : ""}
-          options={[
-            { label: "Tất cả", value: "" },
-            { label: "Dưới 1 triệu", value: "0,1000000" },
-            { label: "1 - 5 triệu", value: "1000000,5000000" },
-            { label: "5 - 10 triệu", value: "5000000,10000000" },
-            { label: "Trên 10 triệu", value: "10000000," },
-          ]}
-          onChange={handlePriceChange}
-          placeholder="Chọn mức giá"
-          className="w-12rem"
-        />
-        <Button icon="pi pi-filter-slash" className="p-button-text" onClick={handleClear} />
-      </div>
+const header = (
+  <div className="flex justify-content-between align-items-center gap-3">
+    {/* ===== TIÊU ĐỀ ===== */}
+    <h3 className="m-0">Danh sách sản phẩm</h3>
+
+    {/* ===== ACTIONS ===== */}
+    <div className="flex align-items-center gap-2">
+      {/* ➕ THÊM SẢN PHẨM */}
+      <Button
+        label="Thêm sản phẩm"
+        icon="pi pi-plus"
+        className="btn-add-product"
+        onClick={onAdd}
+      />
+
+      {/* 🔍 TÌM KIẾM */}
+      <InputText
+        value={filters.name}
+        onChange={handleInputChange}
+        placeholder="Tìm sản phẩm / loại..."
+        className="w-14rem"
+      />
+
+      {/* 💰 LỌC GIÁ */}
+      <Dropdown
+        value={
+          filters.priceFrom
+            ? `${filters.priceFrom}-${filters.priceTo}`
+            : ""
+        }
+        options={[
+          { label: "Tất cả", value: "" },
+          { label: "Dưới 1 triệu", value: "0,1000000" },
+          { label: "1 - 5 triệu", value: "1000000,5000000" },
+          { label: "5 - 10 triệu", value: "5000000,10000000" },
+          { label: "Trên 10 triệu", value: "10000000," },
+        ]}
+        onChange={handlePriceChange}
+        placeholder="Mức giá"
+        className="w-12rem"
+      />
+
+      {/* ❌ CLEAR FILTER */}
+      <Button
+        icon="pi pi-filter-slash"
+        className="p-button-text"
+        onClick={handleClear}
+        tooltip="Xóa bộ lọc"
+      />
     </div>
-  );
+  </div>
+);
+
 
   // 🖼️ Hiển thị từng ảnh trong Galleria
   const itemTemplate = (item) => {

@@ -28,6 +28,7 @@ const InventoryForm = ({ visible, onClose, type = "IMPORT" }) => {
      STATE
   ======================= */
   const [common, setCommon] = useState({
+    inventoryId: 1,
     warehouse: "DEFAULT",
     receiptCode: "",
     actionDate: new Date(),
@@ -44,24 +45,31 @@ const InventoryForm = ({ visible, onClose, type = "IMPORT" }) => {
   /* =======================
      LOAD DATA
   ======================= */
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [p, s, c] = await Promise.all([
-          InventoryService.getAllProducts(),
-          InventoryService.getAllSuppliers(),
-          InventoryService.getAllCustomers()
-        ]);
+ useEffect(() => {
+  const load = async () => {
+    try {
+      const [p, s, c] = await Promise.all([
+        InventoryService.getAllProducts(),
+        InventoryService.getAllSuppliers(),
+        InventoryService.getAllCustomers()
+      ]);
 
-        setProducts(p?.data || p || []);
-        setSuppliers(s?.data || s || []);
-        setCustomers(c?.data || c || []);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    load();
-  }, []);
+    const normalize = (res) => {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.content)) return res.content;
+  return [];
+};
+
+      setProducts(normalize(p));
+      setSuppliers(normalize(s));
+setCustomers(normalize(c));
+console.log("CUSTOMERS DATA:", normalize(c));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  load();
+}, []);
 
   /* =======================
      HANDLER
@@ -133,28 +141,27 @@ const InventoryForm = ({ visible, onClose, type = "IMPORT" }) => {
     if (!validateForm()) return;
 
   const payload = {
-  receiptCode: common.receiptCode,     // Mã phiếu nhập
-  warehouse: common.warehouse,         // Kho
-  date: common.actionDate
-          .toISOString()
-          .slice(0, 10),              // Ngày nhập kho YYYY-MM-DD
-  note: common.note,                   // Ghi chú
+    
+  receiptCode: common.receiptCode,
+  warehouse: common.warehouse,
+  date: common.actionDate.toISOString().slice(0, 10),
+  note: common.note,
+
+  ...( !isImport && { customerId: common.customerId }),
 
   items: items.map(item => ({
-    productId: item.productId,         // ID sản phẩm
-    quantity: Number(item.quantity),   // Số lượng
-    supplierId: item.supplierId,       // Nhà cung cấp
-    importPrice: Number(item.price),   // Giá nhập
-    batchNumber: item.batchNumber,     // Số lô
-    manufactureDate: item.manufactureDate
-                     ?.toISOString()
-                     .slice(0, 10),   // Ngày sản xuất
-    expirationDate: item.expirationDate
-                     ?.toISOString()
-                     .slice(0, 10)    // Hạn sử dụng
+    productId: item.productId,
+    quantity: Number(item.quantity),
+
+    ...(isImport && {
+      supplierId: item.supplierId,
+      importPrice: Number(item.price),
+      batchNumber: item.batchNumber,
+      manufactureDate: item.manufactureDate?.toISOString().slice(0, 10),
+      expirationDate: item.expirationDate?.toISOString().slice(0, 10)
+    })
   }))
 };
-
     try {
       isImport
         ? await InventoryService.importInventory(payload)
@@ -193,16 +200,14 @@ const totalAmount = items.reduce((sum, item) => {
         {!isImport && (
           <div className="form-group">
             <label>Khách hàng</label>
-            <Dropdown
-              value={common.customerId}
-              options={customers}
-              optionLabel="name"
-              optionValue="id"
-              placeholder="Chọn khách hàng"
-              onChange={e =>
-                updateCommon("customerId", e.value)
-              }
-            />
+<Dropdown
+  value={common.customerId}
+  options={customers}
+  optionLabel="name"
+  optionValue="id"
+  placeholder="Chọn khách hàng"
+  onChange={e => updateCommon("customerId", e.value)}
+/>
           </div>
         )}
 
@@ -253,7 +258,7 @@ const totalAmount = items.reduce((sum, item) => {
 
  <div className="add-item-wrapper">
   <Button
-    label="Thêm sản phẩm"
+    label="Thêm sản phẩ"
     icon="pi pi-plus"
     className="add-item-btn"
     onClick={addItem}
@@ -308,7 +313,7 @@ const totalAmount = items.reduce((sum, item) => {
 
               <InputText
                 value={item.batchNumber}
-                placeholder="Batch"
+                placeholder=" Số Lô "
                 onChange={e =>
                   updateItem(index, "batchNumber", e.target.value)
                 }

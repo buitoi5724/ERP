@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.erp.dto.InventoryExportRequestDTO;
 import com.example.erp.dto.InventoryImportRequestDTO;
 import com.example.erp.dto.InventoryRequestDTO;
 import com.example.erp.dto.InventoryResponseDTO;
@@ -84,4 +85,12 @@ public class InventoryController {
         inventoryItemService.importInventory(request);
         return ResponseEntity.ok("Import inventory success");
     }
+    @PostMapping("/export")
+    public ResponseEntity<?> exportInventory(
+            @RequestBody InventoryExportRequestDTO request
+    ) {
+        inventoryItemService.exportInventory(request);
+        return ResponseEntity.ok("Export inventory success");
+    }
+    
 }
