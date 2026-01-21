@@ -2,37 +2,47 @@ package com.example.erp.entity;
 
 import com.example.erp.util.BaseEntity;
 import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+import com.example.erp.util.InventoryStatus;
 @Entity
 @Table(
     name = "inventory",
     uniqueConstraints = {
         @UniqueConstraint(columnNames = {"product_id", "warehouse"})
+    },
+    indexes = {
+        @Index(name = "idx_inventory_product_warehouse", columnList = "product_id, warehouse")
     }
 )
 public class Inventory extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Column(name = "product_id")
-    private Long productId;
-    
-   
-    // ===== Phiếu nhập kho =====
-    @Column(name = "receipt_code")
-    private String receiptCode;
 
-    // ===== Snapshot thông tin sản phẩm =====
+    /* =====================================================
+     *  SẢN PHẨM
+     * ===================================================== */
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
+
+    // snapshot – tránh join Product
     @Column(name = "product_code")
     private String productCode;
 
     @Column(name = "product_name")
     private String productName;
 
-    // ===== Số lượng =====
+    /* =====================================================
+     *  KHO
+     * ===================================================== */
+    @Column(nullable = false)
+    private String warehouse = "DEFAULT";
+
+    /* =====================================================
+     *  SỐ LƯỢNG
+     * ===================================================== */
     @Column(nullable = false)
     private Integer quantity = 0;
 
@@ -42,111 +52,167 @@ public class Inventory extends BaseEntity implements Serializable {
     @Column(name = "available_quantity", nullable = false)
     private Integer availableQuantity = 0;
 
-    // ===== Giá =====
-    @Column(name = "cost_price")
+    /* =====================================================
+     *  GIÁ
+     * ===================================================== */
+    // giá vốn hiện tại (bình quân / FIFO tuỳ nghiệp vụ)
+    @Column(name = "cost_price", precision = 19, scale = 2)
     private BigDecimal costPrice;
 
-    @Column(name = "sale_price")
+    @Column(name = "sale_price", precision = 19, scale = 2)
     private BigDecimal salePrice;
 
-    // ===== Cảnh báo tồn =====
-    @Column(name = "min_stock")
-    private Integer minStock = 0;
+    /* =====================================================
+     *  CẢNH BÁO TỒN
+     * ===================================================== */
 
-    @Column(name = "max_stock")
-    private Integer maxStock;
 
-    // ===== Kho =====
-    @Column(nullable = false)
-    private String warehouse = "DEFAULT";
-
-    // ===== Thời điểm nghiệp vụ =====
+    /* =====================================================
+     *  THỜI ĐIỂM NGHIỆP VỤ
+     * ===================================================== */
     @Column(name = "last_import_date")
     private LocalDateTime lastImportDate;
 
     @Column(name = "last_export_date")
     private LocalDateTime lastExportDate;
 
-    // ===== Trạng thái & ghi chú =====
-    @Column
-    private String status;
+    /* =====================================================
+     *  TRẠNG THÁI
+     * ===================================================== */
+    // ACTIVE | INACTIVE | LOCKED
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private InventoryStatus status = InventoryStatus.ACTIVE;
+    
 
     @Column(columnDefinition = "NVARCHAR(500)")
     private String note;
 
-    // ===== Getter / Setter =====
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
-   
-    public String getReceiptCode() { return receiptCode; }
-    public void setReceiptCode(String receiptCode) { this.receiptCode = receiptCode; }
+    /* =====================================================
+     *  GETTER / SETTER
+     * ===================================================== */
 
-    public String getProductCode() { return productCode; }
-    public void setProductCode(String productCode) { this.productCode = productCode; }
+    public Long getProductId() {
+        return productId;
+    }
 
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
 
-    public Integer getQuantity() { return quantity; }
+    public String getProductCode() {
+        return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getWarehouse() {
+        return warehouse;
+    }
+
+    public void setWarehouse(String warehouse) {
+        this.warehouse = warehouse;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
     public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+        this.quantity = quantity != null ? quantity : 0;
         recalcAvailable();
     }
 
-    public Integer getReservedQuantity() { return reservedQuantity; }
+    public Integer getReservedQuantity() {
+        return reservedQuantity;
+    }
+
     public void setReservedQuantity(Integer reservedQuantity) {
-        this.reservedQuantity = reservedQuantity;
+        this.reservedQuantity = reservedQuantity != null ? reservedQuantity : 0;
         recalcAvailable();
     }
 
-    public Integer getAvailableQuantity() { return availableQuantity; }
+    public Integer getAvailableQuantity() {
+        return availableQuantity;
+    }
 
-    public BigDecimal getCostPrice() { return costPrice; }
-    public void setCostPrice(BigDecimal costPrice) { this.costPrice = costPrice; }
+    public BigDecimal getCostPrice() {
+        return costPrice;
+    }
 
-    public BigDecimal getSalePrice() { return salePrice; }
-    public void setSalePrice(BigDecimal salePrice) { this.salePrice = salePrice; }
+    public void setCostPrice(BigDecimal costPrice) {
+        this.costPrice = costPrice;
+    }
 
-    public Integer getMinStock() { return minStock; }
-    public void setMinStock(Integer minStock) { this.minStock = minStock; }
+    public BigDecimal getSalePrice() {
+        return salePrice;
+    }
 
-    public Integer getMaxStock() { return maxStock; }
-    public void setMaxStock(Integer maxStock) { this.maxStock = maxStock; }
+    public void setSalePrice(BigDecimal salePrice) {
+        this.salePrice = salePrice;
+    }
 
-    public String getWarehouse() { return warehouse; }
-    public void setWarehouse(String warehouse) { this.warehouse = warehouse; }
 
-    public LocalDateTime getLastImportDate() { return lastImportDate; }
-    public void setLastImportDate(LocalDateTime lastImportDate) { this.lastImportDate = lastImportDate; }
 
-    public LocalDateTime getLastExportDate() { return lastExportDate; }
-    public void setLastExportDate(LocalDateTime lastExportDate) { this.lastExportDate = lastExportDate; }
+    public LocalDateTime getLastImportDate() {
+        return lastImportDate;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setLastImportDate(LocalDateTime lastImportDate) {
+        this.lastImportDate = lastImportDate;
+    }
 
-    public String getNote() { return note; }
-    public void setNote(String note) { this.note = note; }
+    public LocalDateTime getLastExportDate() {
+        return lastExportDate;
+    }
 
-    // ===== Giá trị tồn kho =====
+    public void setLastExportDate(LocalDateTime lastExportDate) {
+        this.lastExportDate = lastExportDate;
+    }
+
+    public InventoryStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(InventoryStatus status) {
+        this.status = status;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    /* =====================================================
+     *  GIÁ TRỊ TỒN KHO
+     * ===================================================== */
     @Transient
     public BigDecimal getInventoryValue() {
         if (costPrice == null || quantity == null) return BigDecimal.ZERO;
         return costPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
-    // ===== Logic tính availableQuantity =====
+    /* =====================================================
+     *  LOGIC TÍNH AVAILABLE
+     * ===================================================== */
     private void recalcAvailable() {
         this.availableQuantity = Math.max(
-            (quantity != null ? quantity : 0) - (reservedQuantity != null ? reservedQuantity : 0), 0
+            (quantity != null ? quantity : 0)
+                - (reservedQuantity != null ? reservedQuantity : 0),
+            0
         );
     }
-	public void setCreatedDate(LocalDate now) {
-		// TODO Auto-generated method stub
-		
-	}
-	public void setUpdatedDate(LocalDate now) {
-		// TODO Auto-generated method stub
-		
-	}
 }

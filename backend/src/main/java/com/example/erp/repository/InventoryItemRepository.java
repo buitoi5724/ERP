@@ -61,5 +61,6 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, Lo
         @Param("warehouse") String warehouse,
         @Param("productId") Long productId
     );
-	
+
+ 
 }

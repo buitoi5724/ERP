@@ -12,7 +12,6 @@ public class InventoryTransactionService {
 
     public InventoryTransaction record(String product, int qty, String action) {
         InventoryTransaction tx = new InventoryTransaction();
-        tx.setProductName(product);
         tx.setQuantity(qty);
         tx.setAction(Enum.valueOf(com.example.erp.util.InventoryAction.class, action));
         tx.setTransactionDate(LocalDateTime.now());
