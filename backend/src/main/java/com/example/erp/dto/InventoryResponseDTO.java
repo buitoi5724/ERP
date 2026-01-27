@@ -3,6 +3,8 @@ package com.example.erp.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.example.erp.util.InventoryStatus;
+
 public class InventoryResponseDTO {
 
     // ===== PRODUCT SNAPSHOT =====
@@ -25,7 +27,7 @@ public class InventoryResponseDTO {
 
     // ===== META =====
     private String warehouse;
-    private String status;
+    private InventoryStatus status;
     private String note;
 
     // ===== TIME =====
@@ -33,6 +35,8 @@ public class InventoryResponseDTO {
     private LocalDateTime updatedDate;
     private LocalDateTime lastImportDate;
     private LocalDateTime lastExportDate;
+
+    
 
     
     private BigDecimal inventoryValue;
@@ -75,10 +79,23 @@ public class InventoryResponseDTO {
     public String getWarehouse() { return warehouse; }
     public void setWarehouse(String warehouse) { this.warehouse = warehouse; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
 
-    public String getNote() { return note; }
+    
+    
+    
+    /**
+	 * @return the status
+	 */
+	public InventoryStatus getStatus() {
+		return status;
+	}
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(InventoryStatus status) {
+		this.status = status;
+	}
+	public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
 
     public LocalDateTime getCreatedDate() { return createdDate; }

@@ -1,21 +1,15 @@
 package com.example.erp.service.impl;
 
+import com.example.erp.dto.*;
+import com.example.erp.entity.*;
+import com.example.erp.repository.*;
+import com.example.erp.service.OrderService;
+import com.example.erp.util.OrderStatus;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.erp.dto.OrderRequestDTO;
-import com.example.erp.dto.OrderResponseDTO;
-import com.example.erp.dto.OrderItemDTO;
-import com.example.erp.entity.Order;
-import com.example.erp.entity.OrderItem;
-import com.example.erp.entity.Inventory;
-import com.example.erp.entity.InventoryLog;
-import com.example.erp.repository.OrderRepository;
-import com.example.erp.repository.OrderItemRepository;
-import com.example.erp.repository.InventoryRepository;
-import com.example.erp.repository.InventoryLogRepository;
-import com.example.erp.service.OrderService;
 
-import jakarta.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,173 +22,208 @@ public class OrderServiceImpl implements OrderService {
     private final InventoryRepository inventoryRepository;
     private final InventoryLogRepository inventoryLogRepository;
 
-    public OrderServiceImpl(OrderRepository orderRepository,
-                            OrderItemRepository orderItemRepository,
-                            InventoryRepository inventoryRepository,
-                            InventoryLogRepository inventoryLogRepository) {
+    public OrderServiceImpl(
+            OrderRepository orderRepository,
+            OrderItemRepository orderItemRepository,
+            InventoryRepository inventoryRepository,
+            InventoryLogRepository inventoryLogRepository
+    ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.inventoryRepository = inventoryRepository;
         this.inventoryLogRepository = inventoryLogRepository;
     }
 
+    // ================= CREATE ORDER (KHÔNG TRỪ KHO) =================
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO dto) {
 
         Order order = new Order();
         order.setCustomerId(dto.getCustomerId());
         order.setPaymentMethod(dto.getPaymentMethod());
-        order.setStatus("PENDING");
+        order.setStatus(OrderStatus.PENDING);
+        order.setWarehouse("DEFAULT");
         order.setCode("ORD-" + System.currentTimeMillis());
 
         Order savedOrder = orderRepository.save(order);
 
-        // Tạo item & trừ tồn kho
-        List<OrderItem> items = dto.getItems().stream().map(i -> {
-            // kiểm tra tồn kho
-            Inventory inventory = inventoryRepository.findByProductId(i.getProductId())
-                    .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
+        List<OrderItem> items = new ArrayList<>();
 
-            if (inventory.getAvailableQuantity() < i.getQuantity()) {
-                throw new IllegalArgumentException("Not enough stock for product ID " + i.getProductId());
+        for (OrderItemRequestDTO req : dto.getItems()) {
+
+            Inventory inventory = inventoryRepository
+                    .findByProductIdAndWarehouse(req.getProductId(), savedOrder.getWarehouse())
+                    .orElseThrow(() ->
+                            new EntityNotFoundException("Inventory not found for productId=" + req.getProductId())
+                    );
+
+            // ✅ Chỉ kiểm tra tồn
+            if (inventory.getQuantity() < req.getQuantity()) {
+                throw new IllegalArgumentException("Not enough stock for productId=" + req.getProductId());
             }
 
-            inventory.setQuantity(inventory.getQuantity() - i.getQuantity());
-            inventoryRepository.save(inventory);
-
-            // tạo inventory log
-            InventoryLog log = new InventoryLog();
-            log.setProductId(i.getProductId());
-            log.setQuantityChange(-i.getQuantity());
-            log.setType("OUT");
-            log.setWarehouse(inventory.getWarehouse());
-            inventoryLogRepository.save(log);
-
-            // tạo order item
             OrderItem item = new OrderItem();
             item.setOrder(savedOrder);
-            item.setProductId(i.getProductId());
+            item.setProductId(req.getProductId());
             item.setProductName(inventory.getProductName());
-            item.setQuantity(i.getQuantity());
-            item.setPrice(i.getPrice());
-            return item;
-        }).collect(Collectors.toList());
+            item.setQuantity(req.getQuantity());
+            item.setPrice(req.getPrice());
+
+            items.add(item);
+        }
 
         orderItemRepository.saveAll(items);
-
         return toResponseDTO(savedOrder, items);
     }
 
+    // ================= GET =================
     @Override
     @Transactional(readOnly = true)
     public OrderResponseDTO getOrderById(Long id) {
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
         List<OrderItem> items = orderItemRepository.findByOrderId(id);
         return toResponseDTO(order, items);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderResponseDTO> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .map(o -> {
-                    List<OrderItem> items = orderItemRepository.findByOrderId(o.getId());
-                    return toResponseDTO(o, items);
-                })
+
+        return orderRepository.findAll()
+                .stream()
+                .map(o -> toResponseDTO(o, orderItemRepository.findByOrderId(o.getId())))
                 .collect(Collectors.toList());
     }
 
+    // ================= UPDATE ORDER (HOÀN KHO → TRỪ LẠI) =================
     @Override
     public OrderResponseDTO updateOrder(Long id, OrderRequestDTO dto) {
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
-        // trả lại tồn cũ
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot update cancelled order");
+        }
+
+        // 🔁 Hoàn kho item cũ
         List<OrderItem> oldItems = orderItemRepository.findByOrderId(id);
-        oldItems.forEach(i -> {
-            Inventory inv = inventoryRepository.findByProductId(i.getProductId())
-                    .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
+        for (OrderItem i : oldItems) {
+            Inventory inv = getInventory(i.getProductId(), order.getWarehouse());
             inv.setQuantity(inv.getQuantity() + i.getQuantity());
             inventoryRepository.save(inv);
 
-            InventoryLog log = new InventoryLog();
-            log.setProductId(i.getProductId());
-            log.setQuantityChange(i.getQuantity());
-            log.setType("RETURN");
-            log.setWarehouse(inv.getWarehouse());
-            inventoryLogRepository.save(log);
-        });
+            saveInventoryLog(i.getProductId(), i.getQuantity(), "RETURN", order.getWarehouse());
+        }
+
         orderItemRepository.deleteAll(oldItems);
 
-        // thêm item mới
-        List<OrderItem> items = dto.getItems().stream().map(i -> {
-            Inventory inventory = inventoryRepository.findByProductId(i.getProductId())
-                    .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
+        // ➕ Trừ kho item mới
+        List<OrderItem> newItems = new ArrayList<>();
 
-            if (inventory.getAvailableQuantity() < i.getQuantity()) {
-                throw new IllegalArgumentException("Not enough stock for product ID " + i.getProductId());
+        for (OrderItemRequestDTO req : dto.getItems()) {
+
+            Inventory inv = getInventory(req.getProductId(), order.getWarehouse());
+
+            if (inv.getQuantity() < req.getQuantity()) {
+                throw new IllegalArgumentException("Not enough stock for productId=" + req.getProductId());
             }
 
-            inventory.setQuantity(inventory.getQuantity() - i.getQuantity());
-            inventoryRepository.save(inventory);
+            inv.setQuantity(inv.getQuantity() - req.getQuantity());
+            inventoryRepository.save(inv);
 
-            InventoryLog log = new InventoryLog();
-            log.setProductId(i.getProductId());
-            log.setQuantityChange(-i.getQuantity());
-            log.setType("OUT");
-            log.setWarehouse(inventory.getWarehouse());
-            inventoryLogRepository.save(log);
+            saveInventoryLog(req.getProductId(), -req.getQuantity(), "OUT", order.getWarehouse());
 
             OrderItem item = new OrderItem();
             item.setOrder(order);
-            item.setProductId(i.getProductId());
-            item.setProductName(inventory.getProductName()); // ✅ QUAN TRỌNG
-            item.setQuantity(i.getQuantity());
-            item.setPrice(i.getPrice());
-            return item;
-        }).collect(Collectors.toList());
+            item.setProductId(req.getProductId());
+            item.setProductName(inv.getProductName());
+            item.setQuantity(req.getQuantity());
+            item.setPrice(req.getPrice());
 
-        orderItemRepository.saveAll(items);
+            newItems.add(item);
+        }
 
-        return toResponseDTO(order, items);
+        orderItemRepository.saveAll(newItems);
+        return toResponseDTO(order, newItems);
     }
 
+    // ================= CANCEL ORDER (HOÀN KHO) =================
     @Override
     public void cancelOrder(Long id) {
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
-        if (!order.getStatus().equals("CANCELLED")) {
-            order.setStatus("CANCELLED");
-            orderRepository.save(order);
+        if (order.getStatus() == OrderStatus.CANCELLED) return;
 
-            // trả tồn kho
-            List<OrderItem> items = orderItemRepository.findByOrderId(id);
-            items.forEach(i -> {
-                Inventory inventory = inventoryRepository.findByProductId(i.getProductId())
-                        .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
-                inventory.setQuantity(inventory.getQuantity() + i.getQuantity());
-                inventoryRepository.save(inventory);
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
 
-                InventoryLog log = new InventoryLog();
-                log.setProductId(i.getProductId());
-                log.setQuantityChange(i.getQuantity());
-                log.setType("RETURN");
-                log.setWarehouse(inventory.getWarehouse());
-                inventoryLogRepository.save(log);
-            });
+        List<OrderItem> items = orderItemRepository.findByOrderId(id);
+        for (OrderItem i : items) {
+
+            Inventory inv = getInventory(i.getProductId(), order.getWarehouse());
+            inv.setQuantity(inv.getQuantity() + i.getQuantity());
+            inventoryRepository.save(inv);
+
+            saveInventoryLog(i.getProductId(), i.getQuantity(), "RETURN", order.getWarehouse());
         }
     }
 
+    // ================= CONFIRM ORDER (TRỪ KHO) =================
     @Override
     public void confirmOrder(Long id) {
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        order.setStatus("CONFIRMED");
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Only PENDING order can be confirmed");
+        }
+
+        List<OrderItem> items = orderItemRepository.findByOrderId(id);
+
+        for (OrderItem i : items) {
+
+            Inventory inv = getInventory(i.getProductId(), order.getWarehouse());
+
+            if (inv.getQuantity() < i.getQuantity()) {
+                throw new IllegalStateException("Not enough stock when confirm order");
+            }
+
+            inv.setQuantity(inv.getQuantity() - i.getQuantity());
+            inventoryRepository.save(inv);
+
+            saveInventoryLog(i.getProductId(), -i.getQuantity(), "OUT", order.getWarehouse());
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
         orderRepository.save(order);
     }
 
+    // ================= HELPER =================
+    private Inventory getInventory(Long productId, String warehouse) {
+        return inventoryRepository
+                .findByProductIdAndWarehouse(productId, warehouse)
+                .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
+    }
+
+    private void saveInventoryLog(Long productId, int qty, String type, String warehouse) {
+        InventoryLog log = new InventoryLog();
+        log.setProductId(productId);
+        log.setQuantityChange(qty);
+        log.setType(type);
+        log.setWarehouse(warehouse);
+        inventoryLogRepository.save(log);
+    }
+
+    // ================= MAPPER =================
     private OrderResponseDTO toResponseDTO(Order order, List<OrderItem> items) {
+
         OrderResponseDTO dto = new OrderResponseDTO();
         dto.setId(order.getId());
         dto.setCode(order.getCode());
@@ -202,14 +231,16 @@ public class OrderServiceImpl implements OrderService {
         dto.setStatus(order.getStatus());
         dto.setPaymentMethod(order.getPaymentMethod());
         dto.setCreatedDate(order.getCreatedDate());
+
         dto.setItems(items.stream().map(i -> {
-            OrderItemDTO itemDTO = new OrderItemDTO();
-            itemDTO.setProductId(i.getProductId());
-            itemDTO.setProductName(i.getProductName());
-            itemDTO.setQuantity(i.getQuantity());
-            itemDTO.setPrice(i.getPrice());
-            return itemDTO;
+            OrderItemDTO d = new OrderItemDTO();
+            d.setProductId(i.getProductId());
+            d.setProductName(i.getProductName());
+            d.setQuantity(i.getQuantity());
+            d.setPrice(i.getPrice());
+            return d;
         }).collect(Collectors.toList()));
+
         return dto;
     }
 }

@@ -141,27 +141,32 @@ console.log("CUSTOMERS DATA:", normalize(c));
     if (!validateForm()) return;
 
   const payload = {
-    
   receiptCode: common.receiptCode,
   warehouse: common.warehouse,
   date: common.actionDate.toISOString().slice(0, 10),
   note: common.note,
 
-  ...( !isImport && { customerId: common.customerId }),
+  ...(!isImport && { customerId: common.customerId }),
 
   items: items.map(item => ({
     productId: item.productId,
     quantity: Number(item.quantity),
 
-    ...(isImport && {
-      supplierId: item.supplierId,
-      importPrice: Number(item.price),
-      batchNumber: item.batchNumber,
-      manufactureDate: item.manufactureDate?.toISOString().slice(0, 10),
-      expirationDate: item.expirationDate?.toISOString().slice(0, 10)
-    })
+    ...(isImport
+      ? {
+          supplierId: item.supplierId,
+          importPrice: Number(item.price),
+          batchNumber: item.batchNumber,
+          manufactureDate: item.manufactureDate?.toISOString().slice(0, 10),
+          expirationDate: item.expirationDate?.toISOString().slice(0, 10)
+        }
+      : {
+          // ✅🔥 CỰC KỲ QUAN TRỌNG
+          sellPrice: Number(item.price)
+        })
   }))
 };
+
     try {
       isImport
         ? await InventoryService.importInventory(payload)
@@ -200,6 +205,9 @@ const totalAmount = items.reduce((sum, item) => {
         {!isImport && (
           <div className="form-group">
             <label>Khách hàng</label>
+
+
+            
 <Dropdown
   value={common.customerId}
   options={customers}
@@ -252,100 +260,106 @@ const totalAmount = items.reduce((sum, item) => {
           />
         </div>
       </div>
+{/* ===== ITEMS ===== */}
+<h4 className="section-title">Danh sách sản phẩm</h4>
 
-      {/* ===== ITEMS ===== */}
-      <h4 className="section-title">Danh sách sản phẩm</h4>
-
- <div className="add-item-wrapper">
+<div className="add-item-wrapper">
   <Button
-    label="Thêm sản phẩ"
+    label="Thêm sản phẩm"
     icon="pi pi-plus"
     className="add-item-btn"
     onClick={addItem}
   />
 </div>
 
-      {items.map((item, index) => (
-        <div className="inventory-item-row">
+{items.map((item, index) => (
+  <div className="inventory-item-row" key={index}>
 
-          <Dropdown
-            value={item.productId}
-            options={products}
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Sản phẩm"
-            onChange={e =>
-              updateItem(index, "productId", e.value)
-            }
-          />
+    {/* SẢN PHẨM */}
+    <Dropdown
+      value={item.productId}
+      options={products}
+      optionLabel="name"
+      optionValue="id"
+      placeholder="Sản phẩm"
+      onChange={e =>
+        updateItem(index, "productId", e.value)
+      }
+    />
 
-          {isImport && (
-            <Dropdown
-              value={item.supplierId}
-              options={suppliers}
-              optionLabel="name"
-              optionValue="id"
-              placeholder="Nhà cung cấp"
-              onChange={e =>
-                updateItem(index, "supplierId", e.value)
-              }
-            />
-          )}
+    {/* NHÀ CUNG CẤP – CHỈ IMPORT */}
+    {isImport && (
+      <Dropdown
+        value={item.supplierId}
+        options={suppliers}
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Nhà cung cấp"
+        onChange={e =>
+          updateItem(index, "supplierId", e.value)
+        }
+      />
+    )}
 
-          <InputNumber
-            value={item.quantity}
-            min={1}
-            placeholder="SL"
-            onValueChange={e =>
-              updateItem(index, "quantity", e.value)
-            }
-          />
+    {/* SỐ LƯỢNG */}
+    <InputNumber
+      value={item.quantity}
+      min={1}
+      placeholder="SL"
+      onValueChange={e =>
+        updateItem(index, "quantity", e.value)
+      }
+    />
 
-          {isImport && (
-            <>
-              <InputNumber
-                value={item.price}
-                placeholder="Giá nhập"
-                onValueChange={e =>
-                  updateItem(index, "price", e.value)
-                }
-              />
+    {/* GIÁ – IMPORT / EXPORT */}
+    <InputNumber
+      value={item.price}
+      placeholder={isImport ? "Giá nhập" : "Giá bán"}
+      onValueChange={e =>
+        updateItem(index, "price", e.value)
+      }
+    />
 
-              <InputText
-                value={item.batchNumber}
-                placeholder=" Số Lô "
-                onChange={e =>
-                  updateItem(index, "batchNumber", e.target.value)
-                }
-              />
+    {/* ===== CÁC FIELD RIÊNG CHO IMPORT ===== */}
+    {isImport && (
+      <>
+        <InputText
+          value={item.batchNumber}
+          placeholder="Số lô"
+          onChange={e =>
+            updateItem(index, "batchNumber", e.target.value)
+          }
+        />
 
-              <Calendar
-                value={item.manufactureDate}
-                placeholder="Ngày SX"
-                showIcon
-                onChange={e =>
-                  updateItem(index, "manufactureDate", e.value)
-                }
-              />
+        <Calendar
+          value={item.manufactureDate}
+          placeholder="Ngày SX"
+          showIcon
+          onChange={e =>
+            updateItem(index, "manufactureDate", e.value)
+          }
+        />
 
-              <Calendar
-                value={item.expirationDate}
-                placeholder="Hạn SD"
-                showIcon
-                onChange={e =>
-                  updateItem(index, "expirationDate", e.value)
-                }
-              />
-            </>
-          )}
+        <Calendar
+          value={item.expirationDate}
+          placeholder="Hạn SD"
+          showIcon
+          onChange={e =>
+            updateItem(index, "expirationDate", e.value)
+          }
+        />
+      </>
+    )}
 
-          <Button
-            icon="pi pi-trash"
-            className="p-button-danger"
-            onClick={() => removeItem(index)}
-          />
-        </div>
-      ))}
+    {/* XOÁ ITEM */}
+    <Button
+      icon="pi pi-trash"
+      className="p-button-danger"
+      onClick={() => removeItem(index)}
+    />
+  </div>
+))}
+
 {isImport && (
   <div className="inventory-total">
     <span className="total-label">Tổng tiền:</span>

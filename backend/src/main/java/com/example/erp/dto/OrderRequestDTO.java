@@ -2,48 +2,47 @@ package com.example.erp.dto;
 
 import java.util.List;
 
+import com.example.erp.util.PaymentMethod;
+
 public class OrderRequestDTO {
 
     private Long customerId;
-    private String paymentMethod;
-    private List<OrderItemDTO> items;
-	/**
-	 * @return the customerId
-	 */
-	public Long getCustomerId() {
-		return customerId;
-	}
-	/**
-	 * @param customerId the customerId to set
-	 */
-	public void setCustomerId(Long customerId) {
-		this.customerId = customerId;
-	}
-	/**
-	 * @return the paymentMethod
-	 */
-	public String getPaymentMethod() {
-		return paymentMethod;
-	}
-	/**
-	 * @param paymentMethod the paymentMethod to set
-	 */
-	public void setPaymentMethod(String paymentMethod) {
-		this.paymentMethod = paymentMethod;
-	}
+    private PaymentMethod paymentMethod; // ✅ enum
+    private String warehouse;
+    private List<OrderItemRequestDTO> items;
+    
+    public Long getCustomerId() {
+        return customerId;
+    }
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getWarehouse() {
+        return warehouse;
+    }
+    public void setWarehouse(String warehouse) {
+        this.warehouse = warehouse;
+    }
 	/**
 	 * @return the items
 	 */
-	public List<OrderItemDTO> getItems() {
+	public List<OrderItemRequestDTO> getItems() {
 		return items;
 	}
 	/**
 	 * @param items the items to set
 	 */
-	public void setItems(List<OrderItemDTO> items) {
+	public void setItems(List<OrderItemRequestDTO> items) {
 		this.items = items;
 	}
 
-    // getters / setters
-    
+ 
 }

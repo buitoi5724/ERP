@@ -1,70 +1,22 @@
 package com.example.erp.service;
 
 import com.example.erp.entity.ShoppingCart;
-import com.example.erp.repository.ShoppingCartRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
-@Service
-public class ShoppingCartService {
+public interface ShoppingCartService {
 
-    @Autowired
-    private ShoppingCartRepository cartRepo;
+    List<ShoppingCart> getCartByUser(Long userId);
 
-// file này chưa logic chính sử lý trong này
-    // Lấy giỏ hàng theo user
-    public List<ShoppingCart> getCartByUser(Long userId) {
-    	
-        return cartRepo.findByUserId(userId);
-    }
+    ShoppingCart addToCart(Long userId, Long productId, int quantity, long accountId);
 
-    // Thêm sản phẩm vào giỏ
-    public ShoppingCart addToCart(Long userId, Long productId, int quantity, long accountId) {
-        Optional <ShoppingCart> existingCart = cartRepo.findByUserIdAndProductId(userId, productId);
-    
-        if (existingCart.isPresent()) {
-            // Nếu đã có sản phẩm thì cộng dồn số lượng
-            ShoppingCart cart = existingCart.get();
-            cart.setQuantity(cart.getQuantity() + quantity);
-            return cartRepo.save(cart);
-        } else {
-            // Nếu chưa có thì thêm mới
-            ShoppingCart cart = new ShoppingCart();
-            cart.setUserId(userId);
-            cart.setProductId(productId);
-            cart.setQuantity(quantity);
-            cart.setAccountId(accountId);
-            return cartRepo.save(cart);
-        }
-    }
+    ShoppingCart updateQuantity(Long cartId, int quantity);
 
-    // Cập nhật số lượng
-    public ShoppingCart updateQuantity(Long cartId, int quantity) {
-        ShoppingCart cart = cartRepo.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+    void removeFromCart(Long cartId);
 
-        cart.setQuantity(quantity);
-        return cartRepo.save(cart);
-    }
+    void clearCart(Long userId);
 
-    // Xóa sản phẩm khỏi giỏ
-    public void removeFromCart(Long cartId) {
-        cartRepo.deleteById(cartId);
-    }
+    void removeMultipleFromCart(List<Long> cartIds);
 
-    // Xóa toàn bộ giỏ theo user
-    public void clearCart(Long userId) {
-        cartRepo.deleteAllByUserId(userId);
-    }
-    public void removeMultipleFromCart(List<Long> cartIds) {
-        if (cartIds == null || cartIds.isEmpty()) return;
-        cartRepo.deleteAllById(cartIds);
-    }
-    
-    public void deleteAllByProductId(long proudctId) {
-    	cartRepo.deleteAllByProductId(proudctId);
-    }
+    void deleteAllByProductId(long productId);
 }

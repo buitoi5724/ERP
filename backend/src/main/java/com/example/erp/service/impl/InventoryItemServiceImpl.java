@@ -1,6 +1,7 @@
 package com.example.erp.service.impl;
 
-import com.example.erp.dto.ExportItemDTO;
+import com.example.erp.dto.ExportedInventoryItemDTO;
+import com.example.erp.dto.ImportedInventoryItemDTO;
 import com.example.erp.dto.InventoryExportRequestDTO;
 import com.example.erp.dto.InventoryImportRequestDTO;
 import com.example.erp.dto.InventoryItemRequestDTO;
@@ -14,6 +15,8 @@ import com.example.erp.repository.InventoryRepository;
 import com.example.erp.repository.ProductRepository;
 import com.example.erp.repository.SupplierRepository;
 import com.example.erp.service.InventoryItemService;
+import com.example.erp.util.InventoryStatus;
+import com.example.erp.util.InventoryItemStatus;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -21,9 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
+import com.example.erp.service.InvoiceService;
 @Service
 @Transactional
 public class InventoryItemServiceImpl implements InventoryItemService {
@@ -32,214 +39,263 @@ public class InventoryItemServiceImpl implements InventoryItemService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
     private final SupplierRepository supplierRepository;
+	private InvoiceService invoiceService;
 
     public InventoryItemServiceImpl(
             InventoryItemRepository itemRepository,
             InventoryRepository inventoryRepository,
             ProductRepository productRepository,
-            SupplierRepository supplierRepository
+            SupplierRepository supplierRepository,
+            InvoiceService invoiceService   // 👈 THÊM
     ) {
         this.itemRepository = itemRepository;
         this.inventoryRepository = inventoryRepository;
         this.productRepository = productRepository;
         this.supplierRepository = supplierRepository;
+        this.invoiceService = invoiceService; // 👈 THÊM
     }
-
     // =====================================================
-    // THÊM 1 ITEM ĐƠN LẺ (KHÔNG PHẢI PHIẾU NHẬP)
+    // ❌ KHÔNG DÙNG ADD ITEM LẺ
     // =====================================================
     @Override
     public InventoryItemResponseDTO addItem(InventoryItemRequestDTO dto) {
-
-        Inventory inventory = inventoryRepository.findById(dto.getInventoryId())
-                .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
-
-        BigDecimal unitPrice = dto.getImportPrice();
-        BigDecimal totalPrice = unitPrice.multiply(
-                BigDecimal.valueOf(dto.getQuantity())
+        throw new UnsupportedOperationException(
+                "Không sử dụng addItem – chỉ nhập kho qua importInventory"
         );
-
-        InventoryItem item = new InventoryItem();
-        item.setInventoryId(inventory.getId());
-        
-        item.setProductId(dto.getProductId());
-        item.setSupplierId(dto.getSupplierId());
-        item.setBatchNumber(dto.getBatchNumber());
-        item.setSerialNumber(dto.getSerialNumber());
-        item.setExpirationDate(dto.getExpirationDate());
-
-        item.setImportPrice(dto.getImportPrice());
-        item.setUnitPrice(dto.getImportPrice()); // nếu vẫn cần unitPrice legacy
-
-        item.setTotalPrice(
-            dto.getImportPrice()
-                .multiply(BigDecimal.valueOf(dto.getQuantity()))
-        );
-        item.setReceivedDate(LocalDate.now());
-
-        // ===== GIÁ =====
-        item.setUnitPrice(unitPrice);
-        item.setTotalPrice(totalPrice);
-
-        item.setStatus("AVAILABLE");
-        item.setDeleted(false);
-
-        InventoryItem saved = itemRepository.save(item);
-
-        inventory.setQuantity(inventory.getQuantity() + dto.getQuantity());
-        inventoryRepository.save(inventory);
-
-        return toDTO(saved);
     }
 
     // =====================================================
-    // XUẤT KHO FIFO (THEO ITEM)
+    // ❌ KHÔNG DÙNG XUẤT THEO ITEM
     // =====================================================
     @Override
     public InventoryItemResponseDTO exportItem(Long itemId, Long customerId) {
-
-        InventoryItem item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("InventoryItem not found"));
-
-        if (Boolean.TRUE.equals(item.getDeleted()) || item.getRemainingQuantity() <= 0) {
-            throw new IllegalStateException("Item đã hết hàng hoặc bị xóa");
-        }
-
-        item.setRemainingQuantity(item.getRemainingQuantity() - 1);
-        item.setCustomerId(customerId);
-
-        if (item.getRemainingQuantity() == 0) {
-            item.setStatus("SOLD");
-        }
-
-        InventoryItem saved = itemRepository.save(item);
-
-        Inventory inventory = inventoryRepository.findById(item.getInventoryId())
-                .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
-
-        inventory.setQuantity(inventory.getQuantity() - 1);
-        inventoryRepository.save(inventory);
-
-        return toDTO(saved);
+        throw new UnsupportedOperationException(
+                "Không sử dụng exportItem – chỉ xuất kho qua exportInventory (FIFO)"
+        );
     }
 
     // =====================================================
-    // NHẬP KHO THEO PHIẾU NHẬP (CHUẨN ERP)
+    // NHẬP KHO THEO PHIẾU (PRODUCT + WAREHOUSE)
     // =====================================================
     @Override
+    @Transactional
     public void importInventory(InventoryImportRequestDTO request) {
-        Inventory inventory;
 
-        // ==== Tạo mới inventory nếu không có ID ====
-        if (request.getInventoryId() == null) {
-            inventory = new Inventory();
-            inventory.setReceiptCode(request.getReceiptCode());
-            inventory.setWarehouse(request.getWarehouse());
-            inventory.setQuantity(0);
-            inventory.setCreatedDate(LocalDate.now());
-            inventory.setUpdatedDate(LocalDate.now());
-            inventory.setStatus("ACTIVE");
-            inventoryRepository.save(inventory); // lưu trước để sinh ID
-        } else {
-            inventory = inventoryRepository.findById(request.getInventoryId())
-                    .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
-        }
+        // 🔥 Map<SupplierId, List<ImportedInventoryItemDTO>>
+        Map<Long, List<ImportedInventoryItemDTO>> itemsBySupplier = new HashMap<>();
 
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        int totalQuantity = 0;
-
-        // ==== Lưu từng item ====
         for (InventoryItemRequestDTO itemDto : request.getItems()) {
+
+            // ===== 1️⃣ INVENTORY =====
+            Inventory inventory = inventoryRepository
+                    .findByProductIdAndWarehouse(
+                            itemDto.getProductId(),
+                            request.getWarehouse()
+                    )
+                    .orElseGet(() -> {
+                        Inventory inv = new Inventory();
+                        inv.setProductId(itemDto.getProductId());
+                        inv.setWarehouse(request.getWarehouse());
+                        inv.setQuantity(0);
+                        inv.setStatus(InventoryStatus.ACTIVE);
+                        return inventoryRepository.save(inv);
+                    });
+
+            // ===== 2️⃣ INVENTORY ITEM =====
             InventoryItem item = new InventoryItem();
             item.setInventoryId(inventory.getId());
             item.setProductId(itemDto.getProductId());
-            item.setSupplierId(itemDto.getSupplierId());
+            item.setSupplierId(itemDto.getSupplierId()); // ✅ supplier ở ITEM
             item.setBatchNumber(itemDto.getBatchNumber());
+
             item.setQuantity(itemDto.getQuantity());
             item.setRemainingQuantity(itemDto.getQuantity());
-            item.setUnitPrice(itemDto.getImportPrice());
-            item.setTotalPrice(itemDto.getImportPrice().multiply(BigDecimal.valueOf(itemDto.getQuantity())));
             item.setImportPrice(itemDto.getImportPrice());
-            item.setStatus("AVAILABLE");
+            item.setUnitPrice(itemDto.getImportPrice());
+
+            BigDecimal totalPrice =
+                    itemDto.getImportPrice()
+                            .multiply(BigDecimal.valueOf(itemDto.getQuantity()));
+
+            item.setTotalPrice(totalPrice);
+
+            item.setReceivedDate(
+                    request.getDate() != null
+                            ? LocalDate.parse(request.getDate())
+                            : LocalDate.now()
+            );
+
+            item.setStatus(InventoryItemStatus.AVAILABLE);
             item.setDeleted(false);
-
-         // ==== Ngày nhập (receivedDate) ====
-            if (itemDto.getReceivedDate() != null) {
-                item.setReceivedDate(itemDto.getReceivedDate()); // trực tiếp từ item
-            } else if (request.getDate() != null) {
-                // request.getDate() là String, parse sang LocalDate
-                item.setReceivedDate(LocalDate.parse(request.getDate()));
-            } else {
-                item.setReceivedDate(LocalDate.now()); // fallback mặc định
-            }
-
-            // ==== Ngày sản xuất (manufactureDate) ====
-            item.setManufactureDate(itemDto.getManufactureDate()); // nếu null cũng ok, entity sẽ lưu null
-
-            // ==== Hạn sử dụng (expirationDate) ====
-            item.setExpirationDate(itemDto.getExpirationDate()); // nếu null cũng ok
 
             itemRepository.save(item);
 
-            totalQuantity += itemDto.getQuantity();
-            totalAmount = totalAmount.add(item.getTotalPrice());
+            // ===== 3️⃣ UPDATE INVENTORY =====
+            inventory.setQuantity(
+                    inventory.getQuantity() + itemDto.getQuantity()
+            );
+            inventory.setLastImportDate(LocalDateTime.now());
+            inventoryRepository.save(inventory);
+
+            // ===== 4️⃣ PREPARE DTO FOR INVOICE =====
+            ImportedInventoryItemDTO invoiceItem = new ImportedInventoryItemDTO();
+            invoiceItem.setInventoryItemId(item.getId());
+            invoiceItem.setProductId(item.getProductId());
+            invoiceItem.setQuantity(itemDto.getQuantity());
+            invoiceItem.setImportPrice(itemDto.getImportPrice());
+            invoiceItem.setSupplierId(itemDto.getSupplierId()); // 🔥 KEY
+
+            // 🔥 GROUP BY SUPPLIER
+            itemsBySupplier
+                    .computeIfAbsent(itemDto.getSupplierId(), k -> new ArrayList<>())
+                    .add(invoiceItem);
         }
 
-        // ==== Cập nhật tổng số lượng kho và tổng tiền ====
-        inventory.setQuantity(inventory.getQuantity() + totalQuantity);
-        inventory.setUpdatedDate(LocalDate.now());
-        inventoryRepository.save(inventory);
-
-        // ==== Cập nhật tổng tiền cho request (DTO) ====
-        request.setTotalAmount(totalAmount);
+        // ===== 5️⃣ CREATE IMPORT INVOICE THEO SUPPLIER =====
+        itemsBySupplier.forEach((supplierId, items) -> {
+            invoiceService.createImportInvoice(supplierId, items);
+        });
     }
 
+
+ // =====================================================
+ // XUẤT KHO FIFO (PRODUCT + WAREHOUSE)
+ // =====================================================
     @Override
     @Transactional
-    public void exportInventory(InventoryExportRequestDTO request) {
+    public List<ExportedInventoryItemDTO> exportInventory(InventoryExportRequestDTO request) {
 
-        for (ExportItemDTO exportItem : request.getItems()) {
+        System.out.println("\n================= 🔥 EXPORT INVENTORY START 🔥 =================");
+        System.out.println("Warehouse     = " + request.getWarehouse());
+        System.out.println("CustomerId    = " + request.getCustomerId());
+        System.out.println("Request Items = " + request.getItems());
 
-            int need = exportItem.getQuantity();
+        List<ExportedInventoryItemDTO> exportedItems = new ArrayList<>();
 
-            List<InventoryItem> items =
-                itemRepository.findFIFOByWarehouseAndProduct(
-                    request.getWarehouse(),
-                    exportItem.getProductId()
-                );
+        System.out.println("📦 TOTAL REQUEST ITEMS = " +
+                (request.getItems() == null ? "NULL" : request.getItems().size()));
 
-            if (items.isEmpty()) {
-                throw new IllegalStateException(
-                    "Kho " + request.getWarehouse()
-                    + " không còn sản phẩm " + exportItem.getProductId()
+        // ================== LOOP REQUEST ITEMS ==================
+        for (ExportedInventoryItemDTO exportRequestItem : request.getItems()) {
+
+            System.out.println("\n➡️ EXPORT PRODUCT");
+            System.out.println("ProductId = " + exportRequestItem.getProductId());
+            System.out.println("Quantity  = " + exportRequestItem.getQuantity());
+            System.out.println("SellPrice = " + exportRequestItem.getSellPrice());
+
+            // 1️⃣ LẤY INVENTORY
+            Inventory inventory = inventoryRepository
+                    .findByProductIdAndWarehouse(
+                            exportRequestItem.getProductId(),
+                            request.getWarehouse()
+                    )
+                    .orElseThrow(() -> {
+                        System.out.println("❌ INVENTORY NOT FOUND");
+                        return new RuntimeException(
+                                "Inventory không tồn tại cho productId = "
+                                        + exportRequestItem.getProductId()
+                        );
+                    });
+
+            System.out.println("✅ Inventory found: id=" + inventory.getId()
+                    + ", qty=" + inventory.getQuantity());
+
+            if (inventory.getQuantity() < exportRequestItem.getQuantity()) {
+                System.out.println("❌ NOT ENOUGH STOCK");
+                throw new RuntimeException(
+                        "Không đủ tồn kho cho productId = " + exportRequestItem.getProductId()
                 );
             }
 
-            for (InventoryItem item : items) {
+            int need = exportRequestItem.getQuantity();
+            int totalExported = 0;
+
+            // 2️⃣ FIFO ITEMS
+            List<InventoryItem> fifoItems =
+                    itemRepository
+                            .findByInventoryIdAndRemainingQuantityGreaterThanAndDeletedFalseOrderByReceivedDateAsc(
+                                    inventory.getId(),
+                                    0
+                            );
+
+            System.out.println("📦 FIFO ITEMS FOUND = " + fifoItems.size());
+
+            for (InventoryItem item : fifoItems) {
+
                 if (need <= 0) break;
 
+                System.out.println("   ▶ InventoryItemId = " + item.getId()
+                        + ", remaining=" + item.getRemainingQuantity());
+
                 int available = item.getRemainingQuantity();
+                int exportedQty;
 
                 if (available <= need) {
+                    exportedQty = available;
                     item.setRemainingQuantity(0);
-                    item.setStatus("SOLD");
-                    need -= available;
+                    item.setStatus(InventoryItemStatus.SOLD);
                 } else {
+                    exportedQty = need;
                     item.setRemainingQuantity(available - need);
-                    need = 0;
+                    item.setStatus(InventoryItemStatus.AVAILABLE);
                 }
 
                 item.setCustomerId(request.getCustomerId());
                 itemRepository.save(item);
+
+                System.out.println("   ✅ ExportedQty = " + exportedQty);
+
+                ExportedInventoryItemDTO exportedDTO = new ExportedInventoryItemDTO();
+                exportedDTO.setInventoryItemId(item.getId());
+                exportedDTO.setProductId(item.getProductId());
+                exportedDTO.setQuantity(exportedQty);
+                exportedDTO.setSellPrice(
+                        exportRequestItem.getSellPrice() != null
+                                ? exportRequestItem.getSellPrice()
+                                : item.getUnitPrice()
+                );
+
+                exportedItems.add(exportedDTO);
+
+                totalExported += exportedQty;
+                need -= exportedQty;
             }
 
             if (need > 0) {
-                throw new IllegalStateException(
-                    "Không đủ tồn cho sản phẩm " + exportItem.getProductId()
+                System.out.println("❌ FIFO NOT ENOUGH AFTER LOOP");
+                throw new RuntimeException(
+                        "FIFO không đủ số lượng cho productId = "
+                                + exportRequestItem.getProductId()
                 );
             }
+
+            inventory.setQuantity(inventory.getQuantity() - totalExported);
+            inventory.setLastExportDate(LocalDateTime.now());
+            inventoryRepository.save(inventory);
+
+            System.out.println("✅ Inventory updated: newQty=" + inventory.getQuantity());
         }
+
+        // ================== CREATE INVOICE ==================
+        System.out.println("\n================= 🧾 BEFORE CREATE INVOICE =================");
+        System.out.println("ExportedItems size = " + exportedItems.size());
+
+        if (!exportedItems.isEmpty()) {
+            System.out.println("🔥 CALL invoiceService.createExportInvoice()");
+            invoiceService.createExportInvoice(
+                    request.getCustomerId(),
+                    exportedItems
+            );
+            System.out.println("✅ AFTER createExportInvoice()");
+        } else {
+            System.out.println("⚠️ SKIP CREATE INVOICE – exportedItems EMPTY");
+        }
+
+        System.out.println("================= ✅ EXPORT INVENTORY END =================\n");
+        return exportedItems;
     }
+
+
     // =====================================================
     // QUERY
     // =====================================================
@@ -300,8 +356,9 @@ public class InventoryItemServiceImpl implements InventoryItemService {
         InventoryItemResponseDTO dto = new InventoryItemResponseDTO();
 
         dto.setItemId(item.getId());
-        dto.setInventoryId(item.getInventoryId());
-        dto.setWarehouseName(getWarehouseName(item.getInventoryId()));
+
+        inventoryRepository.findById(item.getInventoryId())
+                .ifPresent(inv -> dto.setWarehouseName(inv.getWarehouse()));
 
         dto.setProductId(item.getProductId());
         dto.setProductName(getProductName(item.getProductId()));
@@ -311,7 +368,6 @@ public class InventoryItemServiceImpl implements InventoryItemService {
 
         dto.setCustomerId(item.getCustomerId());
         dto.setBatchNumber(item.getBatchNumber());
-        dto.setSerialNumber(item.getSerialNumber());
 
         dto.setQuantity(item.getQuantity());
         dto.setRemainingQuantity(item.getRemainingQuantity());
@@ -325,7 +381,9 @@ public class InventoryItemServiceImpl implements InventoryItemService {
 
         return dto;
     }
-
+    
+    
+    
     private String getProductName(Long productId) {
         return productId == null ? null :
                 productRepository.findById(productId)
@@ -339,11 +397,5 @@ public class InventoryItemServiceImpl implements InventoryItemService {
                         .map(Supplier::getName)
                         .orElse(null);
     }
-
-    private String getWarehouseName(Long inventoryId) {
-        return inventoryId == null ? null :
-                inventoryRepository.findById(inventoryId)
-                        .map(Inventory::getWarehouse)
-                        .orElse(null);
-    }
+    
 }

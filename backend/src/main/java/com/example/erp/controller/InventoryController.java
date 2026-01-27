@@ -89,7 +89,15 @@ public class InventoryController {
     public ResponseEntity<?> exportInventory(
             @RequestBody InventoryExportRequestDTO request
     ) {
+        System.out.println("🚀 API /api/inventory/export CALLED");
+        System.out.println("Request = " + request);
+        System.out.println("CustomerId = " + request.getCustomerId());
+        System.out.println("Items size = " + 
+            (request.getItems() == null ? "null" : request.getItems().size())
+        );
+
         inventoryItemService.exportInventory(request);
+
         return ResponseEntity.ok("Export inventory success");
     }
     

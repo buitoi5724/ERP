@@ -1,8 +1,8 @@
 package com.example.erp.util;
 
 public enum InvoiceType {
-    DOING,  // chưa thanh toán
-    DONE,   // đã thanh toán
-    CANCEL  // hủy
-, IMPORT
+    IMPORT,     // nhập kho / mua hàng
+    EXPORT,     // bán hàng
+    RETURN,     // trả hàng / hoàn tiền
+    ADJUSTMENT  // điều chỉnh tài chính (hiếm)
 }

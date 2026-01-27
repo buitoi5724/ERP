@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.example.erp.util.InventoryItemStatus;
 public class InventoryItemResponseDTO {
 
     // ===== ID =====
@@ -25,7 +26,6 @@ public class InventoryItemResponseDTO {
     private Long supplierId;
     private Long customerId;
     private String supplierName;    // mới
-    
     // ===== THÔNG TIN LÔ =====
     private String serialNumber;
     private String batchNumber;
@@ -33,7 +33,7 @@ public class InventoryItemResponseDTO {
     private LocalDate receivedDate;
 
     // ===== TRẠNG THÁI =====
-    private String status; // AVAILABLE, SOLD, DAMAGED, EXPIRED
+    private InventoryItemStatus status;
 
     // ===== AUDIT =====
     private LocalDateTime createdDate;
@@ -195,15 +195,26 @@ public class InventoryItemResponseDTO {
         this.receivedDate = receivedDate;
     }
 
-    public String getStatus() {
-        return status;
-    }
+  
+    
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    /**
+	 * @return the status
+	 */
+	public InventoryItemStatus getStatus() {
+		return status;
+	}
 
-    public LocalDateTime getCreatedDate() {
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(InventoryItemStatus status) {
+		this.status = status;
+	}
+
+
+	public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 

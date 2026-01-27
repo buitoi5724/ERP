@@ -3,7 +3,9 @@ package com.example.erp.entity;
 import com.example.erp.util.BaseEntity;
 import com.example.erp.util.InventoryAction;
 import jakarta.persistence.*;
+
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,34 +14,135 @@ public class InventoryTransaction extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String productName;
-    private int quantity;
-    private LocalDateTime transactionDate;
+    // ====== LIÊN KẾT NGHIỆP VỤ ======
+    @Column(nullable = false)
+    private Long inventoryId;
 
+    private Long inventoryItemId;
+
+    @Column(nullable = false)
+    private Long productId;
+
+    @Column(nullable = false, length = 50)
+    private String warehouse;
+
+    private Long customerId;
+
+    // ====== SỐ LƯỢNG ======
+    @Column(nullable = false)
+    private Integer quantity; // + hoặc -
+
+    private Integer beforeQuantity;
+    private Integer afterQuantity;
+
+    // ====== HÀNH ĐỘNG ======
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private InventoryAction action;
 
-    public InventoryTransaction() {}
+    // ====== THỜI GIAN ======
+    @Column(nullable = false)
+    private LocalDateTime transactionDate;
 
-    public InventoryTransaction(String productName, int quantity, LocalDateTime transactionDate, InventoryAction action) {
-        this.productName = productName;
+    // ====== GHI CHÚ ======
+    private String note;
+
+    // ====== GETTERS / SETTERS =====
+    public Long getInventoryId() {
+        return inventoryId;
+    }
+
+    public void setInventoryId(Long inventoryId) {
+        this.inventoryId = inventoryId;
+    }
+
+    public Long getInventoryItemId() {
+        return inventoryItemId;
+    }
+
+    public void setInventoryItemId(Long inventoryItemId) {
+        this.inventoryItemId = inventoryItemId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public String getWarehouse() {
+        return warehouse;
+    }
+
+    public void setWarehouse(String warehouse) {
+        this.warehouse = warehouse;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
-        this.transactionDate = transactionDate;
+    }
+
+    public Integer getBeforeQuantity() {
+        return beforeQuantity;
+    }
+
+    public void setBeforeQuantity(Integer beforeQuantity) {
+        this.beforeQuantity = beforeQuantity;
+    }
+
+    public Integer getAfterQuantity() {
+        return afterQuantity;
+    }
+
+    public void setAfterQuantity(Integer afterQuantity) {
+        this.afterQuantity = afterQuantity;
+    }
+
+    public InventoryAction getAction() {
+        return action;
+    }
+
+    public void setAction(InventoryAction action) {
         this.action = action;
     }
 
-    // ===== GETTERS / SETTERS =====
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public LocalDateTime getTransactionDate() {
+        return transactionDate;
+    }
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setTransactionDate(LocalDateTime transactionDate) {
+        this.transactionDate = transactionDate;
+    }
 
-    public LocalDateTime getTransactionDate() { return transactionDate; }
-    public void setTransactionDate(LocalDateTime transactionDate) { this.transactionDate = transactionDate; }
+    public String getNote() {
+        return note;
+    }
 
-    public InventoryAction getAction() { return action; }
-    public void setAction(InventoryAction action) { this.action = action; }
+    public void setNote(String note) {
+        this.note = note;
+    }
 
-    // id đã có sẵn từ BaseEntity
+	public void setUnitPrice(BigDecimal unitPrice) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setReferenceCode(String referenceCode) {
+		// TODO Auto-generated method stub
+		
+	}
 }

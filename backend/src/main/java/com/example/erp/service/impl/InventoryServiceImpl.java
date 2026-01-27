@@ -18,6 +18,7 @@ import com.example.erp.repository.InventoryRepository;
 import com.example.erp.repository.ProductRepository;
 import com.example.erp.service.InventoryItemService;
 import com.example.erp.service.InventoryService;
+import com.example.erp.util.InventoryStatus;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -30,43 +31,52 @@ public class InventoryServiceImpl implements InventoryService {
     private final ProductRepository productRepository;
     private final InventoryItemService inventoryItemService;
 
-    public InventoryServiceImpl(InventoryRepository inventoryRepository,
-                                InventoryLogRepository logRepository,
-                                ProductRepository productRepository,
-                                InventoryItemService inventoryItemService) {
+    public InventoryServiceImpl(
+            InventoryRepository inventoryRepository,
+            InventoryLogRepository logRepository,
+            ProductRepository productRepository,
+            InventoryItemService inventoryItemService) {
         this.inventoryRepository = inventoryRepository;
         this.logRepository = logRepository;
         this.productRepository = productRepository;
         this.inventoryItemService = inventoryItemService;
     }
 
-    // ================== HELPER ==================
+    /* =====================================================
+     * HELPER: TÌM HOẶC TẠO INVENTORY
+     * ===================================================== */
     private Inventory findOrCreate(Long productId, String warehouse) {
-        return inventoryRepository.findByProductIdAndWarehouse(productId, warehouse)
+
+        return inventoryRepository
+            .findByProductIdAndWarehouse(productId, warehouse)
             .orElseGet(() -> {
+
                 Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
 
                 Inventory inv = new Inventory();
                 inv.setProductId(productId);
                 inv.setProductCode(product.getCode());
                 inv.setProductName(product.getName());
 
+                // ✅ GIÁ BÁN lấy từ Product
                 inv.setSalePrice(product.getPrice());
-                inv.setCostPrice(product.getPrice());
+
+                // ❌ KHÔNG set costPrice = price
+                inv.setCostPrice(null);
 
                 inv.setWarehouse(warehouse);
                 inv.setQuantity(0);
                 inv.setReservedQuantity(0);
-
-                inv.setMinStock(0);
-                inv.setMaxStock(1000);
-                inv.setStatus("ACTIVE");
+                inv.setStatus(InventoryStatus.ACTIVE);
 
                 return inventoryRepository.save(inv);
             });
     }
 
+    /* =====================================================
+     * LOG
+     * ===================================================== */
     private void createLog(Inventory inv, int changeQty, String type) {
         InventoryLog log = new InventoryLog(
             inv.getProductId(),
@@ -77,6 +87,9 @@ public class InventoryServiceImpl implements InventoryService {
         logRepository.save(log);
     }
 
+    /* =====================================================
+     * MAP ENTITY → DTO
+     * ===================================================== */
     private InventoryResponseDTO toDTO(Inventory inv) {
         InventoryResponseDTO dto = new InventoryResponseDTO();
         dto.setProductId(inv.getProductId());
@@ -89,8 +102,6 @@ public class InventoryServiceImpl implements InventoryService {
         dto.setSalePrice(inv.getSalePrice());
         dto.setInventoryValue(inv.getInventoryValue());
         dto.setWarehouse(inv.getWarehouse());
-        dto.setMinStock(inv.getMinStock());
-        dto.setMaxStock(inv.getMaxStock());
         dto.setStatus(inv.getStatus());
         dto.setNote(inv.getNote());
         dto.setCreatedDate(inv.getCreatedDate());
@@ -100,11 +111,15 @@ public class InventoryServiceImpl implements InventoryService {
         return dto;
     }
 
-    // ================== NHẬP KHO (AUTO TẠO INVENTORY_ITEM) ==================
+    /* =====================================================
+     * NHẬP KHO
+     * ===================================================== */
     @Override
     public InventoryResponseDTO addStock(InventoryRequestDTO dto) {
+
         Inventory inv = findOrCreate(dto.getProductId(), dto.getWarehouse());
 
+        // ✅ giá vốn lấy từ phiếu nhập
         if (dto.getCostPrice() != null) {
             inv.setCostPrice(dto.getCostPrice());
         }
@@ -114,7 +129,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         createLog(inv, dto.getQuantity(), "IN");
 
-        // ================== TẠO INVENTORY_ITEM MỖI LẦN NHẬP KHO ==================
+        // ✅ TẠO INVENTORY_ITEM (CHI TIẾT LÔ)
         InventoryItemRequestDTO itemDTO = new InventoryItemRequestDTO();
         itemDTO.setInventoryId(inv.getId());
         itemDTO.setSupplierId(dto.getSupplierId());
@@ -128,49 +143,75 @@ public class InventoryServiceImpl implements InventoryService {
         return toDTO(inv);
     }
 
-    // ================== XUẤT KHO ==================
+    /* =====================================================
+     * XUẤT KHO
+     * ===================================================== */
     @Override
     public InventoryResponseDTO removeStock(InventoryRequestDTO dto) {
+
         Inventory inv = findOrCreate(dto.getProductId(), dto.getWarehouse());
 
-        int qty = Math.min(dto.getQuantity(), inv.getQuantity() - inv.getReservedQuantity());
-        inv.setQuantity(inv.getQuantity() - qty);
+        int available = inv.getQuantity() - inv.getReservedQuantity();
+        int exportQty = Math.min(dto.getQuantity(), available);
+
+        inv.setQuantity(inv.getQuantity() - exportQty);
         inv.setLastExportDate(LocalDateTime.now());
 
-        createLog(inv, -qty, "OUT");
+        createLog(inv, -exportQty, "OUT");
 
         return toDTO(inv);
     }
 
-    // ================== CÁC CHỨC NĂNG KHÁC GIỮ NGUYÊN ==================
+    /* =====================================================
+     * ĐIỀU CHỈNH TỒN
+     * ===================================================== */
     @Override
     public InventoryResponseDTO adjustStock(InventoryRequestDTO dto) {
+
         Inventory inv = findOrCreate(dto.getProductId(), dto.getWarehouse());
+
         int diff = dto.getQuantity() - inv.getQuantity();
         inv.setQuantity(dto.getQuantity());
+
         createLog(inv, diff, "ADJUST");
+
         return toDTO(inv);
     }
 
+    /* =====================================================
+     * GIỮ HÀNG
+     * ===================================================== */
     @Override
     public InventoryResponseDTO reserveStock(InventoryRequestDTO dto) {
+
         Inventory inv = findOrCreate(dto.getProductId(), dto.getWarehouse());
+
         int available = inv.getQuantity() - inv.getReservedQuantity();
         int reserveQty = Math.min(dto.getQuantity(), available);
+
         inv.setReservedQuantity(inv.getReservedQuantity() + reserveQty);
+
         createLog(inv, reserveQty, "RESERVE");
+
         return toDTO(inv);
     }
 
     @Override
     public InventoryResponseDTO releaseReserved(InventoryRequestDTO dto) {
+
         Inventory inv = findOrCreate(dto.getProductId(), dto.getWarehouse());
+
         int releaseQty = Math.min(dto.getQuantity(), inv.getReservedQuantity());
         inv.setReservedQuantity(inv.getReservedQuantity() - releaseQty);
+
         createLog(inv, -releaseQty, "RELEASE");
+
         return toDTO(inv);
     }
 
+    /* =====================================================
+     * QUERY
+     * ===================================================== */
     @Override
     @Transactional(readOnly = true)
     public InventoryResponseDTO getByProductIdAndWarehouse(Long productId, String warehouse) {
@@ -189,56 +230,46 @@ public class InventoryServiceImpl implements InventoryService {
             .collect(Collectors.toList());
     }
 
+    /* =====================================================
+     * KHỞI TẠO TỒN BAN ĐẦU
+     * ===================================================== */
     @Override
     public InventoryResponseDTO importInitialStock(Long productId, String warehouse, int quantity) {
+
         Inventory inv = findOrCreate(productId, warehouse);
+
         inv.setQuantity(inv.getQuantity() + quantity);
         inv.setLastImportDate(LocalDateTime.now());
-        createLog(inv, quantity, "INT");
 
-        // Tạo InventoryItem cho initial stock
+        createLog(inv, quantity, "INIT");
+
         InventoryItemRequestDTO itemDTO = new InventoryItemRequestDTO();
         itemDTO.setInventoryId(inv.getId());
         itemDTO.setQuantity(quantity);
+
         inventoryItemService.addItem(itemDTO);
 
         return toDTO(inv);
     }
 
-    @Override
-    public void initializeInventoryForAllProducts(String warehouse) {
-        List<Product> products = productRepository.findAll();
-        for (Product p : products) {
-            inventoryRepository.findByProductIdAndWarehouse(p.getId(), warehouse)
-                .orElseGet(() -> {
-                    Inventory inv = new Inventory();
-                    inv.setProductId(p.getId());
-                    inv.setProductCode(p.getCode());
-                    inv.setProductName(p.getName());
-                    inv.setSalePrice(p.getPrice());
-                    inv.setWarehouse(warehouse);
-                    inv.setQuantity(0);
-                    inv.setReservedQuantity(0);
-                    inv.setMinStock(0);
-                    inv.setStatus("ACTIVE");
-                    return inventoryRepository.save(inv);
-                });
-        }
-    }
-
+    /* =====================================================
+     * INVENTORY PAGE
+     * ===================================================== */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryResponseDTO> getAllProductsWithInventory(String warehouse) {
+
         return productRepository.findAll().stream()
             .map(product -> {
+
                 Inventory inv = inventoryRepository
                     .findByProductIdAndWarehouse(product.getId(), warehouse)
                     .orElse(null);
 
                 InventoryResponseDTO dto = new InventoryResponseDTO();
                 dto.setProductId(product.getId());
-                dto.setProductName(product.getName());
                 dto.setProductCode(product.getCode());
+                dto.setProductName(product.getName());
                 dto.setSalePrice(product.getPrice());
 
                 if (inv != null) {
@@ -261,5 +292,10 @@ public class InventoryServiceImpl implements InventoryService {
             })
             .collect(Collectors.toList());
     }
-    
+
+	@Override
+	public void initializeInventoryForAllProducts(String warehouse) {
+		// TODO Auto-generated method stub
+		
+	}
 }

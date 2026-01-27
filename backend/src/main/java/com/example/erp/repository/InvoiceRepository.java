@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     Optional<Invoice> findByCode(String code);
+    
+    
 }
