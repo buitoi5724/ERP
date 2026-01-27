@@ -2,13 +2,15 @@ package com.example.erp.dto;
 
 import java.util.List;
 
+import com.example.erp.util.PaymentMethod;
+
 public class OrderRequestDTO {
 
     private Long customerId;
-    private String paymentMethod;
-    private String warehouse; // ✅ THÊM
-    private List<OrderItemDTO> items;
-
+    private PaymentMethod paymentMethod; // ✅ enum
+    private String warehouse;
+    private List<OrderItemRequestDTO> items;
+    
     public Long getCustomerId() {
         return customerId;
     }
@@ -16,27 +18,31 @@ public class OrderRequestDTO {
         this.customerId = customerId;
     }
 
-    public String getPaymentMethod() {
+    public PaymentMethod getPaymentMethod() {
         return paymentMethod;
     }
-    public void setPaymentMethod(String paymentMethod) {
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
-    public String getWarehouse() {          // ✅ THÊM
+    public String getWarehouse() {
         return warehouse;
     }
     public void setWarehouse(String warehouse) {
         this.warehouse = warehouse;
     }
+	/**
+	 * @return the items
+	 */
+	public List<OrderItemRequestDTO> getItems() {
+		return items;
+	}
+	/**
+	 * @param items the items to set
+	 */
+	public void setItems(List<OrderItemRequestDTO> items) {
+		this.items = items;
+	}
 
-    public List<OrderItemDTO> getItems() {
-        return items;
-    }
-    public void setItems(List<OrderItemDTO> items) {
-        this.items = items;
-    }
-    
-    
-    
+ 
 }

@@ -17,8 +17,11 @@ public class InvoiceResponseDTO {
      * IMPORT  -> supplierId
      * EXPORT  -> customerId
      */
-    private Long partnerId;
-
+    private Long customerId;
+    
+    private Long supplierId;
+    
+    
     private InvoiceType type;
     private InvoiceStatus status;
     private PaymentMethod paymentMethod;
@@ -46,15 +49,37 @@ public class InvoiceResponseDTO {
         this.code = code;
     }
 
-    public Long getPartnerId() {
-        return partnerId;
-    }
 
-    public void setPartnerId(Long partnerId) {
-        this.partnerId = partnerId;
-    }
 
-    public InvoiceType getType() {
+    /**
+	 * @return the supplierId
+	 */
+	public Long getSupplierId() {
+		return supplierId;
+	}
+
+	/**
+	 * @param supplierId the supplierId to set
+	 */
+	public void setSupplierId(Long supplierId) {
+		this.supplierId = supplierId;
+	}
+
+	/**
+	 * @return the customerId
+	 */
+	public Long getCustomerId() {
+		return customerId;
+	}
+
+	/**
+	 * @param customerId the customerId to set
+	 */
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
+	}
+
+	public InvoiceType getType() {
         return type;
     }
 

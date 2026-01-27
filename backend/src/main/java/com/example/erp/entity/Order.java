@@ -1,7 +1,11 @@
 package com.example.erp.entity;
 
 import com.example.erp.util.BaseEntity;
+import com.example.erp.util.OrderStatus;
+import com.example.erp.util.PaymentMethod;
+
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,20 +19,25 @@ public class Order extends BaseEntity {
     @Column(nullable = false)
     private Long customerId;
 
-    // ✅ KHO BẮT BUỘC – CÓ DEFAULT ĐỂ MIGRATE DB
-    @Column(nullable = false, length = 50, columnDefinition = "varchar(50) default 'DEFAULT'")
-    private String warehouse;
+    @Column(nullable = false, length = 50)
+    private String warehouse = "DEFAULT";
+    
 
     @Column(nullable = false)
     private LocalDateTime createdDate = LocalDateTime.now();
 
-    @Column(length = 20)
-    private String status = "PENDING";
-    // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+    // ✅ DÙNG ENUM
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private OrderStatus status = OrderStatus.PENDING;
 
-    @Column(length = 20)
-    private String paymentMethod;
-    // CASH, CARD, TRANSFER
+    
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PaymentMethod paymentMethod;
+    
+    
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
@@ -65,21 +74,29 @@ public class Order extends BaseEntity {
         this.createdDate = createdDate;
     }
 
-    public String getStatus() {
+    public OrderStatus getStatus() {
         return status;
     }
-    public void setStatus(String status) {
+    public void setStatus(OrderStatus status) {
         this.status = status;
     }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
 
-    public List<OrderItem> getItems() {
+    /**
+	 * @return the paymentMethod
+	 */
+	public PaymentMethod getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	/**
+	 * @param paymentMethod the paymentMethod to set
+	 */
+	public void setPaymentMethod(PaymentMethod paymentMethod) {
+		this.paymentMethod = paymentMethod;
+	}
+
+	public List<OrderItem> getItems() {
         return items;
     }
     public void setItems(List<OrderItem> items) {

@@ -166,6 +166,8 @@ export const confirmOrder = async (orderId) => {
 };
 
 
+export const clearCartByUser = async (userId) =>
+  axios.delete(`${CART_URL}/clear/${userId}`);
 // =====================================================
 // ✅ EXPORT DEFAULT
 // =====================================================
@@ -178,6 +180,8 @@ const shoppingService = {
     getOrderById,
   getPriceHistory,
   getCategories,
+    clearCartByUser, // ✅ BẮT BUỘC
+
   getShoppingProductById,
   getImage,
   getCartByUser,

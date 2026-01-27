@@ -3,15 +3,27 @@ package com.example.erp.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.erp.util.OrderStatus;
+import com.example.erp.util.PaymentMethod;
 public class OrderResponseDTO {
 
     private Long id;
     private String code;
     private Long customerId;
-    private String status;
-    private String paymentMethod;
+    private OrderStatus status; // ✅ enum
+    private PaymentMethod paymentMethod; // ✅ enum
     private LocalDateTime createdDate;
+    
+    
+    
     private List<OrderItemDTO> items;
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
 	/**
 	 * @return the id
 	 */
@@ -48,28 +60,19 @@ public class OrderResponseDTO {
 	public void setCustomerId(Long customerId) {
 		this.customerId = customerId;
 	}
-	/**
-	 * @return the status
-	 */
-	public String getStatus() {
-		return status;
-	}
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(String status) {
-		this.status = status;
-	}
+
+	
+	
 	/**
 	 * @return the paymentMethod
 	 */
-	public String getPaymentMethod() {
+	public PaymentMethod getPaymentMethod() {
 		return paymentMethod;
 	}
 	/**
 	 * @param paymentMethod the paymentMethod to set
 	 */
-	public void setPaymentMethod(String paymentMethod) {
+	public void setPaymentMethod(PaymentMethod paymentMethod) {
 		this.paymentMethod = paymentMethod;
 	}
 	/**
@@ -96,7 +99,7 @@ public class OrderResponseDTO {
 	public void setItems(List<OrderItemDTO> items) {
 		this.items = items;
 	}
-
-    // getters / setters
+    
+    
     
 }

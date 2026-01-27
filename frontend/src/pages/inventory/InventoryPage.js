@@ -21,6 +21,7 @@ export default function InventoryPages() {
 
   const [formVisible, setFormVisible] = useState(false);
   const [formType, setFormType] = useState("IMPORT"); // IMPORT | EXPORT
+const [searchText, setSearchText] = useState("");
 
  const fetchInventory = async () => {
   try {
@@ -69,6 +70,13 @@ useEffect(() => {
   const formatNumber = v => v ?? 0;
   const formatDate = v =>
     v ? new Date(v).toLocaleDateString("vi-VN") : "";
+
+
+  const filteredInventory = inventory.filter(item =>
+  item.productName
+    ?.toLowerCase()
+    .includes(searchText.toLowerCase())
+);
 
   return (
     <div className="inventory-page">
@@ -130,14 +138,26 @@ useEffect(() => {
       </div>
 
       {/* ===== TABLE ===== */}
-      <div className="inventory-table-section">
-        <h2>Danh sách tồn kho</h2>
-        <DataTable
-          value={inventory}
-          dataKey="productId"
-          stripedRows
-          responsiveLayout="scroll"
-        >
+     <div className="inventory-table-section">
+  <h2>Danh sách tồn kho</h2>
+
+  {/* 🔍 SEARCH */}
+  <div className="inventory-search">
+    <input
+      type="text"
+      className="inventory-search-input"
+      placeholder="Tìm sản phẩm..."
+      value={searchText}
+      onChange={e => setSearchText(e.target.value)}
+    />
+  </div>
+
+  <DataTable
+    value={filteredInventory}
+    dataKey="productId"
+    stripedRows
+    responsiveLayout="scroll"
+  >
           <Column field="productName" header="Sản phẩm" />
           <Column field="quantity" header="Tồn" body={r => formatNumber(r.quantity)} />
           <Column field="availableQuantity" header="Khả dụng" />

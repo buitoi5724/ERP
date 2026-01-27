@@ -1,8 +1,7 @@
 package com.example.erp.service.impl;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.example.erp.dto.ExportedInventoryItemDTO;
+import com.example.erp.dto.ImportedInventoryItemDTO;
 import com.example.erp.dto.InvoiceItemDTO;
 import com.example.erp.dto.InvoiceRequestDTO;
 import com.example.erp.dto.InvoiceResponseDTO;
@@ -12,8 +11,12 @@ import com.example.erp.repository.InvoiceItemRepository;
 import com.example.erp.repository.InvoiceRepository;
 import com.example.erp.service.InvoiceService;
 import com.example.erp.util.InvoiceStatus;
+import com.example.erp.util.InvoiceType;
+import com.example.erp.util.PriceType;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,46 +31,78 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     public InvoiceServiceImpl(
             InvoiceRepository invoiceRepository,
-            InvoiceItemRepository itemRepository) {
+            InvoiceItemRepository itemRepository
+    ) {
         this.invoiceRepository = invoiceRepository;
         this.itemRepository = itemRepository;
     }
 
-    // ================= CREATE =================
+    // =====================================================
+    // 🔥 CREATE EXPORT INVOICE (ĐƯỢC GỌI TỪ INVENTORY)
+    // =====================================================
     @Override
-    public InvoiceResponseDTO createInvoice(InvoiceRequestDTO dto) {
+    public InvoiceResponseDTO createExportInvoice(
+            Long customerId,
+            List<ExportedInventoryItemDTO> exportedItems
+    ) {
 
-        if (dto.getItems() == null || dto.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Invoice must have at least one item");
+        if (exportedItems == null || exportedItems.isEmpty()) {
+            throw new IllegalArgumentException("Exported items is empty");
         }
 
         Invoice invoice = new Invoice();
         invoice.setCode("INV-" + System.currentTimeMillis());
-        invoice.setPartnerId(dto.getPartnerId());
-        invoice.setType(dto.getType());
-        invoice.setPaymentMethod(dto.getPaymentMethod());
+        invoice.setCustomerId(customerId);
+     // ✅ EXPORT → có CUSTOMER
+
+        // ✅ EXPORT → KHÔNG CÓ supplier
+        invoice.setPartnerId(null);
+
+        invoice.setType(InvoiceType.EXPORT);
         invoice.setStatus(InvoiceStatus.DRAFT);
 
-        Invoice savedInvoice = invoiceRepository.save(invoice);
+        invoice = invoiceRepository.save(invoice);
 
-        List<InvoiceItem> items = dto.getItems().stream().map(i -> {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (ExportedInventoryItemDTO e : exportedItems) {
+
             InvoiceItem item = new InvoiceItem();
-            item.setInvoice(savedInvoice);
-            item.setProductId(i.getProductId());
-            item.setQuantity(i.getQuantity());
-            item.setPrice(i.getPrice());
-            return item;
-        }).collect(Collectors.toList());
+            item.setInvoice(invoice);
+            item.setInventoryItemId(e.getInventoryItemId());
+            item.setProductId(e.getProductId());
 
-        itemRepository.saveAll(items);
+            Integer quantity = e.getQuantity();           // Integer
+            BigDecimal unitPrice = e.getSellPrice();      // BigDecimal
 
-        savedInvoice.setTotalAmount(calculateTotal(items));
-        invoiceRepository.save(savedInvoice);
+            BigDecimal totalPrice =
+                    unitPrice.multiply(BigDecimal.valueOf(quantity));
 
-        return toResponseDTO(savedInvoice, items);
+            item.setQuantity(quantity);                   // ✅
+            item.setUnitPrice(unitPrice);                 // (nếu dùng)
+            item.setPrice(unitPrice);                     // ✅🔥 BẮT BUỘC
+            item.setTotalPrice(totalPrice);               // ✅
+            item.setPriceType(PriceType.EXPORT);
+
+            totalAmount = totalAmount.add(totalPrice);
+
+            itemRepository.save(item);
+        }
+
+        invoice.setTotalAmount(totalAmount);
+        invoice = invoiceRepository.save(invoice);
+
+        // ✅ QUAN TRỌNG: TRẢ DTO, KHÔNG TRẢ ENTITY
+        return toResponseDTO(
+                invoice,
+                itemRepository.findByInvoiceId(invoice.getId())
+        );
+    
     }
 
-    // ================= GET BY ID =================
+    // =====================================================
+    // QUERY
+    // =====================================================
     @Override
     @Transactional(readOnly = true)
     public InvoiceResponseDTO getInvoiceById(Long id) {
@@ -75,77 +110,27 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Invoice not found"));
 
-        List<InvoiceItem> items = itemRepository.findByInvoiceId(id);
-        return toResponseDTO(invoice, items);
+        return toResponseDTO(
+                invoice,
+                itemRepository.findByInvoiceId(invoice.getId())
+        );
     }
 
-    // ================= GET ALL =================
     @Override
+    @Transactional(readOnly = true)
     public List<InvoiceResponseDTO> getAllInvoices() {
 
         return invoiceRepository.findAll().stream()
-                .map(inv -> {
-                    List<InvoiceItem> items =
-                            itemRepository.findByInvoiceId(inv.getId());
-                    return toResponseDTO(inv, items);
-                })
+                .map(inv -> toResponseDTO(
+                        inv,
+                        itemRepository.findByInvoiceId(inv.getId())
+                ))
                 .collect(Collectors.toList());
     }
 
-    // ================= UPDATE =================
-    @Override
-    public InvoiceResponseDTO updateInvoice(Long id, InvoiceRequestDTO dto) {
-
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Invoice not found"));
-
-        if (invoice.getStatus() == InvoiceStatus.PAID) {
-            throw new IllegalStateException("Paid invoice cannot be updated");
-        }
-
-        invoice.setPartnerId(dto.getPartnerId());
-        invoice.setType(dto.getType());
-        invoice.setPaymentMethod(dto.getPaymentMethod());
-
-        itemRepository.deleteAll(
-                itemRepository.findByInvoiceId(id)
-        );
-
-        List<InvoiceItem> items = dto.getItems().stream().map(i -> {
-            InvoiceItem item = new InvoiceItem();
-            item.setInvoice(invoice);
-            item.setProductId(i.getProductId());
-            item.setQuantity(i.getQuantity());
-            item.setPrice(i.getPrice());
-            return item;
-        }).collect(Collectors.toList());
-
-        itemRepository.saveAll(items);
-
-        invoice.setTotalAmount(calculateTotal(items));
-        invoiceRepository.save(invoice);
-
-        return toResponseDTO(invoice, items);
-    }
-
-    // ================= DELETE =================
-    @Override
-    public void deleteInvoice(Long id) {
-
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Invoice not found"));
-
-        if (invoice.getStatus() == InvoiceStatus.PAID) {
-            throw new IllegalStateException("Cannot delete paid invoice");
-        }
-
-        itemRepository.deleteAll(
-                itemRepository.findByInvoiceId(id)
-        );
-        invoiceRepository.delete(invoice);
-    }
-
-    // ================= MARK PAID =================
+    // =====================================================
+    // STATUS
+    // =====================================================
     @Override
     public void markAsPaid(Long id) {
 
@@ -156,39 +141,114 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.save(invoice);
     }
 
-    // ================= HELPERS =================
-    private BigDecimal calculateTotal(List<InvoiceItem> items) {
-        return items.stream()
-                .map(i -> i.getPrice()
-                        .multiply(BigDecimal.valueOf(i.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    // =====================================================
+    // ❌ KHÔNG CHO UPDATE / DELETE
+    // =====================================================
+    @Override
+    public void deleteInvoice(Long id) {
+        throw new UnsupportedOperationException(
+                "Invoice generated from inventory cannot be deleted"
+        );
     }
 
+    @Override
+    public InvoiceResponseDTO updateInvoice(Long id, InvoiceRequestDTO dto) {
+        throw new UnsupportedOperationException(
+                "Invoice generated from inventory cannot be updated"
+        );
+    }
+
+    @Override
+    public InvoiceResponseDTO createInvoice(InvoiceRequestDTO dto) {
+        throw new UnsupportedOperationException(
+                "Use inventory export to create invoice"
+        );
+    }
+
+    // =====================================================
+    // MAPPER
+    // =====================================================
     private InvoiceResponseDTO toResponseDTO(
             Invoice invoice,
-            List<InvoiceItem> items) {
+            List<InvoiceItem> items
+    ) {
 
         InvoiceResponseDTO dto = new InvoiceResponseDTO();
         dto.setId(invoice.getId());
         dto.setCode(invoice.getCode());
-
-        // 🔥 QUAN TRỌNG
-        dto.setPartnerId(invoice.getPartnerId());
+        dto.setCustomerId(invoice.getCustomerId());
         dto.setType(invoice.getType());
         dto.setStatus(invoice.getStatus());
         dto.setPaymentMethod(invoice.getPaymentMethod());
-
         dto.setCreatedDate(invoice.getCreatedDate());
         dto.setTotalAmount(invoice.getTotalAmount());
 
-        dto.setItems(items.stream().map(i -> {
-            InvoiceItemDTO itemDTO = new InvoiceItemDTO();
-            itemDTO.setProductId(i.getProductId());
-            itemDTO.setQuantity(i.getQuantity());
-            itemDTO.setPrice(i.getPrice());
-            return itemDTO;
-        }).collect(Collectors.toList()));
+        dto.setItems(
+                items.stream().map(i -> {
+                    InvoiceItemDTO itemDTO = new InvoiceItemDTO();
+                    itemDTO.setProductId(i.getProductId());
+                    itemDTO.setQuantity(i.getQuantity());
+                    itemDTO.setPrice(i.getUnitPrice());
+
+                    return itemDTO;
+                }).collect(Collectors.toList())
+        );
 
         return dto;
+    }
+    @Override
+    public InvoiceResponseDTO createImportInvoice(
+            Long supplierId,
+            List<ImportedInventoryItemDTO> importedItems
+    ) {
+
+        if (importedItems == null || importedItems.isEmpty()) {
+            throw new IllegalArgumentException("Imported items is empty");
+        }
+
+        Invoice invoice = new Invoice();
+        invoice.setCode("IMP-" + System.currentTimeMillis());
+
+        invoice.setSupplierId(supplierId); // ✅
+        invoice.setCustomerId(null);       // ✅ DB cho phép null
+
+        invoice.setType(InvoiceType.IMPORT);
+        invoice.setStatus(InvoiceStatus.DRAFT);
+
+        invoiceRepository.save(invoice);
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (ImportedInventoryItemDTO i : importedItems) {
+
+            InvoiceItem item = new InvoiceItem();
+            item.setInvoice(invoice);
+            item.setInventoryItemId(i.getInventoryItemId());
+            item.setProductId(i.getProductId());
+
+            Integer quantity = i.getQuantity();
+            BigDecimal unitPrice = i.getImportPrice();
+
+            BigDecimal totalPrice =
+                    unitPrice.multiply(BigDecimal.valueOf(quantity));
+
+            item.setQuantity(quantity);
+            item.setUnitPrice(unitPrice);
+            item.setPrice(unitPrice);              // 🔥 BẮT BUỘC
+            item.setTotalPrice(totalPrice);
+            item.setPriceType(PriceType.IMPORT);   // 🔥 KHÁC EXPORT
+
+            totalAmount = totalAmount.add(totalPrice);
+
+            itemRepository.save(item);
+        }
+
+        invoice.setTotalAmount(totalAmount);
+        invoice = invoiceRepository.save(invoice);
+
+        return toResponseDTO(
+                invoice,
+                itemRepository.findByInvoiceId(invoice.getId())
+        );
     }
 }

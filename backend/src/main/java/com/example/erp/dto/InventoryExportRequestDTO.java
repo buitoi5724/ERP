@@ -10,7 +10,7 @@ public class InventoryExportRequestDTO {
     private String note;
     private Long customerId;
     private String warehouse;
-    private List<ExportItemDTO> items;
+    private List<ExportedInventoryItemDTO> items;
 
     public Long getInventoryId() {
         return inventoryId;
@@ -52,10 +52,10 @@ public class InventoryExportRequestDTO {
 	public void setWarehouse(String warehouse) {
 		this.warehouse = warehouse;
 	}
-	public List<ExportItemDTO> getItems() {
+	public List<ExportedInventoryItemDTO> getItems() {
         return items;
     }
-    public void setItems(List<ExportItemDTO> items) {
+    public void setItems(List<ExportedInventoryItemDTO> items) {
         this.items = items;
     }
 	public int getQuantity() {
