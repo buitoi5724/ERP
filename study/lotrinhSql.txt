@@ -1,0 +1,360 @@
+🚀 LỘ TRÌNH SQL (7 lệnh / ngày)
+🟢 Day 1
+
+SQL Home
+
+SQL Intro
+
+SQL Syntax
+
+SELECT
+
+Là lấy dữ liệu không thể thiếu trong sql được 
+có hai cấc lấy 
+1 là lấy cũng với SELECT * là lấy tất acr dữ liệu trong bảng 
+2 là lấy SELECT colum 1 , colum2 là lấy từng cột theo yêu cầu của lấy từng cột 
+
+SELECT DISTINCT
+Để lấy dữ liệu không trung nhau 
+
+VD:
+SELECT DISTINCT PRICE FROM PRODUCTS 
+Lấy giá không trùng  của cọt PRICE
+SELECT DISTINCT PRICE , NAME FROM PRODUCTS 
+Lấy dữ liệu của hai cột PRICE VÀ NAME dữ liệu không được trùng 
+SELECT DISTINCT PRICE FROM PRODUCTS 
+WHERE PRICE > 200000
+Sẽ lọc trước rồi mới bỏ trùng dữu liệu 
+SELECT COUNT(DISTINCT price) FROM products;
+đếm số dữ liệu không trùng 
+
+WHERE
+SELECT * FROM Students
+WHERE Age BETWEEN 18 AND 25;
+Lấy dữ liệu từ tuổi 18 đến 25 dùng BETWEEN
+select *
+from products 
+where name like 'S%'
+lấy dữ liệu có chữ cái đầu là S
+ Lệnh	Ý nghĩa
+=	bằng
+>	lớn hơn
+<	nhỏ hơn
+<>	khác
+BETWEEN	trong khoảng
+LIKE 'A%'	tìm gần đúng
+IN	nhiều giá trị
+ORDER BY
+lệnh này dùng để sắp xếp theo thứ tự có thể dùng điều kiện ròi cho sắp xếp tăng dần
+SELECT * FROM Students
+ORDER BY Age;
+mặc định sẽ là tăng dần 
+SELECT * FROM Students
+ORDER BY Age DESC;
+sẽ là lệnh giảm dần dùng DESC
+SELECT * FROM Students
+ORDER BY Age ASC;
+sẽ là lệnh giảm dần dữ liệu dùng ASC
+select name , stock 
+from products 
+where stock > 8 
+order by stock DESC
+Lệnh logic nhỏ hơn rồi sắp xếp sau dùng Where nhỏ hơn 8 rồi lấy dữ liệu rồi sắp xếp 
+🟢 Day 2
+AND
+SELECT * FROM products
+WHERE name  = 'iPhone 13'
+AND category = 'Phone'
+And stock = 15 ;
+lệnh and gộp được rất nhiều điều kiện thì phải đúng thì mới ra được kết quả  
+lệnh and này thì phải hai điều kiện phải đúng mới hiện được kết quả ra được 
+OR
+lệnh or này thì moottj trong hai điều kiện đúng là được thì dữ liệu sẽ hiện ra 
+
+SELECT *
+FROM products
+WHERE name = 'iPhone 13' OR name = 'Spain';
+NOT
+là phủ đinh nếu không muốn lấy dữ liệu của cái nào thì dùng not trước thì dữ liệu đó sẽ không được lấy ra 
+
+SELECT * FROM products
+WHERE NOT name = 'iPhone 13';
+INSERT INTO
+SELECT * FROM products 
+WHERE Name NOT LIKE 'A%';
+là lệnh not like dùng để không lấy dữ liệu bắt đầu bằng chữ đầu tiền sẽ không lấy dữ liệu đó 
+phải dùng Like 'A%' là không lấy dư xlieeuj có chữ đầu là A 
+SELECT * FROM products 
+WHERE name NOT IN ('Samsung S21', 'MacBook Air');
+lệnh not in này dùng loại bỏ dữ liệu không lấy dữ liệu nào thì thì not in này thì lập tức dữ liệu đó sẽ không lấy được ra 
+SELECT * FROM products 
+WHERE stock IS NOT NULL;
+dùng is not null này thì không láy dữu liệu bị null ra và nó sẽ bỏ ra những giá trị nào bị null 
+select * from 
+products 
+where stock not between 5 and 10 
+lệnh not between này dùng để khoảng giá trị nào đến giá trị nào sẽ không được lấy ra 
+vd : stock 5 đến 10 thì sẽ không lấy ra 
+
+NULL VALUES
+là dùng để kiểm tra giá trị nị null và lấy giá trị bị null và lấy tất cả ra 
+chỉ cần i snot nul thì loại bỏ những giá trị null thì lấy giá trị null ra 
+UPDATE
+hàm này dùng để sửa dữ liệu trong bảng 
+UPDATE table_name
+SET column1 = value1, column2 = value2
+WHERE condition;
+Bắt đầu dùng updates và đến bảng rồi set colom nào rồi bằng giá trị bao nhiêu và sẽ where đến id nào 
+VD:
+update products 
+set name = 'BUITOI' 
+where id = 1 
+tháy đổi dữ liệu cảu cột name của id 1 thanh tên Bùi Tới  đấy là thay đổi từng cột 
+Select products 
+set name = 'buitoi' , price = 2000
+where id = 2 
+đây là tháy đổi dữ liệu bằng nhiều cột dùng nhiều cột cùng một lúc chỉ ccahs nhau dấu phẩy thôi 
+select products 
+set name = 'iphone13' 
+where name = 'BUITOI'
+đây là thay đổi nhiều dòng nhưng cùng một cột thôi tất cả dòng đó đưuọc thay thành bui toi
+DELETE
+
+🟢 Day 3
+
+SELECT TOP
+SELECT TOP 3 * FROM Customers
+WHERE address = 'nga son';
+lấy 3 khách hàng của customers có tên là nga sơn lấy đúng 3 khách hagf thôi lấy dữ liệu của 3 người đầu thôi chứ không lấy theo thứ tự 
+SELECT TOP 3 * FROM Customers;
+lấy dữ liệu 3 dòng từ bảng customer 
+SELECT TOP 50 PERCENT * FROM Customers;
+lấy 50 phần trăm số dòng trong bảng 
+SELECT TOP 3 * 
+FROM Customers
+WHERE name  = 'toi';
+lấy dư xlieeuj của 3 người tteen là toi lấy  bất cứ người nào cũng được nhưng lấy ngẫu nhiêu nhưng là đầu tiên của bảng 
+SELECT * FROM Customers
+WHERE Country = 'Germany'
+FETCH FIRST 3 ROWS ONLY;
+lấy dữ liệu của 3 khách hàng đầu tiên là germany 
+Aggregate Functions
+
+MIN()
+
+MAX()
+
+COUNT()
+
+SUM()
+
+AVG()
+
+🟡 Day 4
+
+LIKE
+SELECT * FROM suppliers
+WHERE name LIKE 'b%';
+lấy dữu liệu của bảng abwts đầu bằng chữ b là ra dữu liệu của tất cả của cột suppliers
+select 8 from suppliers 
+where name like '%on%'
+lấy dữ liệu tất cả trong cột có phần chữ on trong cột sẽ hiện tất acr dữ liệu trên ra 
+
+
+WILDCARDS
+
+IN
+
+BETWEEN
+là lấy dữ liệu của khoảng từ a đến b và ra lấy dữ liệu trong khoảng đó 
+ví dụ 
+SELECT * FROM Orders
+WHERE OrderDate BETWEEN '1996-07-01' AND '1996-07-31';
+lấy dữ liệu của bảng order từ ngày này đên sngayf kia 
+select * from product 'ao dai' and 'quan dai'
+là lấy dữ liệu từ khoảng áo dài đến quần dài 
+ALIASES
+là đật bí danh cho bảng hoặc cho cột 
+ví dụ 
+select  name as ten
+ from product
+ select name , price , sum (price) as toal_price
+ from product 
+gorup by name ,price
+đặt tên cho cột kết quả của tông giá price là cột toal_price đó alf đặt bí danh cho tổng số tiền 
+JOINS
+INNER JOIN
+select product.name , category.name
+from product
+inner join category
+on product.category_id = category_id
+lấy tất cả các tên trong hai bảng 
+
+select product.name , category.name , product.price 
+from product
+inner join category
+on product.category_id = category_id
+where product.price > 500
+
+lấy tất cả các tên trong hai bảng và lấy giá nhỏ 500 
+select category.name ,product.name 
+from category
+inner join product
+on product.category_id = category.id
+where category.name = 'áo thun'
+lấy tên và có sản phẩn tên là áo thun 
+
+🟡 Day 5
+LEFT JOIN
+Nếu left join thì lấy tất cả dữ liệu bên phải bình thường 
+nếu có dữ liệu thì sẽ hiện bình thường còn không có dữ liệu thì sẽ hiện null
+
+RIGHT JOIN
+lấy tất cả fuex liệu bên bảng trái sẽ hiện ra 
+và dữ liệu bên bảng phải sẽ hiện null
+FULL JOIN
+lấy tất cả dữu liệu cảu hai bảng và sẽ hiện ra 
+nếu cột nào không có dữ liệu thì sẽ hiện null
+ví dự lấy tất acr các đơn  hàng của 
+
+select customers.name 
+from customers 
+full join orders
+on customers.id = orders.customer_id
+
+
+SELF JOIN
+lấy bảng chính lá láy tên nhân viên và tên quản lý 
+
+UNION
+lấy dữu liệu cảu hai bảng và hai cột rồi ghép chúng lại 
+lấy cacs cột có dữ liệu tên  cototj cùng nhau rồi bỏ trùng đỉ ồi hiện hết quả 
+ví dụ 
+sleect name , city from  sustomers
+union
+select name , city from  suppliers
+
+  
+UNION ALL
+lấy tất cả dữ liệu của ccas cootjj mà cột dọc sẽ hiện tất cả dữ liệu kể cả dữ liệu trung nhau cũng sẽ hiện
+ví dụ 
+select name ,city from  customers 
+union all 
+selct name ,city from suppliers 
+
+GROUP BY
+nhóm ccas cột lại lấy dữ liệu ra và nhóm lại 
+
+🟡 Day 6
+HAVING
+Nghĩa là sau khi nhóm xong  group by xong having sẽ làm viecj nhóm lại những dữ liệu và lọc nhóm 
+như điều kiện của where sau khi dã group 
+ví dụ 
+select p.category-id , sum (p.quantity) as total_quantity
+from product p
+join orders o
+on p.id = o.product_id  
+group by 
+having sum (p.quantity) > 2
+lấy lấy tổng sản ohamr có nhỏ hơn là 2 
+
+
+EXISTS
+định nghĩa là lấy diều kiện của nó là true thì se xlaays dữu liệu của dòng đó 
+chỉ có dữ liệu  đúng nhất là sẽ lấy  dòng đó 
+selct s.name 
+from suppliers s  
+where exits ( select 1
+from product p
+where p.suppliers_id = s.id
+and price > 100
+lấy tất cả giá sản phẩm có nhỏ hơn dưới 100 
+nếu điều kiện có dòng đúng là true thì sẽ lấy dữ liệu dòng đó
+ANY
+là so sánh dữ liệu nếu đúng thì sẽ hiện tất cả và đúng với nhất 1 dưu xlieeuj thôi chứ không so với nhiều điều kiện khác 
+
+ALL
+là dùng đẻ so sánh cho tất cả giá trị trong bảng  có thể đúng với tất cả  
+SELECT INTO
+để tạo ra bảng khác và copy dữ liệu của bảng củ được và muốn láy dữu liệu của ác bảng khác 
+ví dụ 
+selct naem, price into newproduct 
+from prodcut 
+where price > 20 
+nghĩa lấy giá của sản phẩm nhỏ hơn 20 rồi và lấy tên chỉ tạo tên và giá nhỏ hơn 20 thôi 
+ 
+INSERT INTO SELECT
+
+CASE
+
+🟡 Day 7
+
+NULL FUNCTIONS
+
+STORED PROCEDURES
+
+COMMENTS
+
+OPERATORS
+
+CREATE DB
+
+DROP DB
+
+BACKUP DB
+
+🔵 Day 8
+
+CREATE TABLE
+
+DROP TABLE
+
+ALTER TABLE
+
+CONSTRAINTS
+
+NOT NULL
+
+UNIQUE
+
+PRIMARY KEY
+
+🔵 Day 9
+
+FOREIGN KEY
+
+CHECK
+
+DEFAULT
+
+INDEX
+
+AUTO INCREMENT
+
+DATES
+
+VIEWS
+
+🔴 Day 10
+
+SQL INJECTION
+
+PARAMETERS
+
+PREPARED STATEMENTS
+
+SQL HOSTING
+
+Ôn toàn bộ
+
+Làm bài tập
+
+Mini Project
+
+🎯 Kết quả nếu học đúng
+
+⏱ 5 ngày → hiểu SQL cơ bản
+
+⏱ 10 ngày → đủ làm project
+
+⏱ 2 tuần → đi phỏng vấn intern được

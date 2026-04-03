@@ -19,7 +19,7 @@
     <artifactId>ERP</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ERP</name>
-    <description>Spring Boot project for managing products (ERP system)</description>
+    <description>Spring Boot ERP System</description>
 
     <!-- ================= PROPERTIES ================= -->
     <properties>
@@ -29,36 +29,45 @@
     <!-- ================= DEPENDENCIES ================= -->
     <dependencies>
 
-        <!-- Spring Web (REST API) -->
+        <!-- 🌐 Spring Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-<dependency>
-    <groupId>org.projectlombok</groupId>
-    <artifactId>lombok</artifactId>
-    <scope>provided</scope>
-</dependency>
-        <!-- Spring Data JPA -->
+
+        <!-- 🔐 Spring Security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- 🗄 Spring Data JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- ✅ VALIDATION (BẮT BUỘC cho @NotNull, @NotBlank) -->
+        <!-- ✅ Validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- SQL Server JDBC (OK cho Java 21) -->
+        <!-- 🧩 Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- 🗃 SQL Server JDBC -->
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
             <version>12.8.1.jre11</version>
         </dependency>
 
-        <!-- DevTools -->
+        <!-- 🔄 DevTools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -66,18 +75,49 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Test -->
+        <!-- 🧪 Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <!-- ⚠️ Nếu KHÔNG cần thì nên xoá -->
         <dependency>
-        	<groupId>com.example</groupId>
-        	<artifactId>demo</artifactId>
-        	<version>0.0.1-SNAPSHOT</version>
+            <groupId>com.example</groupId>
+            <artifactId>demo</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.roomate</groupId>
+            <artifactId>Exercise</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+<!-- 🔑 JWT (bắt buộc cho login/auth) -->
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.11.5</version>
+</dependency>
+
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+
+
     </dependencies>
 
     <!-- ================= BUILD ================= -->
