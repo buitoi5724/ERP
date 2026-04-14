@@ -120,7 +120,8 @@ where name = 'BUITOI'
 đây là thay đổi nhiều dòng nhưng cùng một cột thôi tất cả dòng đó đưuọc thay thành bui toi
 DELETE
 
-🟢 Day 3
+ *******************************************************
+
 
 SELECT TOP
 SELECT TOP 3 * FROM Customers
@@ -150,7 +151,8 @@ SUM()
 
 AVG()
 
-🟡 Day 4
+
+ *******************************************************
 
 LIKE
 SELECT * FROM suppliers
@@ -159,11 +161,14 @@ lấy dữu liệu của bảng abwts đầu bằng chữ b là ra dữu liệu 
 select 8 from suppliers 
 where name like '%on%'
 lấy dữ liệu tất cả trong cột có phần chữ on trong cột sẽ hiện tất acr dữ liệu trên ra 
+ *******************************************************
 
 
 WILDCARDS
+ *******************************************************
 
 IN
+ *******************************************************
 
 BETWEEN
 là lấy dữ liệu của khoảng từ a đến b và ra lấy dữ liệu trong khoảng đó 
@@ -173,6 +178,8 @@ WHERE OrderDate BETWEEN '1996-07-01' AND '1996-07-31';
 lấy dữ liệu của bảng order từ ngày này đên sngayf kia 
 select * from product 'ao dai' and 'quan dai'
 là lấy dữ liệu từ khoảng áo dài đến quần dài 
+ *******************************************************
+
 ALIASES
 là đật bí danh cho bảng hoặc cho cột 
 ví dụ 
@@ -183,6 +190,8 @@ select  name as ten
 gorup by name ,price
 đặt tên cho cột kết quả của tông giá price là cột toal_price đó alf đặt bí danh cho tổng số tiền 
 JOINS
+ *******************************************************
+
 INNER JOIN
 select product.name , category.name
 from product
@@ -204,7 +213,8 @@ on product.category_id = category.id
 where category.name = 'áo thun'
 lấy tên và có sản phẩn tên là áo thun 
 
-🟡 Day 5
+ *******************************************************
+
 LEFT JOIN
 Nếu left join thì lấy tất cả dữ liệu bên phải bình thường 
 nếu có dữ liệu thì sẽ hiện bình thường còn không có dữ liệu thì sẽ hiện null
@@ -212,7 +222,11 @@ nếu có dữ liệu thì sẽ hiện bình thường còn không có dữ li�
 RIGHT JOIN
 lấy tất cả fuex liệu bên bảng trái sẽ hiện ra 
 và dữ liệu bên bảng phải sẽ hiện null
+
+ *******************************************************
+
 FULL JOIN
+
 lấy tất cả dữu liệu cảu hai bảng và sẽ hiện ra 
 nếu cột nào không có dữ liệu thì sẽ hiện null
 ví dự lấy tất acr các đơn  hàng của 
@@ -222,9 +236,12 @@ from customers
 full join orders
 on customers.id = orders.customer_id
 
+ *******************************************************
 
 SELF JOIN
 lấy bảng chính lá láy tên nhân viên và tên quản lý 
+
+ *******************************************************
 
 UNION
 lấy dữu liệu cảu hai bảng và hai cột rồi ghép chúng lại 
@@ -234,18 +251,18 @@ sleect name , city from  sustomers
 union
 select name , city from  suppliers
 
-  
+ *******************************************************
+ 
 UNION ALL
 lấy tất cả dữ liệu của ccas cootjj mà cột dọc sẽ hiện tất cả dữ liệu kể cả dữ liệu trung nhau cũng sẽ hiện
 ví dụ 
 select name ,city from  customers 
 union all 
 selct name ,city from suppliers 
-
+ *******************************************************
 GROUP BY
 nhóm ccas cột lại lấy dữ liệu ra và nhóm lại 
-
-🟡 Day 6
+**************************************************
 HAVING
 Nghĩa là sau khi nhóm xong  group by xong having sẽ làm viecj nhóm lại những dữ liệu và lọc nhóm 
 như điều kiện của where sau khi dã group 
@@ -258,7 +275,7 @@ group by
 having sum (p.quantity) > 2
 lấy lấy tổng sản ohamr có nhỏ hơn là 2 
 
-
+************************
 EXISTS
 định nghĩa là lấy diều kiện của nó là true thì se xlaays dữu liệu của dòng đó 
 chỉ có dữ liệu  đúng nhất là sẽ lấy  dòng đó 
@@ -272,9 +289,10 @@ lấy tất cả giá sản phẩm có nhỏ hơn dưới 100
 nếu điều kiện có dòng đúng là true thì sẽ lấy dữ liệu dòng đó
 ANY
 là so sánh dữ liệu nếu đúng thì sẽ hiện tất cả và đúng với nhất 1 dưu xlieeuj thôi chứ không so với nhiều điều kiện khác 
-
+*******************************
 ALL
-là dùng đẻ so sánh cho tất cả giá trị trong bảng  có thể đúng với tất cả  
+là dùng đẻ so sánh cho tất cả giá trị trong bảng  có thể đúng với tất cả 
+************************ 
 SELECT INTO
 để tạo ra bảng khác và copy dữ liệu của bảng củ được và muốn láy dữu liệu của ác bảng khác 
 ví dụ 
@@ -282,44 +300,156 @@ selct naem, price into newproduct
 from prodcut 
 where price > 20 
 nghĩa lấy giá của sản phẩm nhỏ hơn 20 rồi và lấy tên chỉ tạo tên và giá nhỏ hơn 20 thôi 
- 
+ *******************************************************
 INSERT INTO SELECT
-
+để sao chep dữ liệu này vào sang bên bảng khác và có dữ liệu như bảng đã sao chép
+insert into name , price 
+select * from product 
+where price > 50 
 CASE
-
-🟡 Day 7
-
+dùng để lọc điều kiện nếu a đúng dừng nếu b thì sẽ vào b còn nếu c thì còn lại
+ví dụ : 
+**********************************************************************
 NULL FUNCTIONS
-
+không có giá trị nếu giá trị không có là null và giá tri bằng không thi vẫn là không chứ không có gá trị 
+*****************************************************************
 STORED PROCEDURES
-
+là được phép tái sữ dựng lại code chỉ cần tạo bảng rồi sau đó gọi lại và tái sửa dụng thôi
+ví dụ : 
+create procedures getallproduct 
+@id = INT 
+@name = varchar(50)
+as 
+begin 
+select * from product 
+where id = @id 
+end 
 COMMENTS
-
+là dùng đẻ comment của sql 
+******************************************************
 OPERATORS
-
+tổng hợp những kiểu lọc trong  dâttbase
+công trừ nhan chia đều có dữ liệu và kiểu lọc 
+****************************************************
 CREATE DB
+CREATE DATABASE testDB; 
+là tạo một cái database ròi tạo table sau rồi cấp dữu liệu vào cho nó 
 
+là tạo một bảng trong database giông snhuw tạo kho trước rồi sản phẩm vào sau là dữ liệu 
+CREATE TABLE product  (
+id INT
+name VARCHAR(100)
+price INT 
+);
+************************************************************
 DROP DB
-
+là xóa cả cái database luôn chứ cả dữ liệu cũng bị xóa 
+Drop DATABASE testDB
+***********************************
 BACKUP DB
+dung  để sao luu tất cả dữ liệu cảu DATABASE 
+coppy dữ liệu sang một file dự phòng rồi backup lại 
+ví dụ : 
 
-🔵 Day 8
+BACKUP DATABASE testDB
+TO DISK = 'D:\backups\testDB_full.bak';
+nghãi là sao chep dữ liệu của DATABASE này sang ổ D 
+
+🔵******************************************************
 
 CREATE TABLE
-
+là tạo một bảng trong DATABASE có tên và có dữ liệu  rồi có điều kiện luật
+CREATE Table product (
+id INT 
+name VACHAR
+);
+Khi tạo có thể coppy dữ liệu từ bảng khác 
+Ví dụ 
+ CREATE product as
+ Select * from customer
+ where country =  'USE'
+ đây là coppy từ bảng customer lấy dữu liệu đến country có tên là USE thôi nhé 
+ 
+ ***************************************************
 DROP TABLE
-
+là xóa dữ liệu cua rbangr cũng như xóa cả bảng luôn 
+ví dự
+DROP table  product
+nếu dùng truncate thì sẽ cũng nhanh hơn 
+Ví dụ 
+TRUNCATE table product
+************************************************
 ALTER TABLE
+là thêm dữ liệu vào bảng đã có sãn trong 
+ví Dụ : 
+Alter table product
+add culumn email  varchar(255)
+thêm dữu liệu cột emmail vào bảng product 
+
+nếu dung modiey thì là sửa dữ liệu đã có rồi sửa
+ví dụ : 
+ALTER table product 
+MODIFY email (100)
 
 CONSTRAINTS
+là các dàng buộc các quy tắc để dặt vào bảng để đảm bảo dữu liệu luôn đúng và hợp lệ \
+ví dụ : PRIMARY key (ID) 
+ý nghĩa là : không trùng , không null ,dùng để phân biết từng dòng 
+Name VARCHAR (100) Not null dữ liệu không được null
+UNIQUE(email) dữ liệu có thể null nhưng không được trùng
+FOREGIN KEY (Customers) ERFERENCES Customers (ID0 là liên kết dữ liệu hai bảng với nhau 
+Age INT DEFAULT 18 
+là dữ liệu không nhập thì lấy giá trị mặc định 
 
 NOT NULL
-
+Là bát buộc phải có dữ liệu 
+cột nào không có dữ liệu bắt buộc phải có INSERT hoặc  update vào đẻ có dữ liệu
+ ví dụ :
+ CREATE table product (
+ id int not null , 
+ latsname varchar (255) not null 
+ firstName varchar (255) not null 
+ age int 
+ );
+ kết luận là nếu thêm dư xlieeu haowcj điều kiện thì not null này là điều kiện để bắt buộc phải có dữ liệu chứ không được để null
+********************************************
 UNIQUE
+là không trùng giá trị ,mỗi giá trị phải khác nhau 
+Ví Dụ :
+CREATE table product (
+id int  not null UNIQUE ,
+name VACHAR (100)
+);
+này là giá trị của id không được trung nhau
+ 
+ALTER TABLE Persons
+ADD UNIQUE (ID);
+nghãi lệnh này là cột này ID này khong được trùng nhau nữa 
+thêm luật  cho cột id này khong cho chúng trùng nhau nữa
+ 
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    CONSTRAINT UC_Person UNIQUE (ID,LastName)
+);
+nghĩa là cột ID và cột LastName này không được trùng dữ liệu với nhau nữa mà phải khác nhau 
 
+******************************************************
 PRIMARY KEY
+Là dùng để dặt cột làm khóa chính không cho phép null không cho trùng 
+Alter table product 
+add PRIMARY KEY (ID);
+đặt cột ID là khóa chính  
+Sau khi chạy lệnh này thì ID 
+không được null và không dược trùng nhau , mỗi dòng phải có id riêng 
 
-🔵 Day 9
+ALTER TABLE Persons
+ADD CONSTRAINT PK_Person PRIMARY KEY (ID, LastName);
+như này hai cột này  là khóa chính cho quy luật  điều kiện không được null và không trùng nhau cả hai cột đều thế 
+ 
+***********************
 
 FOREIGN KEY
 
