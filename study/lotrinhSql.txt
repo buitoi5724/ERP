@@ -324,6 +324,7 @@ begin
 select * from product 
 where id = @id 
 end 
+
 COMMENTS
 là dùng đẻ comment của sql 
 ******************************************************
@@ -452,20 +453,151 @@ như này hai cột này  là khóa chính cho quy luật  điều kiện không
 ***********************
 
 FOREIGN KEY
+là một haowcj nhiều thuộc tính của một bảng để tham chiếu ngoại khóa chính  đối với bảng khác 
+CREATE table ordders(
+OrderID int PRIMARY KEY,
+OrdersNUmber int not null ,
+ PersonID int,
+ CONSTRAINT fk_Person
+    FOREIGN KEY (PersonID)
+    REFERENCES Persons(PersonID)
+);
+trong trường hợp này là tạo bảng rồi cho khóa ngoại với bảng PersonsID ngoại khó với PersonID của bảng Orders 
+CONSTRAINT fk_Person
+    FOREIGN KEY (PersonID)
+    REFERENCES Persons(PersonID)
+	điều kiệ quy luật và trỏ tới bảng persons rồi tìm đến cột và ngoại khóa
+REFERENCES dùng cái này để trỏ tới nó 
+
+ALTER TABLE Orders
+ADD CONSTRAINT fk_Person
+FOREIGN KEY (PersonID)
+REFERENCES Persons(PersonID);
+	thêm ngoiaj khóa bảng đã tồn tại dùng Alter table và dúng ngoại khóa cho hai bảng ngoại khó với nhau 
+	
+	ALTER TABLE Orders
+DROP CONSTRAINT fk_Person;
+nghĩa là xóa ràng buộc tới bảng đó và không còn ngoại khóa nữa 
 
 CHECK
+là cho giới hạn giá trị của cột không cho phép hơn hoặc ít hơn 
+CREATE TABLE Persons ( 
+ ID int PRIMARY KEY ,
+ LastName varchar (255) not null 
+ FirstName varchar(255),
+ Age int CHECK ( Age>= 18 ) 
+ );
+ hiểu hơn là check làm việc trong đoạn code này là cho phép tuổi chỉ >= 18 thôi chứ khong được hơn 
+ CREATE TABLE Persons (
+    ID int PRIMARY KEY,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    City varchar(255),
+    CONSTRAINT chk_PersonAge CHECK (Age >= 18 AND City = 'Sandnes')
+);
+
+Đặt tên cho check rồi thêm luật cho chúng để khi thêm 
+Trong đoạn này chỉ được phép Age >= 18 và thanh phố phải đúng như trong điều kiện luật
+ALTER TABLE Persons
+ADD CHECK (Age >= 18); 
+là sửa bảng củ cho chúng và thêm điều kiện có cột của chúng 
 
 DEFAULT
+nếu không nhập giá trị thì sẽ tự nhập là default còn nếu bạn nhập thì sẽ có dữ liệu bạn nhập 
+Create table product ( 
+id int primary key ,
+lastname varchar (255) not null 
+fristname varchar (255),
+age int ,
+city varchar (255) default 'buitoi'
+);
+cho default và cột city nếu khong nhập thì giá trị sẽ tự diền là default còn nếu bạn nhập thì sẽ có giá trị 
+create table ordders (
+id int Primary key ,
+ordersNumber int not null ,
+ordersDate date default curent_date()
+);
+nghĩa đoạn này là lấy giá trị của ngày nhập nếu khong nhập thì lấy mặc định của ngày hôm đó luôn dùng CURRENT_DATE() sẽ lấy ngày mặc định 
+ALter table Persons 
+Alter city set DEFAULT 'BuiToi'
+nghĩa là thêm DEFAULT cho cột cit này nếu nhập thì sẽ có giá trị nhập nếu khong nhập giá trị mắc định là BUIOi
 
+Alter table Persons 
+Alter city Drop DEFAULT
+cóa DEFAULT cho cột city đi nghĩa là nếu nhập sẽ có giá trị nếu khong nhập thì sẽ là giá trị null
+********************************************
 INDEX
-
+là tạo mục lục cho bảng giúp tìm kiếm nhanh hơn 
+ví dụ :
+CREATE index name
+on product (name)
+tạo cho name một cái mục lục chỉ cần tìm tên là ra luôn 
+lúc truy xuất ra thì sẽ lấy tên ra luôn thôi là sẽ láy được cả tên đó ra 
+CREATE UNIQUE INDEX idname 
+on product ( name,code )
+nghĩa là không đưuọc trùng giá trị khi bị trùng nhau thì sẽ khong tìm ra được 
+ALTER TABLE product
+DROP INDEX idname;
+là xóa mục lục cảu bảng đso đi sẽ không truy xuất của bảng đó nữa 
+ 
 AUTO INCREMENT
+là cho giá trị tự tăng khi cũng không cần nhập thì giá trị đó sẽ tự tăng dùng AUTO_INCREMENT   luôn đi kèm với PRIMARY KEY để tránh trùng nhau 
+CREATE TABLE Persons (
+PersonID int AUTO_INCREMENT PRIMARY KEY ,
+LastName varchar ( 255) not null ,
+FristName varchar (255),
+age int 
+);
+cho cột PersonIDgiá trị ID khong được trung nhau này và giá trị của id đó tự tăng và khi không cân ghi thì cũng tự tăng 
+ALTER TABLE Persons AUTO_INCREMENT = 100;
+bắt đầu từ sau cột giá trị nhập vào sẽ bắt đàu là 100 trở lên 
+*** CREATE TABLE Persons (
+    Personid int IDENTITY(1,1) PRIMARY KEY,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int
+);
+nếu mà dụng lệnh này thì cũng giống nhau chỉ khác từ khóa là IDENTITY ý nghĩa của chúng cũng giống nhau 
+
 
 DATES
-
+là làm viecj với thời gian 
+ MySQL
+DATE → chỉ ngày → 2025-11-11
+DATETIME → có cả giờ → 2025-11-11 13:23:44
+TIMESTAMP → giống datetime nhưng auto cập nhật
+TIME → 13:23:44
+YEAR → 2025
 VIEWS
+Là tạo một bảng ảo để lấy dữu lieeun từ bảng gốc nhưng từ lệnh select thoi select đến column nào thì sẽ có dữu liệu của column ấy 
+CREATE VIEW view_name as
+select name , code 
+from product 
+where name = 'toi'
 
-🔴 Day 10
+CREATE VIEW [Products Above Average Price] AS
+SELECT ProductName, Price
+FROM Products
+WHERE Price > (SELECT AVG(Price) FROM Products);
+
+nghĩa là tạo bảng trung bình giá của sản phẩm và lấy tên và giá của sản phẩm 
+và điều kiện là lấy trung bình giá của hai sản phẩm đó dùng (SELECT AVG(Price) from Product) 
+ALTER VIEW [Brazil Customers] AS
+SELECT CustomerName, ContactName, City
+FROM Customers
+WHERE Country = 'Brazil';
+cầu này là sẽ sảu lệnh view này và thêm cột city bổ sung vì trước đó bảng view này chỉ có CustomerName và ContactName 
+thôi sau khi chạy lệnh thì sẽ có thêm Cột City
+DROP VIEW [Brazil Customers]; 
+lẹnh này là xóa bảng view đó đi không ảnh hưởng gì đến bảng hay cột hết 
+kết luận là view là sẽ tạo một bảng ao có thể truy xuất nhưu bảng thật và chỉ truy xuất chỉ select thôi 
+🔹 So sánh nhanh
+Lệnh	 Ý nghĩa
+CREATE VIEW	          Tạo VIEW
+ALTER VIEW	          Sửa VIEW
+DROP VIEW	          Xóa VIEW
+
 
 SQL INJECTION
 
