@@ -1,0 +1,971 @@
+🚀 LỘ TRÌNH 7 NGÀY HỌC JAVA OOP
+📅 Ngày 1: Java Constructor
+🎯 Mục tiêu:
+
+Hiểu constructor là gì và dùng thành thạo
+
+🧠 Note cần ghi:
+Constructor là gì?
+Đặc điểm:
+Trùng tên class
+Không có kiểu trả về
+Các loại:
+1. Default Constructor 
+Là dùng để khởi tạo object với giá trị là default mặc định khi không truyền tham số  cho trúng thì mặc định sẽ là default 
+Ví dụ : 
+package Java_Contructor;
+
+public class Default_Constructor {
+	
+String name ;
+int age ;
+	 
+	Default_Constructor (){
+		System.out.println(" ");
+		name = "Unkoun";
+		age = 0 ;
+		
+	}
+void display () {
+			System.out.println( name + " " +  age );
+	}
+} 
+class Main {
+	public static void main(String[]args) {
+		
+		Default_Constructor D1 = new Default_Constructor();
+		D1.display();
+	}
+}
+Default_Constructor (){
+system.out.println(" ");
+name = Unkoun;
+age = 0 ;
+}
+là Constructor Default không có tham số gì thì mặc định nó là Constructor  Default 
+2. Parameterized Constructor
+Là khởi tạo objectcó tham số có thế truyền vào 
+ví dụ : 
+package Java_Contructor;
+
+public class Parameterized_Constructor {
+
+	String name;
+	String color;
+	
+Parameterized_Constructor ( String name ,String color) {
+		this.name = name ;
+		this.color = color;
+	}
+	void display () {
+		System.out.println(name + "" + color);
+	}
+}
+class Main2  {
+	public static void  main (String[]args) {
+		Parameterized_Constructor D1 = new Parameterized_Constructor("Toi","xanh ");
+		D1.display();
+	
+} 
+}
+Kết luận là Parameterized_Constructor là có tham số để truyền vào từ bên ngoài 
+3. Constructor Overloading
+Là việc một class có nhiều constructor cùng tên nhưng khác nhau về số lượng hoặc kiểu dữ liệu của tham số.
+ví dụ : 
+package Java_Contructor;
+
+public class Constructor_Overloading {
+String name ;
+String color;
+Double price;
+int age ;
+Constructor_Overloading(){
+	name = "unkon";
+	color = "unkon";
+	price = 0.0;
+	age = 0 ;
+}
+Constructor_Overloading(String name , String color ){
+	this.name =name ;
+	this.color =color ;
+	
+}
+Constructor_Overloading (String name , String color , Double price ,int age  ) {
+	this.name = name ;
+	this.color = color;
+	this.price = price ;
+	this.age = age ;
+	
+}
+	void display() {
+		System.out.println(name + " - " + color  + " - " + price +"--" + age );
+    }
+	class Main3 {
+		public static void main(String[]agrs) {	
+			Constructor_Overloading D1 = new Constructor_Overloading();
+			Constructor_Overloading D2 = new Constructor_Overloading(" Toi " , "Black");
+			Constructor_Overloading D3 = new Constructor_Overloading( " Toi " , " black " , 200.0 , 20  );
+			D1.display();
+			D2.display();
+			D3.display();
+		}
+	}
+}
+Kết luận là có phép nhiều constructor nhưng khác tham số thêm từ bên ngoài vào object
+4. Chaining Constructors
+Là kỹ thuật trong java cho phép contructor này gọi đến contructor khác trong cùng một clss
+hoặc cùng class cha và tái sữu dụng được lại code và tránh lặp lại 
+package Java_Contructor;
+
+public class Chaining_Constructors {
+String name;
+int age ;
+
+Chaining_Constructors () {
+	this("unknown" , 0);
+}
+
+Chaining_Constructors (String name){
+	this( name  , 0 );
+}
+Chaining_Constructors( String name , int age ){
+	this.name= name;
+	this.age = age ;
+			
+}
+void display() {
+	System.out.println(name + " - " + age );
+	
+}
+	public static void main(String[]agrs) {
+		Chaining_Constructors a  = new Chaining_Constructors( ) ;
+		a.display();
+		
+		
+		Chaining_Constructors b =  new Chaining_Constructors( "BuiToi"  ) ;
+		b.display();
+		
+		
+		Chaining_Constructors c  = new Chaining_Constructors( "BuiToi" , 22 ) ;
+		c .display();	
+	}	
+}
+kết luận : là kỹ thuật của java cho phép cho các contructor này gọi đến contructor khác nhằm tái sử dụng lại code và tránh lặp lại 
+5. Copy Constructor 
+Là contructor dùng tạo một objectbằng ccahs coppy dữ liệu của một object đã có 
+Ví dụ :
+package Java_Contructor;
+
+public class Copy_Constructor {
+	
+String name ;
+int age ;
+	Copy_Constructor ( String name , int age ){
+		
+		this.name = name ;
+		this.age = age ;
+	}
+	Copy_Constructor ( Copy_Constructor c ){
+		this.name = c.name ;
+		this.age = c.age ;
+	}
+	void display() {
+		System.out.println(name + "      "+ age );
+	} 
+	
+	public static void main (String[]agrs) {
+		Copy_Constructor c1 = new Copy_Constructor( " BuiToi " ,  22 );
+		Copy_Constructor c2 = new Copy_Constructor(c1 ); 
+		
+		c1.display();
+		c2.display();
+	}
+	
+}
+Kết luận : Là cho phép contrucs này dùng dữ liệu của contructor khác 
+dùng tạo một object này sao chép cho sang một object khác 
+6. Constructor with Validation 
+Là contructor cho và nhằm để kiểm tra dữ liệu đầu vào khi thêm vào biến  rồi mới cho thêm dữu liệu vào để đảm bảo dữ liệu hợp lệ
+Không phải truyền gì cũng được mà phải kiểm tra trước rồi mới thêm vào nếu sai sẽ bị từ chối 
+ví dụ :
+package Java_Contructor;
+
+public class Constructor_with_Validation {
+ 
+	String name ;
+	int age ;
+	
+	Constructor_with_Validation( String name , int age  ){
+		if(name == null || name.isEmpty()) {
+			this.name = " Unknown";
+		}else {
+			this.name = name ;
+		}
+		if(age < 0 ) {
+			this.age = 0 ;
+			
+		}else {
+			this.age = age ;	
+		}
+	}
+		void display () {
+			System.out.println(name + " - " + age);	
+	}
+		public static void    main (String[]args) {
+			Constructor_with_Validation c1 = new Constructor_with_Validation("BuiToi" , 22);
+			Constructor_with_Validation c2 = new Constructor_with_Validation("  " , 4 ) ;
+			c1.display();
+			c2.display();
+		
+	}	
+}
+Kết luận : 
+Là cho phép contructor kiểm tra dữ liệu trước khi thêm dữ liệu vào biến để kiểm tra rồi mới thêm nếu không hợp lệ sẽ không được thêm 
+7. Constructor with Default Values
+Là nếu không truyền gì thì sẽ lấy dữ liệu mặc định được ghi trong contructor và nếu truyền dữ liệu thì nó sẽ có dữ liệu truyền vào 
+ví dụ :
+package Java_Contructor;
+
+public class Constructor_with_Default_Values {
+
+	String name ;
+	int age ;
+	Constructor_with_Default_Values(String name , int age ){
+		this.name = name ;
+		this.age = age ;	
+	}
+	Constructor_with_Default_Values(){
+		this("Unkown " , 18 );
+	}
+	void display () {
+		System.out.println(name + " - " + age );
+	}
+	
+	public static void main (String[]args) {
+		Constructor_with_Default_Values c1 = new Constructor_with_Default_Values();
+		c1.display();
+		
+	}
+}
+8. Overloading Constructors with Different Data Types
+Là là việc tạo các contructor trong một class nhưng cho phép khác nhau về kiểu dữ liểu cũng như  số lượng  tham số 
+ví dụ : 
+package Java_Contructor;
+
+public class Overloading_Constructors_with_Different_Data_Types {
+
+	String name ;
+	int age ;
+	
+	Overloading_Constructors_with_Different_Data_Types(int age   ){
+		this.age = age  ;
+		this.name = " Unkown" ;
+	}
+	Overloading_Constructors_with_Different_Data_Types(String name  ){
+		this.name = name ;
+		this.age = 18 ; 
+
+	}
+	Overloading_Constructors_with_Different_Data_Types(String name , int age ){
+		this.name = name ;
+		this.age = age ;
+		
+	}
+	
+	void display () {
+		System.out.println(name + " - " + age );
+	}
+	public static void main (String[]args) {
+		Overloading_Constructors_with_Different_Data_Types c1 = new Overloading_Constructors_with_Different_Data_Types( 20 );
+		Overloading_Constructors_with_Different_Data_Types c2 = new Overloading_Constructors_with_Different_Data_Types( " Toi ");
+		Overloading_Constructors_with_Different_Data_Types c3 = new Overloading_Constructors_with_Different_Data_Types( " BUITOI " , 22) ;
+	
+		c1.display();
+		c2.display();
+		c3.display();
+	}
+}
+Kết Luận : 
+Cho các contructor tạo nhiều cùng một class và mỗi contructor có nhiều dữ liệu khác nhau và nhiều tham số 
+9. Constructor with Array Initialization
+Là khi tạo contructor thì sẽ gán giá trị cho mảng luôn và sẽ có giá trị cho mảng khi tại object
+Ví dụ :
+package Java_Contructor;
+
+public class Constructor_with_Array_Initialization {
+
+	String name ;
+	int [] scorce ;
+	
+	Constructor_with_Array_Initialization (String name , int [ ] scorce ){
+		this.name = name ;
+		this.scorce = scorce ;
+		
+	}
+	void display () {
+		System.out.println(name + " : ");
+	for ( int s : scorce ) {
+		System.out.println(s + " " );
+	}
+		System.out.println();
+		
+	}
+	public static void main (String[]args) {
+		int [] arr = {8 ,9, 10 };
+		
+		Constructor_with_Array_Initialization c1 = new Constructor_with_Array_Initialization (" Bui Toi " , arr);
+
+		c1.display();
+		
+	}
+	
+}
+Kết luận : 
+Dùng để khởi tạo objectvà gán giá trị cho mảng luôn  
+10. Constructor for Singleton Pattern
+là là một class có duy nhất mọt objectvà cung cấp các đỉm truy cập toàn cục cho intance đó và chỉ có một objectđó ai cũng có thể dùng chung 
+ví dụ : 
+package Java_Contructor;
+
+public class Constructor_for_Singleton_Pattern {
+
+	private static  Constructor_for_Singleton_Pattern instance  ;
+	String name ;
+	
+	private Constructor_for_Singleton_Pattern() {
+		name = "BuiToi";
+		
+	}
+	/**
+	 * @return the instence
+	 */
+	public static Constructor_for_Singleton_Pattern getInstence() {
+		if (instance   == null) {
+			instance   = new Constructor_for_Singleton_Pattern();
+		}
+		return instance  ;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public static void main (String[]args) {
+		Constructor_for_Singleton_Pattern c1 = Constructor_for_Singleton_Pattern.getInstence();
+		Constructor_for_Singleton_Pattern c2 = Constructor_for_Singleton_Pattern.getInstence();
+		
+		
+		c1.setName(" BuiToi1");
+		System.out.println(c2.getName());
+
+		System.out.println(c1 == c2 );
+		
+	}
+	
+}
+Kết luận : là một design đảm bảo cho một class có duy nhất một intance object và cung cấp cho một ddiemr truy cập toàn bộ đến intance đó 
+constructor đầy đủ
+In thông tin ra
+
+II : Java Static Members
+1. Static Variables
+là là biến được khai báo với từ khóa là static thuộc về class dùng chung cho tất cả các  object của class đó 
+Ví dụ :
+package Java_Static_Members;
+
+public class Static_Variables {
+
+	static int count = 0 ;
+	
+	Static_Variables(){
+		count++;
+	}
+}
+ class Main5 {
+		public static void main(String[]args) {
+			
+			Static_Variables c1 = new Static_Variables();
+			Static_Variables c2 = new Static_Variables();
+			Static_Variables c3 = new Static_Variables();
+			
+			
+			System.out.println(Static_Variables.count);
+		
+	}
+}
+2. Static Methods
+Là gọi thẳng cho class làm việc luôn mà khong cần dùng hàm tạo object để gọi nữa 
+ví dụ :
+package Java_Static_Members;
+
+public class Static_Methods {
+
+	static int toal (int a , int b ) {
+		return a + b ; 
+	}
+	public static void main(String[]args) {
+		
+		int kq = Static_Methods.toal(5, 5);
+		
+		System.out.print(kq);
+	}
+	
+}
+kết luận : 
+sẽ là gọi trực tiếp đến class làm việc luôn thôi chứ khong cần phải tạo object
+
+3. Static Block
+Là đoạn code được chạy khi chương trinh được bắt đầu
+là khối lệnh dduojc chạy 1 lần duy nhất khi class được load
+Ví dụ :
+package Java_Static_Members;
+
+public class Static_Block {
+
+	static {
+		System.out.println(" Satatic block ");
+	}
+	public static void main(String[]agrs) {
+		System.out.println(" main ");
+	}
+}
+Kết luận :
+Chạy một lần duy nhất khi class được load
+
+4. Static Final Variables
+Là biến hàng số thuộc vè class và được dùng chung nhưng mà không thay đổi được 
+ví dụ :
+package Java_Static_Members;
+
+public class Static_Final_Variables {
+
+	static final double PI = 3.14;
+	static double area(double r ) {
+		return PI * r * r ;
+	}
+	public static void main ( String[]args) {
+		double kq = area (2);
+		
+		System.out.println(kq);
+	}
+}
+kết luận :
+Dùng chung cho tất cả class mà không thay đổi được 
+
+5. Static Block for Initialization
+là class lod cùng với hàm main luôn 
+ví dụ 
+package Java_Static_Members;
+
+public class Static_Block_for_Initialization {
+
+    static String name;
+    static int age;
+    static {
+        System.out.println("Dang load chương trình");
+        name = "Bui Toi";
+        age = 22;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Bat dau chay");
+        System.out.println(Static_Block_for_Initialization.name);
+        System.out.println(Static_Block_for_Initialization.age);
+    }
+}
+Kết luận là class static load cùng mới hàm main bắt đàu là hàm main rồi khi gặp biến static rồi cho phép load hàm sattic trước luôn 
+vậy alf chạy trước khi cả hàm main và hiện dữ liệu trước hàm main 
+6. Static Method with Static Variable
+là cho phép quản lí dữ liệu chung  và  sử lý trong class mà khong cần tạo object
+ví dụ : 
+package Java_Static_Members;
+
+public class Static_Method_with_Static_Variable {
+	static String name ;
+	
+	static {
+		System.out.println(" bắt đàu load ");
+		name = " Bùi Tới ";
+		
+	}
+	static void display () {
+		System.out.println( " Họ Và tên : " + name );
+	}
+	public static void main(String[] args) {
+		System.out.println(" Bắt dầu chạy hàm main ");
+		
+		Static_Method_with_Static_Variable.display ();
+	}
+	
+}
+7. Static Block for Complex Initialization
+là khối static khởi  tạo biến cho nó bằng khối lệnh  phức tạp như vòng lặp , điều kiện ,đọc dữ liệu 
+Ví dụ : 
+package Java_Static_Members;
+
+public class Static_Block_for_Complex_Initialization {
+
+	static int [] array ;
+
+	static {
+
+		System.out.println(" bắt dầu load dữ liệu ");
+		array = new int [10];
+
+
+		for(int i = 0 ; i < array.length ; i ++) {
+			array [i]  = i * 2 ;
+
+		}
+
+	}
+	public static void main(String[] args) {
+		for ( int n : array ) {
+			System.out.print( n + "  ");
+		}
+	}
+}
+Kết luận : 
+Là khối lệnh static dùng để khởi tạo biến static bằng các xử lý phức tạp như vòng lặp và điều kiện và ddowcj dữ liệu 
+
+Java Nested Classes - Exercises
+
+Hiểu static dùng khi nào
+1. Inner Class
+Là class bên trong được tạo trong một class khác 
+Là cho phép class  bên trong 1 class khác vì thường sẽ hỗ trợ class bên ngoài 
+ví dụ 
+package java_Nested_Classes;
+
+public class Inner_Class {
+
+	String name = " Bui Văn Tới ";
+
+	class thongtin {
+		void 	display(){
+			System.out.println(" Họ Và Tên " + name );
+		}
+	}
+
+	public static void main(String[] args) {
+		Inner_Class c = new Inner_Class();
+		Inner_Class.thongtin p = c.new thongtin();
+
+		p.display();
+	}
+}
+Kết luận : 
+là cho phép tạo class bên trong 1 class dùng để hỗ trợ class bên ngoài 
+
+2. Static Nested Class
+Là là class được tạo với static nó sẽ hỗ trợ class và hoạt động đọc lập và không cần object từ class bên ngoài 
+Ví dụ : 
+package java_Nested_Classes;
+
+public class Static_Nested_Class {
+
+	static class students {
+		String name ;
+		int age ;
+
+		students(String name , int age ){
+			this.name = name ;
+			this.age = age ;
+
+		}
+		void display() {
+			System.out.println("Tên của học Sinh " + name );
+			System.out.println(" Tuổi của học sinh " + age );
+		}
+		public static void main(String[] args) {
+			Static_Nested_Class.students s = new Static_Nested_Class.students("Bui Văn Toi ", 22);
+
+			s.display();
+		}
+	}
+}
+
+Kết luận : 
+Là sẽ tạo một class với khối static nó hoạt động đọc lập và không cần tạo objectcủa class bên ngoài 
+3. Local Class
+là class được phép khai báo và sử dung bên trong một method
+ví dụ : 
+package java_Nested_Classes;
+
+public class Local_Class {
+
+	void luong () {
+
+		class whker {
+			private String name ;
+
+			whker (String name){
+				this.name = name ;
+			}
+			void luong () {
+				System.out.println(" Dây là bảng lương  :" + name );
+			}
+		}
+		whker w = new whker ( " Toi "); 
+		w.luong();
+	}
+
+	public static void main(String[] args) {
+		Local_Class lo =  new Local_Class();
+		lo.luong();
+	}
+
+}
+Kết luận : Là được phép khai báo và sử dụng trong một method
+4. Anonymous Class Exercise
+là không cần dùng tên class mà có thể dùng được  ngay qua phương thức kế thừa 
+
+package java_Nested_Classes;
+
+public interface worker {
+ void luong();
+ 
+}
+
+package java_Nested_Classes;
+
+public class Anonymous_Class_Exercise {
+
+	public static void main(String[] args) {
+		worker w = new worker() {
+
+			@Override
+			public void luong() {
+				// TODO Auto-generated method stub
+
+				System.out.println(" Lương của bạn là :  ");
+			}
+
+		};
+		w.luong();
+	}
+
+}
+ Kết luận : Là tạo nhanh một class không tên từ interfec haocj 1 class dùng mà không cần tên 
+5. Inner Class Accessing Outer Class Members
+là có thể truy cập hay sử dụng của các thành phần biến method của lớp bên ngoài của outer class kể cae chúng là private 
+ví dụ : 
+package java_Nested_Classes;
+
+public class Inner_Class_Accessing_Outer_Class_Members {
+
+	private String tien;
+
+	class nguoitrongnha{
+		void nguoixemtien() {
+			System.out.println(" Người xem tiền nha "+ tien);
+		}
+	}
+	public static void main(String[] args) {
+		Inner_Class_Accessing_Outer_Class_Members i = new Inner_Class_Accessing_Outer_Class_Members();
+		Inner_Class_Accessing_Outer_Class_Members.nguoitrongnha p = i.new nguoitrongnha();
+
+		p.nguoixemtien();
+	}
+}
+kết luận là : 
+là có thể truy cập và sữ dụng biến hay method của outer class và kể cả private cũng sẽ sử dụng được 
+Có thể truy cập tất cả toàn bộ của thanh phần của outer class bao gồm private vì nó được định nghĩa bên trong của outer class 
+6. Static Nested Class and Static Methods
+Là class không phụ thuộc vào object thuộc về class khi muốn gọi thì ta chỉ cần chấm không cần tạo object nữa 
+Ví dụ :
+package java_Nested_Classes;
+
+public class Static_Nested_Class_and_Static_Methods {
+
+	  static class outer {
+		 void ten() {
+			 System.out.println("Bùi Văn Tới ");
+		 }
+	 }
+}
+
+package java_Nested_Classes;
+
+public class OuterDisplay {
+
+	public static void main(String[] args) {
+		Static_Nested_Class_and_Static_Methods.outer p = new Static_Nested_Class_and_Static_Methods.outer();
+		p.ten();
+	}
+}
+kết luận là : 
+Static Static Nested Class là class ở trong hoàn toàn đọc lập 
+Static method hàm dùng chung gọi thẳng không càn tạo object nữa 
+7. Local Class Accessing Local Variables
+Là cho phép sử dụng trong class method của chúng nhưng phải có điều kiện là final hoặc không tháy đổi được biến đó 
+ví dụ 
+package java_Nested_Classes;
+
+public class Local_Class_Accessing_Local_Variables {
+
+	void test (){
+	int a = 10 ; 
+	 class local{
+		 void display() {
+			 System.out.println(a);
+		 }
+	 }
+	 new local().display();
+}
+}
+8. Anonymous Class Implementing Abstract Class
+là cho phép class con tạo object luôn và kế thừa từ abstract của cha luôn và có class không tên 
+ví dụ : 
+package java_Nested_Classes;
+
+abstract class Anonymous_Class_Implementing_Abstract_Class {
+
+	abstract void sound ();
+
+
+
+	public static void main(String[] args) {
+
+		Anonymous_Class_Implementing_Abstract_Class dog = new Anonymous_Class_Implementing_Abstract_Class() {
+			void sound () {
+				System.out.println(" Gau Gau ");
+			}
+		};
+		Anonymous_Class_Implementing_Abstract_Class cat = new Anonymous_Class_Implementing_Abstract_Class() {
+			void sound () {
+				System.out.println(" meo meo");
+			}
+		};
+		dog.sound();
+		cat.sound();
+
+	}
+}
+kết luận : cho phép class con kế thừa và tạo objectluôn và class không có tên và ẩn danh
+9.Inner Class with Constructor
+Là class nằm bên trong 1 class và có contructor để khởi tạo đối tượng thì phải tạo object thì phải thông object của lớp ngoài 
+ví dụ : 
+package java_Nested_Classes;
+
+public class Inner_Class_with_Constructor {
+
+	class Students {
+		String name ;
+		int age ;
+
+
+		Students(String name , int age ){
+			this.name = name ;
+			this.age = age;
+		}
+
+
+		class Address {
+			String city ;
+			String state ;
+			String sreet ;
+			String zipcode;
+
+
+			Address( String city , String state , String sreet , String zipcode){
+				this.city = city ;
+				this.sreet = sreet;
+				this.state = state ;
+				this.zipcode = zipcode;
+
+			}
+			void display() {
+				System.out.println("Tên học sinh: " + name);
+				System.out.println("Tuổi: " + age);
+				System.out.println("Thành phố: " + city);
+				System.out.println("Bang: " + state);
+				System.out.println("Đường: " + sreet);
+				System.out.println("Zipcode: " + zipcode);
+			}
+		}
+	}
+	public static void main(String[] args) {
+		Inner_Class_with_Constructor ch = new Inner_Class_with_Constructor();
+		Inner_Class_with_Constructor.Students st = ch.new Students ( " Tới Bùi  " , 22) ;
+		Inner_Class_with_Constructor.Students.Address add = st.new Address (" hà Nôi " ," Hoàng mai " , "Vĩnh Hưng" , "10000" );
+
+		add.display();
+	}
+}
+Kết Luận : 
+Có class năm bên trong của class và có constructor khi khỏi tạo đối tượng của nó nhưng khi tạo  object thì sẽ thông qua object của lớp bên ngoài 
+
+🧠 Note:
+static là gì?
+static variable vs instance variable
+static method
+static block
+Khi nào dùng static?
+✍️ Bài tập:
+Tạo class Counter:
+Đếm số object được tạo
+
+📌 Chủ đề:Java Static Members
+👉 Định nghĩa:
+
+👉 Cú pháp:
+
+👉 Ví dụ:
+
+👉 Khi nào dùng:
+
+👉 Lưu ý:
+
+👉 So sánh (nếu có):
+
+ Java Nested Classes
+🎯 Mục tiêu:
+
+Hiểu class bên trong class
+
+🧠 Note:
+Nested class là gì?
+Các loại:
+Static nested class
+Inner class
+Cách truy cập
+✍️ Bài tập:
+Tạo class Outer
+Bên trong có Inner
+Gọi method từ inner class
+
+
+📌 Chủ đề:  Java Nested Classes
+👉 Định nghĩa:
+
+👉 Cú pháp:
+
+👉 Ví dụ:
+
+👉 Khi nào dùng:
+
+👉 Lưu ý:
+
+👉 So sánh (nếu có):
+ Inheritance + Abstract Class
+🎯 Mục tiêu:
+
+Hiểu kế thừa và class trừu tượng
+
+🧠 Note:
+Inheritance:
+extends
+kế thừa thuộc tính & method
+override
+Abstract:
+abstract class là gì?
+abstract method
+khi nào dùng
+✍️ Bài tập:
+Class Animal
+Class Dog kế thừa
+Tạo abstract method sound()
+
+📌 Chủ đề: Inheritance + Abstract Class
+👉 Định nghĩa:
+
+👉 Cú pháp:
+
+👉 Ví dụ:
+
+👉 Khi nào dùng:
+
+👉 Lưu ý:
+
+👉 So sánh (nếu có):
+
+ Interface
+🎯 Mục tiêu:
+
+Phân biệt Interface vs Abstract
+
+🧠 Note:
+Interface là gì?
+implements
+default method (Java 8+)
+multiple inheritance
+✍️ Bài tập:
+Interface Flyable
+Class Bird implements
+ Encapsulation + Polymorphism
+🎯 Mục tiêu:
+
+Hiểu đóng gói và đa hình
+
+🧠 Note:
+Encapsulation:
+private
+getter/setter
+bảo vệ dữ liệu
+Polymorphism:
+overloading
+overriding
+✍️ Bài tập:
+Class Person
+private field + getter/setter
+tạo 2 method cùng tên (overload)
+
+📌 Chủ đề: Encapsulation + Polymorphism
+👉 Định nghĩa:
+
+👉 Cú pháp:
+
+👉 Ví dụ:
+
+👉 Khi nào dùng:
+
+👉 Lưu ý:
+
+👉 So sánh (nếu có):
+
+Tổng ôn Object-Oriented Programming
+🎯 Mục tiêu:
+
+Hiểu tổng thể OOP
+
+🧠 Note:
+4 tính chất OOP:
+Encapsulation
+Inheritance
+Polymorphism
+Abstraction
+So sánh:
+Interface vs Abstract
+Overload vs Override
+✍️ Bài tập lớn:
+
+👉 Xây dựng mini project:
+
+Quản lý sinh viên:
+Class cha: Person
+Class con: Student
+Interface: Study
+Có constructor, encapsulation, override
+
+📌 Chủ đề: Tổng ôn Object-Oriented Programming 
+👉 Định nghĩa:
+
+👉 Cú pháp:
+
+👉 Ví dụ:
+
+👉 Khi nào dùng:
+
+👉 Lưu ý:
+
+👉 So sánh (nếu có):
