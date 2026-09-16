@@ -1,28 +1,25 @@
 package com.example.erp.service;
 
-import com.example.erp.entity.Account;
+import com.example.erp.entity.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface AccountService {
 
-    Account create(Account account);
+    User create(User user, String roleName);
 
-    List<Account> getAll();
+    List<User> getAll();
 
-    Optional<Account> getById(Long id);
+    Optional<User> getById(Long id);
 
-    Account checkEmail(String email);
+    User checkUsername(String username);
 
-    Account checkUsername(String username);
-
-    Account checkName(String name);
-
-    Account update(Long id, Account newAccount);
-    
-    Optional<Account> getBySupplierId(Long supplierId);
-    
+    User update(
+            Long id,
+            User user,
+            String roleName
+    );
 
     void delete(Long id);
 }

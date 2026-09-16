@@ -1,15 +1,17 @@
 package com.example.erp.config;
 
+import com.example.erp.security.JwtAuthenticationFilter;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import com.example.erp.security.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -20,33 +22,141 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
+    // Authentication Manager
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration
-    ) throws Exception {
+            AuthenticationConfiguration configuration) throws Exception {
+
         return configuration.getAuthenticationManager();
     }
 
+    // Security Filter Chain
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
+
         http
+            // Không dùng CSRF vì sử dụng JWT
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {})
+
+            // JWT không sử dụng session
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                session.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS
+                )
             )
+
+            // Phân quyền API
             .authorizeHttpRequests(auth -> auth
+
+                // =========================
+                // PUBLIC
+                // =========================
+
+                .requestMatchers("/api/auth/**")
+                .permitAll()
+
+                .requestMatchers("/uploads/**")
+                .permitAll()
+
                 .requestMatchers(
-                    "/api/auth/**",
                     "/api/products/**",
+                    "/api/categories/**"
+                )
+                .permitAll()
+
+
+                // =========================
+                // ADMIN
+                // =========================
+
+                .requestMatchers(
+                    "/api/users/**",
+                    "/api/admin/**"
+                )
+                .hasRole("ADMIN")
+
+
+                // =========================
+                // CART
+                // =========================
+
+                .requestMatchers("/api/cart/**")
+                .hasAnyRole(
+                    "ADMIN",
+                    "MANAGER",
+                    "SALES",
+                    "USER"
+                )
+
+
+                // =========================
+                // ORDERS
+                // =========================
+
+                .requestMatchers("/api/orders/**")
+                .hasAnyRole(
+                    "ADMIN",
+                    "MANAGER",
+                    "SALES",
+                    "USER"
+                )
+
+
+                // =========================
+                // INVOICES
+                // =========================
+
+                .requestMatchers("/api/invoices/**")
+                .hasAnyRole(
+                    "ADMIN",
+                    "MANAGER",
+                    "SALES",
+                    "USER"
+                )
+
+
+                // =========================
+                // CUSTOMERS
+                // =========================
+
+                .requestMatchers("/api/customers/**")
+                .hasAnyRole(
+                    "ADMIN",
+                    "MANAGER",
+                    "SALES"
+                )
+
+
+                // =========================
+                // WAREHOUSE
+                // =========================
+
+                .requestMatchers(
                     "/api/inventory/**",
-                    "/uploads/**"
-                ).permitAll()
-                .anyRequest().authenticated()
+                    "/api/suppliers/**"
+                )
+                .hasAnyRole(
+                    "ADMIN",
+                    "MANAGER",
+                    "WAREHOUSE"
+                )
+
+
+                // =========================
+                // CÒN LẠI
+                // =========================
+
+                .anyRequest()
+                .authenticated()
             )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+            // JWT Filter
+            .addFilterBefore(
+                jwtFilter,
+                UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
-
 }

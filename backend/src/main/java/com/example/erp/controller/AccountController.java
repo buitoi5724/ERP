@@ -24,7 +24,7 @@ import java.util.Optional; // Import lớp Optional
 @RestController
 
 // 📝 @RequestMapping: Đặt ra địa chỉ chính cho người quản lý này. Mọi yêu cầu liên quan đến tài khoản đều phải đến địa chỉ "/accounts".
-@RequestMapping("/accounts")
+@RequestMapping("/api/accounts")
 public class AccountController {
 
     // Đây là "nhân viên" chuyên xử lý mọi logic, nghiệp vụ liên quan đến tài khoản.

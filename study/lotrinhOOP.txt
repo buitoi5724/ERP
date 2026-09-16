@@ -1,9 +1,6 @@
-🚀 LỘ TRÌNH 7 NGÀY HỌC JAVA OOP
+🚀 LỘ TRÌNH HỌC JAVA OOP
 📅 Ngày 1: Java Constructor
-🎯 Mục tiêu:
-
-Hiểu constructor là gì và dùng thành thạo
-
+🎯 Mục tiêu:Hiểu constructor là gì và dùng thành thạo
 🧠 Note cần ghi:
 Constructor là gì?
 Đặc điểm:
@@ -804,7 +801,349 @@ public class Inner_Class_with_Constructor {
 }
 Kết Luận : 
 Có class năm bên trong của class và có constructor khi khỏi tạo đối tượng của nó nhưng khi tạo  object thì sẽ thông qua object của lớp bên ngoài 
+Java Inheritance
+Là cho phép class con dùng tất cả thuộc tính và mothed của lớp cha có 
+ví dụ 
+Class cha 
+package Java_Inheritance;
 
+class Animal {
+	void makeSound() {
+		System.out.println("Đây là hành động");
+	}
+}
+
+Class cha là Animal 
+Class con 
+package Java_Inheritance;
+
+public   class car extends Animal {
+
+	void hanhdong () {
+		super.makeSound();
+		System.out.println( " Ùn Ùn ");
+	}
+
+	public static void main(String[] args) {
+
+		car c = new car();
+
+		c.hanhdong();
+	}
+
+}
+Đây là class con kế thừa class của cha bằng extends của lớp cha
+Kết luận là : Dùng để tái sử dụng lại code 
+và tránh viết lặp lại 
+và tạo mỗi quan hệ 
+Java Abstract Classes
+Là tạo khuân mẫu cho lớp con rồi lớp con sẽ vẽ lại theo thuộc tính của lớp cha đưa ra 
+tao sẽ đưa mày tính diện tích thì mày sẽ kiếm hình nào đó tính diện tích đó đi 
+Ví dụ :
+Lớp Cha 
+package Java_Abstract_Classes;
+
+abstract  class Shape {
+
+	abstract double getArea();
+	abstract double getPerimeter() ;
+
+}
+Lớp con 
+package Java_Abstract_Classes;
+
+   class hinhchunhat extends Shape {
+ 
+		double length , width ;
+
+		hinhchunhat(double length , double  width){
+			this.length = length ;
+			this.width = width; 
+		}
+		@Override
+		double getArea() {
+			// TODO Auto-generated method stub
+			return length * width ;
+		}
+
+		@Override
+		double getPerimeter() {
+			// TODO Auto-generated method stub
+			return 2 * (length + width);
+		}
+
+		
+}
+Lớp con
+package Java_Abstract_Classes;
+
+public class hinhtron extends Shape {
+
+    double radius;
+
+    hinhtron(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    double getArea() {
+
+        return Math.PI * radius * radius;
+    }
+
+    @Override
+    double getPerimeter() {
+
+        return 2 * Math.PI * radius;
+    }
+}
+Ham main
+package Java_Abstract_Classes;
+
+public class main {
+
+	public static void main(String[] args) {
+
+		hinhtron c = new hinhtron(3);
+
+		hinhchunhat r = new hinhchunhat(4, 5);
+
+		System.out.println("Diện tích hình tròn : " + c.getArea());
+
+		System.out.println("Diện tích hình chữ nhật : " + r.getArea());
+
+		System.out.println( " Chu Vi Hình Tròn :" + c.getPerimeter());
+		System.out.println( " Chu Vi Hình Chữ nhật : " + r.getPerimeter());
+	}
+}
+Kết Luận là : Abstract là tạo khuân mẫu cho lớp con kế thừa toàn bộ của thuộc tính của lớp cha đưa ra rồi lớp con sẽ vẽ lại
+Tao sẽ đưa cho mày diện tích thì mày phải kiếm hình nào đó rồi tính đi 
+Java Interface
+Là luật cho class con nếu phải dùng thì implements rồi sử dụng 
+Ví dụ : 
+Class cha 
+package Java_Interface;
+
+public interface Payment {
+
+	void pay();
+
+
+}
+Class con ;
+ package Java_Interface;
+
+public class Momo  implements Payment{
+
+	@Override
+	public void pay() {
+		System.out.println( " Thanh Toán bảng Momo");
+	}
+
+
+}
+mvn javafx:run
+
+
+package com.learning.calculator;
+
+import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+public class CalculatorApplication extends Application {
+
+    TextField display = new TextField();
+
+    double firstNumber = 0;
+    String operator = "";
+
+    @Override
+    public void start(Stage stage) {
+
+        // màn hình
+        display.setEditable(false);
+        display.setPrefHeight(50);
+        display.setAlignment(Pos.CENTER_RIGHT);
+
+        // grid chứa button
+        GridPane grid = new GridPane();
+
+        // các nút calculator
+        String[] buttons = {
+
+        	    "%", "CE", "C", "X",
+
+        	    "1/x", "x²", "√", "/",
+
+        	    "7", "8", "9", "*",
+
+        	    "4", "5", "6", "-",
+
+        	    "1", "2", "3", "+",
+
+        	    "+/-", "0", ".", "="
+        	};
+
+        int row = 0;
+        int col = 0;
+
+        // tạo button bằng loop
+        for (String text : buttons) {
+
+            Button btn = new Button(text);
+
+            btn.setPrefSize(70, 70);
+
+            btn.setOnAction(e -> handButton(text));
+
+            grid.add(btn, col, row);
+
+            col++;
+
+            if (col == 4) {
+                col = 0;
+                row++;
+            }
+        }
+
+        VBox root = new VBox(10, display, grid);
+
+        root.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(root, 320, 420);
+
+        stage.setScene(scene);
+
+        stage.setTitle("Calculator");
+
+        stage.show();
+    }
+
+    // xử lý button
+    private void handButton(String value) {
+
+        // số và dấu .
+        if (value.matches("[0-9]") || value.equals(".")) {
+
+            display.appendText(value);
+        }
+
+        // phép toán
+        else if (
+                value.equals("+") ||
+                value.equals("-") ||
+                value.equals("*") ||
+                value.equals("/")
+        ) {
+
+            firstNumber =
+                    Double.parseDouble(display.getText());
+
+            operator = value;
+
+            display.clear();
+        }
+
+        // dấu =
+        else if (value.equals("=")) {
+
+            double secondNumber =
+                    Double.parseDouble(display.getText());
+
+            double result = 0;
+
+            switch (operator) {
+
+                case "+":
+                    result = firstNumber + secondNumber;
+                    break;
+
+                case "-":
+                    result = firstNumber - secondNumber;
+                    break;
+
+                case "*":
+                    result = firstNumber * secondNumber;
+                    break;
+
+                case "/":
+                    result = firstNumber / secondNumber;
+                    break;
+            }
+
+            display.setText(String.valueOf(result));
+        }
+
+        // clear hết
+        else if (value.equals("C")) {
+
+            display.clear();
+
+            firstNumber = 0;
+
+            operator = "";
+        }
+
+        // delete 1 ký tự
+        else if (value.equals("X")) {
+
+            String text = display.getText();
+
+            if (!text.isEmpty()) {
+
+                display.setText(
+                        text.substring(0, text.length() - 1)
+                );
+            }
+        }
+
+        // phần trăm
+        else if (value.equals("%")) {
+
+            double number =
+                    Double.parseDouble(display.getText());
+
+            double result = number / 100;
+
+            display.setText(String.valueOf(result));
+        }
+
+        // căn bậc 2
+        else if (value.equals("√")) {
+
+            double number =
+                    Double.parseDouble(display.getText());
+
+            double result = Math.sqrt(number);
+
+            display.setText(String.valueOf(result));
+        }
+        else if(value.equals("x²")) {
+
+            double number =
+                    Double.parseDouble(display.getText());
+
+            double result = number * number;
+
+            display.setText(String.valueOf(result));
+        }
+        else if(value.equals("CE")) {
+
+            display.clear();
+        }
+    }
+
+    public static void main(String[] args) {
+
+        launch();
+    }
+}
 🧠 Note:
 static là gì?
 static variable vs instance variable
