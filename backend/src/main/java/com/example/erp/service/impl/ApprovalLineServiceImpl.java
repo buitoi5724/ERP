@@ -1,15 +1,15 @@
+
 package com.example.erp.service.impl;
 
+import com.example.erp.dto.ApprovalLineResponse;
 import com.example.erp.entity.Approval;
 import com.example.erp.entity.ApprovalLine;
 import com.example.erp.entity.Employee;
 import com.example.erp.entity.RequestApprove;
-
 import com.example.erp.repository.ApprovalLineRepository;
 import com.example.erp.repository.ApprovalRepository;
 import com.example.erp.repository.EmployeeRepository;
 import com.example.erp.repository.RequestApproveRepository;
-
 import com.example.erp.service.ApprovalLineService;
 import com.example.erp.service.CurrentUserService;
 
@@ -21,17 +21,12 @@ import java.util.List;
 
 @Service
 @Transactional
-public class ApprovalLineServiceImpl
-        implements ApprovalLineService {
+public class ApprovalLineServiceImpl implements ApprovalLineService {
 
-	private final CurrentUserService currentUserService;
-	
+    private final CurrentUserService currentUserService;
     private final ApprovalLineRepository approvalLineRepository;
-
     private final EmployeeRepository employeeRepository;
-
     private final ApprovalRepository approvalRepository;
-
     private final RequestApproveRepository requestApproveRepository;
 
     public ApprovalLineServiceImpl(
@@ -39,7 +34,7 @@ public class ApprovalLineServiceImpl
             EmployeeRepository employeeRepository,
             ApprovalRepository approvalRepository,
             RequestApproveRepository requestApproveRepository,
-            CurrentUserService currentUserService ) {
+            CurrentUserService currentUserService) {
 
         this.approvalLineRepository = approvalLineRepository;
         this.employeeRepository = employeeRepository;
@@ -48,49 +43,49 @@ public class ApprovalLineServiceImpl
         this.currentUserService = currentUserService;
     }
 
-    // =====================================================
+    // =========================================================
     // GET ALL
-    // =====================================================
+    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
     public List<ApprovalLine> getAll() {
-
         return approvalLineRepository.findAll();
     }
-    // =====================================================
+
+    // =========================================================
     // GET BY ID
-    // =====================================================
+    // =========================================================
+
     @Override
     @Transactional(readOnly = true)
     public ApprovalLine getById(Long id) {
-
         return approvalLineRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
-                                "Không tìm thấy ApprovalLine với ID: "
-                                        + id
+                                "Không tìm thấy ApprovalLine với ID: " + id
                         )
                 );
     }
-    // =====================================================
+
+    // =========================================================
     // GET BY APPROVAL ID
-    // =====================================================
+    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
-    public List<ApprovalLine> getByApprovalId(
-            Long approvalId) {
+    public List<ApprovalLineResponse> getByApprovalId(Long approvalId) {
 
         return approvalLineRepository
-                .findByApprovalIdOrderByApprovalOrderAsc(
-                        approvalId
-                );
+                .findByApprovalIdOrderByApprovalOrderAsc(approvalId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    // =====================================================
+    // =========================================================
     // GET BY APPROVAL ID + ORDER
-    // =====================================================
+    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
@@ -112,9 +107,10 @@ public class ApprovalLineServiceImpl
                         )
                 );
     }
-    // =====================================================
+
+    // =========================================================
     // GET BY APPROVER
-    // =====================================================
+    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
@@ -123,15 +119,12 @@ public class ApprovalLineServiceImpl
             String status) {
 
         return approvalLineRepository
-                .findByApproverEmpIdAndStatus(
-                        empId,
-                        status
-                );
+                .findByApproverEmpIdAndStatus(empId, status);
     }
 
-    // =====================================================
+    // =========================================================
     // GET BY ACTION EMPLOYEE
-    // =====================================================
+    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
@@ -140,29 +133,81 @@ public class ApprovalLineServiceImpl
             String status) {
 
         return approvalLineRepository
-                .findByActionEmployeeEmpIdAndStatus(
-                        empId,
-                        status
-                );
+                .findByActionEmployeeEmpIdAndStatus(empId, status);
     }
 
-    // =====================================================
-    // CREATE
-    // =====================================================
+    // =========================================================
+    // MY PENDING APPROVALS
+    // =========================================================
 
     @Override
-    public ApprovalLine create(
-            ApprovalLine approvalLine) {
+    @Transactional(readOnly = true)
+    public List<ApprovalLineResponse> getMyPendingApprovals() {
+
+        Employee currentEmployee =
+                currentUserService.getCurrentEmployee();
+
+        if (currentEmployee == null) {
+            throw new RuntimeException(
+                    "Tài khoản chưa được liên kết với Employee"
+            );
+        }
+
+        List<ApprovalLine> lines =
+                approvalLineRepository
+                        .findByApproverEmpIdAndStatusAndApprovalRequestStatus(
+                                currentEmployee.getEmpId(),
+                                "PENDING",
+                                "PENDING"
+                        );
+
+        return lines.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    // =========================================================
+    // MY APPROVAL HISTORY
+    // =========================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ApprovalLineResponse> getMyApprovalHistory() {
+
+        Employee currentEmployee =
+                currentUserService.getCurrentEmployee();
+
+        if (currentEmployee == null) {
+            throw new RuntimeException(
+                    "Tài khoản chưa được liên kết với Employee"
+            );
+        }
+
+        List<ApprovalLine> lines =
+                approvalLineRepository
+                        .findByActionEmployeeEmpIdOrderByApprovedAtDesc(
+                                currentEmployee.getEmpId()
+                        );
+
+        return lines.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    // =========================================================
+    // CREATE
+    // =========================================================
+
+    @Override
+    public ApprovalLine create(ApprovalLine approvalLine) {
 
         if (approvalLine.getApproval() == null) {
-
             throw new RuntimeException(
                     "Approval không được để trống"
             );
         }
 
         if (approvalLine.getApprover() == null) {
-
             throw new RuntimeException(
                     "Người duyệt không được để trống"
             );
@@ -170,48 +215,35 @@ public class ApprovalLineServiceImpl
 
         if (approvalLine.getApprovalOrder() == null
                 || approvalLine.getApprovalOrder() <= 0) {
-
             throw new RuntimeException(
                     "Thứ tự duyệt phải lớn hơn 0"
             );
         }
 
         if (approvalLine.getStatus() == null
-                || approvalLine.getStatus()
-                        .trim()
-                        .isEmpty()) {
-
+                || approvalLine.getStatus().isBlank()) {
             approvalLine.setStatus("WAITING");
         }
 
-        return approvalLineRepository.save(
-                approvalLine
-        );
+        return approvalLineRepository.save(approvalLine);
     }
 
-    // =====================================================
+    // =========================================================
     // UPDATE
-    // =====================================================
+    // =========================================================
 
     @Override
-    public ApprovalLine update(
-            Long id,
-            ApprovalLine approvalLine) {
+    public ApprovalLine update(Long id, ApprovalLine approvalLine) {
 
-        ApprovalLine existing =
-                getById(id);
+        ApprovalLine existing = getById(id);
 
         if (approvalLine.getApprover() != null) {
-
-            existing.setApprover(
-                    approvalLine.getApprover()
-            );
+            existing.setApprover(approvalLine.getApprover());
         }
 
         if (approvalLine.getApprovalOrder() != null) {
 
             if (approvalLine.getApprovalOrder() <= 0) {
-
                 throw new RuntimeException(
                         "Thứ tự duyệt phải lớn hơn 0"
                 );
@@ -223,329 +255,345 @@ public class ApprovalLineServiceImpl
         }
 
         if (approvalLine.getStatus() != null
-                && !approvalLine.getStatus()
-                        .trim()
-                        .isEmpty()) {
-
-            existing.setStatus(
-                    approvalLine.getStatus()
-            );
+                && !approvalLine.getStatus().isBlank()) {
+            existing.setStatus(approvalLine.getStatus());
         }
 
         if (approvalLine.getComment() != null) {
-
-            existing.setComment(
-                    approvalLine.getComment()
-            );
+            existing.setComment(approvalLine.getComment());
         }
 
-        return approvalLineRepository.save(
-                existing
-        );
+        return approvalLineRepository.save(existing);
     }
 
-    // =====================================================
-    // APPROVE
-    // =====================================================
+    // =========================================================
+    // CHECK CURRENT APPROVER
+    // =========================================================
 
-    @Override
-    public ApprovalLine approve(
-            Long id,
-            Long actionEmployeeId,
-            String comment) {
+    private Employee getAuthorizedEmployee(ApprovalLine line) {
 
-        // ---------------------------------------------
-        // 1. Lấy ApprovalLine hiện tại
-        // ---------------------------------------------
+        Employee currentEmployee =
+                currentUserService.getCurrentEmployee();
 
-        ApprovalLine currentLine =
-                getById(id);
-
-        // ---------------------------------------------
-        // 2. Kiểm tra trạng thái
-        // ---------------------------------------------
-
-        if (!"PENDING".equals(
-                currentLine.getStatus())) {
-
+        if (currentEmployee == null) {
             throw new RuntimeException(
-                    "Chỉ có dòng phê duyệt đang PENDING mới được duyệt"
+                    "Tài khoản chưa được liên kết với Employee"
             );
         }
 
-        // ---------------------------------------------
-        // 3. Lấy nhân viên thực hiện
-        // ---------------------------------------------
+        Employee approver = line.getApprover();
 
-        Employee actionEmployee =
-                employeeRepository
-                        .findById(actionEmployeeId)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Không tìm thấy nhân viên xử lý với ID: "
-                                                + actionEmployeeId
-                                                
-                                                
-                                )
-                                
-                        );
-
-        // ---------------------------------------------
-        // 4. Cập nhật line hiện tại
-        // ---------------------------------------------
-
-        currentLine.setStatus(
-                "APPROVED"
-        );
-
-        currentLine.setActionEmployee(
-                actionEmployee
-        );
-
-        currentLine.setApprovedAt(
-                LocalDateTime.now()
-        );
-
-        currentLine.setComment(
-                comment
-        );
-
-        ApprovalLine savedLine =
-                approvalLineRepository.save(
-                        currentLine
-                );
-
-        // ---------------------------------------------
-        // 5. Lấy Approval
-        // ---------------------------------------------
-
-        Approval approval =
-                currentLine.getApproval();
-
-        if (approval == null) {
-
+        if (approver == null) {
             throw new RuntimeException(
-                    "Approval không tồn tại"
+                    "ApprovalLine chưa có người duyệt"
             );
         }
 
-        Long approvalId =
-                approval.getId();
+        // Admin được phép xử lý theo chính sách hiện tại.
+        // Người dùng thông thường chỉ được xử lý dòng giao cho mình.
+        if (!currentUserService.isCurrentUserAdmin()
+                && !approver.getEmpId().equals(
+                        currentEmployee.getEmpId()
+                )) {
 
-        // ---------------------------------------------
-        // 6. Lấy tất cả ApprovalLine
-        // ---------------------------------------------
+            throw new RuntimeException(
+                    "Bạn không có quyền xử lý đơn này"
+            );
+        }
+
+        return currentEmployee;
+    }
+
+    // =========================================================
+    // CHECK APPROVAL PROCESS
+    // =========================================================
+
+    private List<ApprovalLine> validateApprovalProcess(
+            ApprovalLine currentLine) {
+
+        if (!"PENDING".equals(currentLine.getStatus())) {
+            throw new RuntimeException(
+                    "Chỉ được xử lý bước đang PENDING"
+            );
+        }
+
+        Approval approval = currentLine.getApproval();
+
+        if (approval == null || approval.getRequest() == null) {
+            throw new RuntimeException(
+                    "Không tìm thấy Approval hoặc Request"
+            );
+        }
+
+        RequestApprove request = approval.getRequest();
+
+        if (!"PENDING".equals(approval.getStatus())
+                || !"PENDING".equals(request.getStatus())) {
+            throw new RuntimeException(
+                    "Đơn không còn trong quy trình phê duyệt"
+            );
+        }
 
         List<ApprovalLine> lines =
                 approvalLineRepository
                         .findByApprovalIdOrderByApprovalOrderAsc(
-                                approvalId
+                                approval.getId()
                         );
 
-        // ---------------------------------------------
-        // 7. Tìm người duyệt tiếp theo
-        // ---------------------------------------------
-
-        ApprovalLine nextLine = null;
-
+        // Kiểm tra tất cả các bước trước phải APPROVED
         for (ApprovalLine line : lines) {
 
-            if ("WAITING".equals(
-                    line.getStatus())) {
+            if (line.getApprovalOrder()
+                    < currentLine.getApprovalOrder()
+                    && !"APPROVED".equals(line.getStatus())) {
 
-                nextLine = line;
-
-                break;
+                throw new RuntimeException(
+                        "Bạn phải chờ hoàn tất bước "
+                                + line.getApprovalOrder()
+                );
             }
         }
 
-        // ---------------------------------------------
-        // 8. Nếu còn người duyệt
-        // ---------------------------------------------
-
-        if (nextLine != null) {
-
-            nextLine.setStatus(
-                    "PENDING"
-            );
-
-            approvalLineRepository.save(
-                    nextLine
-            );
-
-            return savedLine;
-        }
-
-        // ---------------------------------------------
-        // 9. Không còn người duyệt
-        //    → Approval hoàn thành
-        // ---------------------------------------------
-
-        approval.setStatus(
-                "APPROVED"
-        );
-
-        approval.setCompletedAt(
-                LocalDateTime.now()
-        );
-
-        approvalRepository.save(
-                approval
-        );
-
-        // ---------------------------------------------
-        // 10. Cập nhật RequestApprove
-        // ---------------------------------------------
-
-        RequestApprove request =
-                approval.getRequest();
-
-        if (request == null) {
-
-            throw new RuntimeException(
-                    "RequestApprove không tồn tại"
-            );
-        }
-
-        request.setStatus(
-                "APPROVED"
-        );
-
-        request.setUpdatedAt(
-                LocalDateTime.now()
-        );
-
-        requestApproveRepository.save(
-                request
-        );
-
-        return savedLine;
+        return lines;
     }
 
-    // =====================================================
-    // REJECT
-    // =====================================================
+    // =========================================================
+    // APPROVE
+    // =========================================================
 
     @Override
-    public ApprovalLine reject(
+    public ApprovalLineResponse approve(
             Long id,
             Long actionEmployeeId,
             String comment) {
 
-        // ---------------------------------------------
-        // 1. Lấy ApprovalLine
-        // ---------------------------------------------
+        // 1. Lấy dòng phê duyệt
+        ApprovalLine currentLine = getById(id);
 
-        ApprovalLine existing =
-                getById(id);
-
-        // ---------------------------------------------
-        // 2. Kiểm tra trạng thái
-        // ---------------------------------------------
-
-        if (!"PENDING".equals(
-                existing.getStatus())) {
-
-            throw new RuntimeException(
-                    "Chỉ có dòng phê duyệt đang PENDING mới được từ chối"
-            );
-        }
-
-        // ---------------------------------------------
-        // 3. Lấy nhân viên thực hiện
-        // ---------------------------------------------
-
+        // 2. Kiểm tra người đang đăng nhập có quyền duyệt
         Employee actionEmployee =
-                employeeRepository
-                        .findById(actionEmployeeId)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Không tìm thấy nhân viên xử lý với ID: "
-                                                + actionEmployeeId
-                                )
-                        );
+                getAuthorizedEmployee(currentLine);
 
-        // ---------------------------------------------
-        // 4. Cập nhật ApprovalLine
-        // ---------------------------------------------
+        // 3. Kiểm tra trạng thái và thứ tự phê duyệt
+        List<ApprovalLine> lines =
+                validateApprovalProcess(currentLine);
 
-        existing.setStatus(
-                "REJECTED"
-        );
+        Approval approval = currentLine.getApproval();
+        RequestApprove request = approval.getRequest();
 
-        existing.setActionEmployee(
-                actionEmployee
-        );
-
-        existing.setApprovedAt(
-                LocalDateTime.now()
-        );
-
-        existing.setComment(
-                comment
-        );
+        // 4. Hoàn thành bước hiện tại
+        currentLine.setStatus("APPROVED");
+        currentLine.setActionEmployee(actionEmployee);
+        currentLine.setApprovedAt(LocalDateTime.now());
+        currentLine.setComment(comment);
 
         ApprovalLine savedLine =
-                approvalLineRepository.save(
-                        existing
+                approvalLineRepository.save(currentLine);
+
+        // 5. Tìm bước tiếp theo đang WAITING
+        ApprovalLine nextLine = null;
+
+        for (ApprovalLine line : lines) {
+
+            if (line.getApprovalOrder()
+                    > currentLine.getApprovalOrder()
+                    && "WAITING".equals(line.getStatus())) {
+
+                if (nextLine == null
+                        || line.getApprovalOrder()
+                        < nextLine.getApprovalOrder()) {
+                    nextLine = line;
+                }
+            }
+        }
+
+        // 6. Nếu còn bước tiếp theo, kích hoạt người duyệt kế tiếp
+        if (nextLine != null) {
+
+            nextLine.setStatus("PENDING");
+
+            approvalLineRepository.save(nextLine);
+
+            // Đơn tổng thể vẫn PENDING
+            request.setStatus("PENDING");
+            request.setUpdatedAt(LocalDateTime.now());
+
+            requestApproveRepository.save(request);
+
+            return toResponse(savedLine);
+        }
+
+        // 7. Không còn bước nào phải duyệt
+        boolean allApproved = lines.stream()
+                .allMatch(line ->
+                        line.getId().equals(currentLine.getId())
+                                || "APPROVED".equals(line.getStatus())
                 );
 
-        // ---------------------------------------------
-        // 5. Lấy Approval
-        // ---------------------------------------------
-
-        Approval approval =
-                existing.getApproval();
-
-        if (approval == null) {
-
+        if (!allApproved) {
             throw new RuntimeException(
-                    "Approval không tồn tại"
+                    "Quy trình chưa hoàn tất hoặc còn bước chưa được duyệt"
             );
         }
 
-        // ---------------------------------------------
-        // 6. Approval bị từ chối
-        // ---------------------------------------------
+        // 8. Chỉ lúc này mới hoàn thành đơn
+        approval.setStatus("APPROVED");
+        approval.setCompletedAt(LocalDateTime.now());
 
-        approval.setStatus(
-                "REJECTED"
-        );
+        approvalRepository.save(approval);
 
-        approval.setCompletedAt(
-                LocalDateTime.now()
-        );
+        request.setStatus("APPROVED");
+        request.setUpdatedAt(LocalDateTime.now());
 
-        approvalRepository.save(
-                approval
-        );
+        requestApproveRepository.save(request);
 
-        // ---------------------------------------------
-        // 7. Request bị từ chối
-        // ---------------------------------------------
+        return toResponse(savedLine);
+    }
 
-        RequestApprove request =
-                approval.getRequest();
+    // =========================================================
+    // REJECT
+    // =========================================================
 
-        if (request == null) {
+    @Override
+    public ApprovalLineResponse reject(
+            Long id,
+            Long actionEmployeeId,
+            String comment) {
 
-            throw new RuntimeException(
-                    "RequestApprove không tồn tại"
-            );
+        // 1. Lấy dòng phê duyệt
+        ApprovalLine currentLine = getById(id);
+
+        // 2. Kiểm tra quyền
+        Employee actionEmployee =
+                getAuthorizedEmployee(currentLine);
+
+        // 3. Kiểm tra quy trình
+        List<ApprovalLine> lines =
+                validateApprovalProcess(currentLine);
+
+        Approval approval = currentLine.getApproval();
+        RequestApprove request = approval.getRequest();
+
+        // 4. Ghi nhận từ chối
+        currentLine.setStatus("REJECTED");
+        currentLine.setActionEmployee(actionEmployee);
+        currentLine.setApprovedAt(LocalDateTime.now());
+        currentLine.setComment(comment);
+
+        ApprovalLine savedLine =
+                approvalLineRepository.save(currentLine);
+
+        // 5. Hủy các bước còn lại
+        for (ApprovalLine line : lines) {
+
+            if (!line.getId().equals(currentLine.getId())
+                    && ("PENDING".equals(line.getStatus())
+                    || "WAITING".equals(line.getStatus()))) {
+
+                line.setStatus("CANCELLED");
+                approvalLineRepository.save(line);
+            }
         }
 
-        request.setStatus(
-                "REJECTED"
+        // 6. Kết thúc quy trình
+        approval.setStatus("REJECTED");
+        approval.setCompletedAt(LocalDateTime.now());
+
+        approvalRepository.save(approval);
+
+        // 7. Cập nhật đơn
+        request.setStatus("REJECTED");
+        request.setUpdatedAt(LocalDateTime.now());
+
+        requestApproveRepository.save(request);
+
+        return toResponse(savedLine);
+    }
+
+    // =========================================================
+    // CONVERT APPROVAL LINE -> DTO
+    // =========================================================
+
+    private ApprovalLineResponse toResponse(ApprovalLine line) {
+
+        ApprovalLineResponse response =
+                new ApprovalLineResponse();
+
+        response.setId(line.getId());
+        response.setApprovalOrder(line.getApprovalOrder());
+        response.setStatus(line.getStatus());
+        response.setApprovedAt(line.getApprovedAt());
+        response.setComment(line.getComment());
+
+        response.setApprover(
+                toEmployeeResponse(line.getApprover())
         );
 
-        request.setUpdatedAt(
-                LocalDateTime.now()
+        response.setActionEmployee(
+                toEmployeeResponse(line.getActionEmployee())
         );
 
-        requestApproveRepository.save(
-                request
-        );
+        Approval approval = line.getApproval();
 
-        return savedLine;
+        if (approval != null) {
+
+            ApprovalLineResponse.ApprovalResponse approvalResponse =
+                    new ApprovalLineResponse.ApprovalResponse();
+
+            approvalResponse.setId(approval.getId());
+            approvalResponse.setStatus(approval.getStatus());
+            approvalResponse.setStartedAt(approval.getStartedAt());
+            approvalResponse.setCompletedAt(approval.getCompletedAt());
+
+            RequestApprove request = approval.getRequest();
+
+            if (request != null) {
+
+                ApprovalLineResponse.RequestResponse requestResponse =
+                        new ApprovalLineResponse.RequestResponse();
+
+                requestResponse.setId(request.getId());
+                requestResponse.setRequestCode(request.getRequestCode());
+                requestResponse.setRequestType(request.getRequestType());
+                requestResponse.setTitle(request.getTitle());
+                requestResponse.setContent(request.getContent());
+                requestResponse.setStatus(request.getStatus());
+                requestResponse.setCreatedAt(request.getCreatedAt());
+                requestResponse.setUpdatedAt(request.getUpdatedAt());
+
+                requestResponse.setEmployee(
+                        toEmployeeResponse(request.getEmployee())
+                );
+
+                approvalResponse.setRequest(requestResponse);
+            }
+
+            response.setApproval(approvalResponse);
+        }
+
+        return response;
+    }
+
+    // =========================================================
+    // CONVERT EMPLOYEE -> DTO
+    // =========================================================
+
+    private ApprovalLineResponse.EmployeeResponse toEmployeeResponse(
+            Employee employee) {
+
+        if (employee == null) {
+            return null;
+        }
+
+        ApprovalLineResponse.EmployeeResponse response =
+                new ApprovalLineResponse.EmployeeResponse();
+
+        response.setEmpId(employee.getEmpId());
+        response.setEmpCode(employee.getEmpCode());
+        response.setEmpName(employee.getEmpName());
+        response.setEmail(employee.getEmail());
+        response.setActive(employee.getActive());
+
+        return response;
     }
 }

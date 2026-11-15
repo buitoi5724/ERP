@@ -1,5 +1,6 @@
 package com.example.erp.controller;
 
+import com.example.erp.dto.ApprovalResponse;
 import com.example.erp.entity.Approval;
 import com.example.erp.service.ApprovalService;
 
@@ -21,6 +22,11 @@ public class ApprovalController {
         this.approvalService = approvalService;
     }
 
+
+    // =========================================================
+    // GET ALL
+    // =========================================================
+
     // GET /api/approvals
     @GetMapping
     public ResponseEntity<List<Approval>> getAll() {
@@ -29,6 +35,11 @@ public class ApprovalController {
                 approvalService.getAll()
         );
     }
+
+
+    // =========================================================
+    // GET BY ID
+    // =========================================================
 
     // GET /api/approvals/{id}
     @GetMapping("/{id}")
@@ -40,15 +51,27 @@ public class ApprovalController {
         );
     }
 
+
+    // =========================================================
+    // GET BY REQUEST
+    // =========================================================
+
     // GET /api/approvals/request/{requestId}
     @GetMapping("/request/{requestId}")
-    public ResponseEntity<Approval> getByRequestId(
+    public ResponseEntity<ApprovalResponse> getByRequestId(
             @PathVariable Long requestId) {
 
         return ResponseEntity.ok(
-                approvalService.getByRequestId(requestId)
+                approvalService.getByRequestId(
+                        requestId
+                )
         );
     }
+
+
+    // =========================================================
+    // CREATE
+    // =========================================================
 
     // POST /api/approvals
     @PostMapping
@@ -59,6 +82,11 @@ public class ApprovalController {
                 approvalService.create(approval)
         );
     }
+
+
+    // =========================================================
+    // UPDATE
+    // =========================================================
 
     // PUT /api/approvals/{id}
     @PutMapping("/{id}")

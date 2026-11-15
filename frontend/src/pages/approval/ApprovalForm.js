@@ -1,5 +1,5 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import React, { useEffect, useMemo, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -8,427 +8,307 @@ import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import { FileUpload } from "primereact/fileupload";
 import { Divider } from "primereact/divider";
+import { Toast } from "primereact/toast";
 
 import ApprovalService from "./approvalService";
+import "./ApprovalForm.css";
 
-export default function ApprovalForm({
-    visible,
-    onClose,
-    onSuccess
-}) {
+// Danh sách loại yêu cầu
+const REQUEST_TYPES = [
+    { label: "Nghỉ ốm", value: "OM", icon: "pi pi-heart" },
+    { label: "Nghỉ phép năm", value: "NGHI_PHEP", icon: "pi pi-calendar" },
+    { label: "Nghỉ không hưởng lương", value: "NGHI_KHONG_LUONG", icon: "pi pi-wallet" },
+    { label: "Nghỉ việc riêng", value: "NGHI_VIEC_RIENG", icon: "pi pi-user" },
+    { label: "Nghỉ thai sản", value: "NGHI_THAI_SAN", icon: "pi pi-users" },
+    { label: "Nghỉ bù", value: "NGHI_BU", icon: "pi pi-clock" },
+    { label: "Đề nghị mua hàng", value: "MUA_HANG", icon: "pi pi-shopping-cart" },
+    { label: "Đề nghị thanh toán", value: "THANH_TOAN", icon: "pi pi-money-bill" },
+    { label: "Đề nghị xuất kho", value: "XUAT_KHO", icon: "pi pi-box" },
+    { label: "Yêu cầu khác", value: "KHAC", icon: "pi pi-file" }
+];
 
-    // =========================
-    // FORM DATA
-    // =========================
+// Các loại đơn cần nhập thời gian nghỉ
+const LEAVE_TYPES = [
+    "NGHI_PHEP",
+    "OM",
+    "NGHI_KHONG_LUONG",
+    "NGHI_VIEC_RIENG",
+    "NGHI_THAI_SAN",
+    "NGHI_BU"
+];
 
-    const [formData, setFormData] = useState({
-        requestCode: "",
-        requestType: "",
-        title: "",
-        content: "",
+// Thông báo khi đơn nghỉ bị trùng
+const CONFLICT_MESSAGE =
+    "Đơn của bạn đã bị trùng ngày nghỉ với nhân viên khác rồi. Vui lòng chuyển ngày nghỉ sang ngày khác.";
 
-        startDate: "",
-        endDate: "",
+// Khởi tạo form
+const createForm = () => ({
+    requestCode: `REQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+    requestType: "",
+    title: "",
+    content: "",
+    startDate: "",
+    endDate: "",
+    itemName: "",
+    quantity: null,
+    amount: null,
+    reason: ""
+});
 
-        itemName: "",
-        quantity: null,
+// Lấy thông báo lỗi từ backend
+const getErrorMessage = (err) => {
+    const data = err?.response?.data;
 
-        amount: null,
+    if (typeof data === "string") {
+        return data;
+    }
 
-        reason: ""
-    });
+    return (
+        data?.message ||
+        data?.error ||
+        data?.detail ||
+        err?.message ||
+        "Không thể tạo yêu cầu phê duyệt."
+    );
+};
 
+export default function ApprovalForm({ visible, onClose, onSuccess }) {
+    const toastRef = useRef(null);
+
+    const [formData, setFormData] = useState(createForm);
     const [files, setFiles] = useState([]);
-
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
-
-    // =========================
-    // REQUEST TYPES
-    // =========================
-
-    const requestTypes = [
-        {
-            label: "Đơn ốm",
-            value: "OM",
-            icon: "pi pi-heart"
-        },
-        {
-            label: "Nghỉ phép",
-            value: "NGHI_PHEP",
-            icon: "pi pi-calendar"
-        },
-        {
-            label: "Đề nghị mua hàng",
-            value: "MUA_HANG",
-            icon: "pi pi-shopping-cart"
-        },
-        {
-            label: "Đề nghị thanh toán",
-            value: "THANH_TOAN",
-            icon: "pi pi-money-bill"
-        },
-        {
-            label: "Đề nghị xuất kho",
-            value: "XUAT_KHO",
-            icon: "pi pi-box"
-        },
-        {
-            label: "Yêu cầu khác",
-            value: "KHAC",
-            icon: "pi pi-file"
-        }
-    ];
-
-
-    // =========================
-    // GENERATE REQUEST CODE
-    // =========================
-
-    const generateRequestCode = () => {
-
-        const now = new Date();
-
-        const year = now.getFullYear();
-
-        const random =
-            Math.floor(1000 + Math.random() * 9000);
-
-        return `REQ-${year}-${random}`;
-    };
-
-
-    // =========================
-    // RESET FORM
-    // =========================
-
-    const resetForm = () => {
-
-        setFormData({
-            requestCode: generateRequestCode(),
-            requestType: "",
-            title: "",
-            content: "",
-
-            startDate: "",
-            endDate: "",
-
-            itemName: "",
-            quantity: null,
-
-            amount: null,
-
-            reason: ""
+    // Hiển thị thông báo
+    const showToast = (severity, summary, detail, life = 5000) => {
+        toastRef.current?.show({
+            severity,
+            summary,
+            detail,
+            life,
+            closable: true
         });
-
-        setFiles([]);
-        setError("");
     };
 
+    // Thông báo lỗi trùng lịch
+    const showConflictToast = () => {
+        toastRef.current?.show({
+            severity: "error",
+            summary: "Đơn nghỉ bị trùng lịch!",
+            detail: CONFLICT_MESSAGE,
+            life: 6000,
+            closable: true,
+            sticky: false
+        });
+    };
 
-    // =========================
-    // INITIALIZE
-    // =========================
-
+    // Reset form khi mở Dialog
     useEffect(() => {
-
         if (visible) {
-            resetForm();
+            setFormData(createForm());
+            setFiles([]);
         }
-
     }, [visible]);
 
-
-    // =========================
-    // CHANGE
-    // =========================
-
-    const handleChange = (field, value) => {
-
+    // Cập nhật dữ liệu form
+    const change = (field, value) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
-
-        setError("");
     };
 
+    // Loại yêu cầu đang chọn
+    const selectedType = useMemo(
+        () => REQUEST_TYPES.find(x => x.value === formData.requestType),
+        [formData.requestType]
+    );
 
-    // =========================
-    // SELECTED TYPE
-    // =========================
+    // Kiểm tra loại đơn nghỉ
+    const isLeave = LEAVE_TYPES.includes(formData.requestType);
 
-    const selectedType = useMemo(() => {
-
-        return requestTypes.find(
-            item => item.value === formData.requestType
-        );
-
-    }, [formData.requestType]);
-
-
-    // =========================
-    // CALCULATE DAYS
-    // =========================
-
+    // Tính tổng ngày nghỉ theo lịch, bao gồm cuối tuần
     const totalDays = useMemo(() => {
-
-        if (
-            !formData.startDate ||
-            !formData.endDate
-        ) {
+        if (!formData.startDate || !formData.endDate) {
             return 0;
         }
 
-        const start =
-            new Date(formData.startDate);
-
-        const end =
-            new Date(formData.endDate);
+        const start = new Date(`${formData.startDate}T00:00:00`);
+        const end = new Date(`${formData.endDate}T00:00:00`);
 
         if (end < start) {
             return 0;
         }
 
-        const difference =
-            end.getTime() - start.getTime();
-
-        return Math.floor(
-            difference / (1000 * 60 * 60 * 24)
+        return Math.round(
+            (end - start) / (1000 * 60 * 60 * 24)
         ) + 1;
+    }, [formData.startDate, formData.endDate]);
 
-    }, [
-        formData.startDate,
-        formData.endDate
-    ]);
+    // Kiểm tra dữ liệu trước khi gửi
+    const validate = () => {
+        const {
+            requestType,
+            title,
+            startDate,
+            endDate,
+            reason,
+            itemName,
+            quantity,
+            amount
+        } = formData;
 
-
-    // =========================
-    // VALIDATION
-    // =========================
-
-    const validateForm = () => {
-
-        if (!formData.requestType) {
+        if (!requestType) {
             return "Vui lòng chọn loại yêu cầu.";
         }
 
-        if (!formData.title.trim()) {
+        if (!title.trim()) {
             return "Vui lòng nhập tiêu đề yêu cầu.";
         }
 
-
-        // Đơn ốm / nghỉ phép
-
-        if (
-            formData.requestType === "OM" ||
-            formData.requestType === "NGHI_PHEP"
-        ) {
-
-            if (!formData.startDate) {
+        if (isLeave) {
+            if (!startDate) {
                 return "Vui lòng chọn ngày bắt đầu.";
             }
 
-            if (!formData.endDate) {
+            if (!endDate) {
                 return "Vui lòng chọn ngày kết thúc.";
             }
 
-            if (
-                new Date(formData.endDate) <
-                new Date(formData.startDate)
-            ) {
+            if (endDate < startDate) {
                 return "Ngày kết thúc không được trước ngày bắt đầu.";
             }
 
-            if (!formData.reason.trim()) {
-                return "Vui lòng nhập lý do.";
+            if (!reason.trim()) {
+                return "Vui lòng nhập lý do nghỉ.";
             }
         }
 
-
-        // Mua hàng
-
-        if (formData.requestType === "MUA_HANG") {
-
-            if (!formData.itemName.trim()) {
+        if (requestType === "MUA_HANG") {
+            if (!itemName.trim()) {
                 return "Vui lòng nhập tên mặt hàng.";
             }
 
-            if (
-                !formData.quantity ||
-                formData.quantity <= 0
-            ) {
+            if (!quantity || quantity <= 0) {
                 return "Số lượng phải lớn hơn 0.";
             }
         }
 
-
-        // Thanh toán
-
-        if (formData.requestType === "THANH_TOAN") {
-
-            if (
-                !formData.amount ||
-                formData.amount <= 0
-            ) {
+        if (requestType === "THANH_TOAN") {
+            if (!amount || amount <= 0) {
                 return "Vui lòng nhập số tiền cần thanh toán.";
             }
 
-            if (!formData.reason.trim()) {
+            if (!reason.trim()) {
                 return "Vui lòng nhập nội dung thanh toán.";
             }
         }
 
-
         return null;
     };
 
-
-    // =========================
-    // SUBMIT
-    // =========================
-
-    const handleSubmit = async () => {
-
-        setError("");
-
-        const validationError =
-            validateForm();
-
-        if (validationError) {
-            setError(validationError);
+    // Đóng form
+    const handleClose = () => {
+        if (loading) {
             return;
         }
 
+        setFormData(createForm());
+        setFiles([]);
+        onClose?.();
+    };
+
+    // Gửi yêu cầu
+    const handleSubmit = async () => {
+        const validationError = validate();
+
+        if (validationError) {
+            showToast(
+                "warn",
+                "Thông tin chưa hợp lệ!",
+                validationError
+            );
+            return;
+        }
 
         try {
-
             setLoading(true);
 
-
             const payload = {
-                requestCode:
-                    formData.requestCode,
-
-                requestType:
-                    formData.requestType,
-
-                title:
-                    formData.title.trim(),
-
-                content:
-                    formData.content.trim(),
-
-                startDate:
-                    formData.startDate || null,
-
-                endDate:
-                    formData.endDate || null,
-
-                itemName:
-                    formData.itemName.trim() || null,
-
-                quantity:
-                    formData.quantity || null,
-
-                amount:
-                    formData.amount || null,
-
-                reason:
-                    formData.reason.trim() || null
+                requestCode: formData.requestCode,
+                requestType: formData.requestType,
+                title: formData.title.trim(),
+                content: formData.content.trim(),
+                startDate: isLeave ? formData.startDate : null,
+                endDate: isLeave ? formData.endDate : null,
+                itemName: formData.itemName.trim() || null,
+                quantity: formData.quantity || null,
+                amount: formData.amount || null,
+                reason: formData.reason.trim() || null
             };
 
+            console.log("========== GỬI YÊU CẦU ==========");
+            console.log("Payload:", payload);
+            console.log("Files:", files);
 
-            console.log(
-                "===== CREATE APPROVAL REQUEST ====="
+            const response = await ApprovalService.createRequest(payload);
+
+            console.log("Tạo yêu cầu thành công:", response);
+
+            showToast(
+                "success",
+                "Gửi yêu cầu thành công!",
+                "Yêu cầu của bạn đã được gửi đến cấp có thẩm quyền phê duyệt.",
+                4000
             );
 
-            console.log(payload);
+            // Reset dữ liệu và đóng Dialog sau khi gửi thành công
+            setFormData(createForm());
+            setFiles([]);
 
-            console.log(
-                "Attached files:",
-                files
-            );
-
-
-            const response =
-                await ApprovalService.createRequest(
-                    payload
-                );
-
-
-            if (onSuccess) {
-                onSuccess(response);
-            }
-
-            handleClose();
+            onSuccess?.(response);
+            onClose?.();
 
         } catch (err) {
+            const status = err?.response?.status;
+            const responseData = err?.response?.data;
+            const message = getErrorMessage(err);
 
-            console.error(
-                "Lỗi tạo yêu cầu phê duyệt:",
-                err
-            );
+            console.error("========== LỖI TẠO YÊU CẦU ==========");
+            console.error("HTTP Status:", status);
+            console.error("Response:", responseData);
+            console.error("Message:", message);
+            console.error("====================================");
 
-            const message =
-                err?.response?.data?.message ||
-                "Không thể tạo yêu cầu phê duyệt.";
+            const lowerMessage = String(message).toLowerCase();
 
-            setError(message);
+            // Nhận diện lỗi trùng ngày nghỉ
+            const isConflict =
+                status === 409 ||
+                lowerMessage.includes("trùng") ||
+                lowerMessage.includes("chồng lịch") ||
+                lowerMessage.includes("chồng lấn") ||
+                lowerMessage.includes("overlap");
+
+            if (isConflict) {
+                showConflictToast();
+            } else {
+                showToast(
+                    "error",
+                    "Không thể tạo yêu cầu!",
+                    message,
+                    5000
+                );
+            }
 
         } finally {
-
             setLoading(false);
-
         }
     };
 
-
-    // =========================
-    // CLOSE
-    // =========================
-
-    const handleClose = () => {
-
-        resetForm();
-
-        if (onClose) {
-            onClose();
-        }
-    };
-
-
-    // =========================
-    // FILE UPLOAD
-    // =========================
-
-    const handleFileSelect = (event) => {
-
-        setFiles(event.files);
-
-    };
-
-
-    const handleFileRemove = (event) => {
-
-        setFiles(prev =>
-            prev.filter(
-                file => file.name !== event.file.name
-            )
-        );
-
-    };
-
-
-    // =========================
-    // FOOTER
-    // =========================
-
+    // Footer
     const footer = (
-
         <div className="approval-form-footer">
-
             <Button
                 label="Hủy"
                 icon="pi pi-times"
@@ -443,588 +323,323 @@ export default function ApprovalForm({
                 icon="pi pi-send"
                 onClick={handleSubmit}
                 loading={loading}
+                disabled={loading}
             />
-
         </div>
     );
 
-
-    // =========================
-    // RENDER
-    // =========================
-
     return (
+        <>
+            {/* Toast popup */}
+            <Toast
+                ref={toastRef}
+                position="top-right"
+                baseZIndex={99999}
+                className="approval-toast"
+            />
 
-        <Dialog
-            header={
-                <div className="approval-form-dialog-header">
-
-                    <div className="approval-form-dialog-icon">
-                        <i className="pi pi-file-edit" />
-                    </div>
-
-                    <div>
-                        <div className="approval-form-dialog-title">
-                            Tạo yêu cầu
+            <Dialog
+                visible={visible}
+                onHide={handleClose}
+                modal
+                closable={!loading}
+                footer={footer}
+                className="approval-form-dialog"
+                style={{
+                    width: "760px",
+                    maxWidth: "95vw"
+                }}
+                header={
+                    <div className="approval-form-dialog-header">
+                        <div className="approval-form-dialog-icon">
+                            <i className="pi pi-file-edit" />
                         </div>
 
-                        <div className="approval-form-dialog-subtitle">
-                            Gửi yêu cầu để cấp có thẩm quyền phê duyệt
+                        <div>
+                            <div className="approval-form-dialog-title">
+                                Tạo yêu cầu
+                            </div>
+
+                            <div className="approval-form-dialog-subtitle">
+                                Gửi yêu cầu để cấp có thẩm quyền phê duyệt
+                            </div>
                         </div>
                     </div>
+                }
+            >
+                <div className="approval-form">
 
-                </div>
-            }
-            visible={visible}
-            onHide={handleClose}
-            footer={footer}
-            modal
-            closable={!loading}
-            style={{
-                width: "760px",
-                maxWidth: "95vw"
-            }}
-        >
+                    {/* THÔNG TIN CHUNG */}
+                    <section className="approval-form-section">
+                        <div className="approval-form-section-title">
+                            <i className="pi pi-info-circle" />
+                            Thông tin yêu cầu
+                        </div>
 
-            <div className="approval-form">
+                        <div className="approval-form-grid">
+                            <div className="approval-form-field">
+                                <label>Mã yêu cầu</label>
 
+                                <InputText
+                                    value={formData.requestCode}
+                                    readOnly
+                                    disabled={loading}
+                                />
 
-                {/* ERROR */}
+                                <small>Mã được hệ thống tự động tạo</small>
+                            </div>
 
-                {error && (
+                            <div className="approval-form-field">
+                                <label>
+                                    Loại yêu cầu <span>*</span>
+                                </label>
 
-                    <div className="approval-form-error">
+                                <Dropdown
+                                    value={formData.requestType}
+                                    options={REQUEST_TYPES}
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    onChange={e => change("requestType", e.value)}
+                                    placeholder="Chọn loại yêu cầu"
+                                    className="approval-form-dropdown"
+                                    disabled={loading}
+                                />
+                            </div>
+                        </div>
 
-                        <i className="pi pi-exclamation-circle" />
+                        {selectedType && (
+                            <div className="approval-form-type-info">
+                                <i className={selectedType.icon} />
 
-                        <span>
-                            {error}
-                        </span>
-
-                    </div>
-
-                )}
-
-
-                {/* =========================
-                    BASIC INFORMATION
-                ========================= */}
-
-                <div className="approval-form-section">
-
-                    <div className="approval-form-section-title">
-                        <i className="pi pi-info-circle" />
-                        Thông tin yêu cầu
-                    </div>
-
-
-                    <div className="approval-form-grid">
-
-                        {/* REQUEST CODE */}
+                                <span>
+                                    Bạn đang tạo: <strong>{selectedType.label}</strong>
+                                </span>
+                            </div>
+                        )}
 
                         <div className="approval-form-field">
-
                             <label>
-                                Mã yêu cầu
+                                Tiêu đề <span>*</span>
                             </label>
 
                             <InputText
-                                value={
-                                    formData.requestCode
-                                }
-                                readOnly
+                                value={formData.title}
+                                onChange={e => change("title", e.target.value)}
+                                placeholder="Nhập tiêu đề yêu cầu"
                                 disabled={loading}
                             />
-
-                            <small>
-                                Mã được hệ thống tự động tạo
-                            </small>
-
                         </div>
+                    </section>
 
+                    <Divider />
 
-                        {/* REQUEST TYPE */}
+                    {/* THỜI GIAN NGHỈ */}
+                    {isLeave && (
+                        <section className="approval-form-section">
+                            <div className="approval-form-section-title">
+                                <i className="pi pi-calendar" />
+                                Thời gian nghỉ
+                            </div>
 
-                        <div className="approval-form-field">
+                            <div className="approval-form-grid">
+                                <div className="approval-form-field">
+                                    <label>Từ ngày <span>*</span></label>
 
-                            <label>
-                                Loại yêu cầu
-                                <span>*</span>
-                            </label>
+                                    <InputText
+                                        type="date"
+                                        value={formData.startDate}
+                                        onChange={e => change("startDate", e.target.value)}
+                                        disabled={loading}
+                                    />
+                                </div>
 
-                            <Dropdown
-                                value={
-                                    formData.requestType
-                                }
-                                options={requestTypes}
-                                optionLabel="label"
-                                optionValue="value"
-                                onChange={(e) =>
-                                    handleChange(
-                                        "requestType",
-                                        e.value
-                                    )
-                                }
-                                placeholder="Chọn loại yêu cầu"
-                                className="approval-form-dropdown"
-                                disabled={loading}
-                            />
+                                <div className="approval-form-field">
+                                    <label>Đến ngày <span>*</span></label>
 
-                        </div>
+                                    <InputText
+                                        type="date"
+                                        value={formData.endDate}
+                                        min={formData.startDate || undefined}
+                                        onChange={e => change("endDate", e.target.value)}
+                                        disabled={loading}
+                                    />
+                                </div>
+                            </div>
 
-                    </div>
+                            {totalDays > 0 && (
+                                <div className="approval-form-days">
+                                    <i className="pi pi-clock" />
+                                    <span>Tổng thời gian theo lịch:</span>
+                                    <strong>{totalDays} ngày</strong>
+                                </div>
+                            )}
 
+                            <div className="approval-form-field">
+                                <label>Lý do <span>*</span></label>
 
-                    {/* SELECTED TYPE */}
-
-                    {selectedType && (
-
-                        <div className="approval-form-type-info">
-
-                            <i
-                                className={
-                                    selectedType.icon
-                                }
-                            />
-
-                            <span>
-                                Bạn đang tạo:
-                                {" "}
-                                <strong>
-                                    {selectedType.label}
-                                </strong>
-                            </span>
-
-                        </div>
-
+                                <InputTextarea
+                                    value={formData.reason}
+                                    onChange={e => change("reason", e.target.value)}
+                                    rows={4}
+                                    autoResize
+                                    placeholder={
+                                        formData.requestType === "OM"
+                                            ? "Nhập lý do nghỉ ốm..."
+                                            : formData.requestType === "NGHI_PHEP"
+                                                ? "Nhập lý do nghỉ phép năm..."
+                                                : "Nhập lý do nghỉ..."
+                                    }
+                                    disabled={loading}
+                                />
+                            </div>
+                        </section>
                     )}
 
+                    {/* MUA HÀNG */}
+                    {formData.requestType === "MUA_HANG" && (
+                        <section className="approval-form-section">
+                            <div className="approval-form-section-title">
+                                <i className="pi pi-shopping-cart" />
+                                Thông tin mua hàng
+                            </div>
 
-                    {/* TITLE */}
+                            <div className="approval-form-grid">
+                                <div className="approval-form-field">
+                                    <label>Tên mặt hàng <span>*</span></label>
 
-                    <div className="approval-form-field">
+                                    <InputText
+                                        value={formData.itemName}
+                                        onChange={e => change("itemName", e.target.value)}
+                                        placeholder="Nhập tên sản phẩm cần mua"
+                                        disabled={loading}
+                                    />
+                                </div>
 
-                        <label>
-                            Tiêu đề
-                            <span>*</span>
-                        </label>
+                                <div className="approval-form-field">
+                                    <label>Số lượng <span>*</span></label>
 
-                        <InputText
-                            value={
-                                formData.title
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    "title",
-                                    e.target.value
-                                )
-                            }
-                            placeholder="Ví dụ: Xin nghỉ ốm 3 ngày"
-                            disabled={loading}
-                        />
-
-                    </div>
-
-                </div>
-
-
-                <Divider />
-
-
-                {/* =========================
-                    SICK LEAVE / ANNUAL LEAVE
-                ========================= */}
-
-                {(
-                    formData.requestType === "OM" ||
-                    formData.requestType === "NGHI_PHEP"
-                ) && (
-
-                    <div className="approval-form-section">
-
-                        <div className="approval-form-section-title">
-
-                            <i className="pi pi-calendar" />
-
-                            Thời gian nghỉ
-
-                        </div>
-
-
-                        <div className="approval-form-grid">
+                                    <InputNumber
+                                        value={formData.quantity}
+                                        onValueChange={e => change("quantity", e.value)}
+                                        min={1}
+                                        placeholder="Nhập số lượng"
+                                        disabled={loading}
+                                        className="w-full"
+                                    />
+                                </div>
+                            </div>
 
                             <div className="approval-form-field">
+                                <label>Lý do / mục đích mua</label>
 
-                                <label>
-                                    Từ ngày
-                                    <span>*</span>
-                                </label>
-
-                                <InputText
-                                    type="date"
-                                    value={
-                                        formData.startDate
-                                    }
-                                    onChange={(e) =>
-                                        handleChange(
-                                            "startDate",
-                                            e.target.value
-                                        )
-                                    }
+                                <InputTextarea
+                                    value={formData.reason}
+                                    onChange={e => change("reason", e.target.value)}
+                                    rows={4}
+                                    autoResize
+                                    placeholder="Nhập lý do hoặc mục đích mua hàng..."
                                     disabled={loading}
                                 />
-
                             </div>
+                        </section>
+                    )}
 
+                    {/* THANH TOÁN */}
+                    {formData.requestType === "THANH_TOAN" && (
+                        <section className="approval-form-section">
+                            <div className="approval-form-section-title">
+                                <i className="pi pi-money-bill" />
+                                Thông tin thanh toán
+                            </div>
 
                             <div className="approval-form-field">
-
-                                <label>
-                                    Đến ngày
-                                    <span>*</span>
-                                </label>
-
-                                <InputText
-                                    type="date"
-                                    value={
-                                        formData.endDate
-                                    }
-                                    onChange={(e) =>
-                                        handleChange(
-                                            "endDate",
-                                            e.target.value
-                                        )
-                                    }
-                                    disabled={loading}
-                                />
-
-                            </div>
-
-                        </div>
-
-
-                        {totalDays > 0 && (
-
-                            <div className="approval-form-days">
-
-                                <i className="pi pi-clock" />
-
-                                <span>
-                                    Thời gian nghỉ:
-                                </span>
-
-                                <strong>
-                                    {totalDays} ngày
-                                </strong>
-
-                            </div>
-
-                        )}
-
-
-                        <div className="approval-form-field">
-
-                            <label>
-                                Lý do
-                                <span>*</span>
-                            </label>
-
-                            <InputTextarea
-                                value={
-                                    formData.reason
-                                }
-                                onChange={(e) =>
-                                    handleChange(
-                                        "reason",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder={
-                                    formData.requestType === "OM"
-                                        ? "Nhập lý do nghỉ ốm..."
-                                        : "Nhập lý do nghỉ phép..."
-                                }
-                                rows={4}
-                                autoResize
-                                disabled={loading}
-                            />
-
-                        </div>
-
-                    </div>
-
-                )}
-
-
-                {/* =========================
-                    PURCHASE
-                ========================= */}
-
-                {formData.requestType === "MUA_HANG" && (
-
-                    <div className="approval-form-section">
-
-                        <div className="approval-form-section-title">
-
-                            <i className="pi pi-shopping-cart" />
-
-                            Thông tin mua hàng
-
-                        </div>
-
-
-                        <div className="approval-form-grid">
-
-                            <div className="approval-form-field">
-
-                                <label>
-                                    Tên mặt hàng
-                                    <span>*</span>
-                                </label>
-
-                                <InputText
-                                    value={
-                                        formData.itemName
-                                    }
-                                    onChange={(e) =>
-                                        handleChange(
-                                            "itemName",
-                                            e.target.value
-                                        )
-                                    }
-                                    placeholder="Nhập tên sản phẩm cần mua"
-                                    disabled={loading}
-                                />
-
-                            </div>
-
-
-                            <div className="approval-form-field">
-
-                                <label>
-                                    Số lượng
-                                    <span>*</span>
-                                </label>
+                                <label>Số tiền <span>*</span></label>
 
                                 <InputNumber
-                                    value={
-                                        formData.quantity
-                                    }
-                                    onValueChange={(e) =>
-                                        handleChange(
-                                            "quantity",
-                                            e.value
-                                        )
-                                    }
-                                    min={1}
-                                    placeholder="Nhập số lượng"
+                                    value={formData.amount}
+                                    onValueChange={e => change("amount", e.value)}
+                                    mode="currency"
+                                    currency="VND"
+                                    locale="vi-VN"
                                     disabled={loading}
-                                    className="w-full"
                                 />
-
                             </div>
 
-                        </div>
+                            <div className="approval-form-field">
+                                <label>Nội dung thanh toán <span>*</span></label>
 
+                                <InputTextarea
+                                    value={formData.reason}
+                                    onChange={e => change("reason", e.target.value)}
+                                    rows={4}
+                                    autoResize
+                                    placeholder="Nhập nội dung cần thanh toán..."
+                                    disabled={loading}
+                                />
+                            </div>
+                        </section>
+                    )}
 
-                        <div className="approval-form-field">
-
-                            <label>
-                                Lý do / mục đích mua
-                            </label>
-
-                            <InputTextarea
-                                value={
-                                    formData.reason
-                                }
-                                onChange={(e) =>
-                                    handleChange(
-                                        "reason",
-                                        e.target.value
-                                    )
-                                }
-                                rows={4}
-                                autoResize
-                                placeholder="Nhập lý do hoặc mục đích mua hàng..."
-                                disabled={loading}
-                            />
-
-                        </div>
-
-                    </div>
-
-                )}
-
-
-                {/* =========================
-                    PAYMENT
-                ========================= */}
-
-                {formData.requestType === "THANH_TOAN" && (
-
-                    <div className="approval-form-section">
-
+                    {/* NỘI DUNG BỔ SUNG */}
+                    <section className="approval-form-section">
                         <div className="approval-form-section-title">
-
-                            <i className="pi pi-money-bill" />
-
-                            Thông tin thanh toán
-
+                            <i className="pi pi-align-left" />
+                            Nội dung bổ sung
                         </div>
 
-
                         <div className="approval-form-field">
-
-                            <label>
-                                Số tiền
-                                <span>*</span>
-                            </label>
-
-                            <InputNumber
-                                value={
-                                    formData.amount
-                                }
-                                onValueChange={(e) =>
-                                    handleChange(
-                                        "amount",
-                                        e.value
-                                    )
-                                }
-                                mode="currency"
-                                currency="VND"
-                                locale="vi-VN"
-                                disabled={loading}
-                            />
-
-                        </div>
-
-
-                        <div className="approval-form-field">
-
-                            <label>
-                                Nội dung thanh toán
-                                <span>*</span>
-                            </label>
+                            <label>Nội dung</label>
 
                             <InputTextarea
-                                value={
-                                    formData.reason
-                                }
-                                onChange={(e) =>
-                                    handleChange(
-                                        "reason",
-                                        e.target.value
-                                    )
-                                }
+                                value={formData.content}
+                                onChange={e => change("content", e.target.value)}
                                 rows={4}
                                 autoResize
-                                placeholder="Nhập nội dung cần thanh toán..."
+                                placeholder="Nhập thêm thông tin nếu cần..."
                                 disabled={loading}
                             />
+                        </div>
+                    </section>
 
+                    {/* FILE ĐÍNH KÈM */}
+                    <section className="approval-form-section">
+                        <div className="approval-form-section-title">
+                            <i className="pi pi-paperclip" />
+                            Tài liệu đính kèm
                         </div>
 
-                    </div>
-
-                )}
-
-
-                {/* =========================
-                    GENERAL CONTENT
-                ========================= */}
-
-                <div className="approval-form-section">
-
-                    <div className="approval-form-section-title">
-
-                        <i className="pi pi-align-left" />
-
-                        Nội dung bổ sung
-
-                    </div>
-
-
-                    <div className="approval-form-field">
-
-                        <label>
-                            Nội dung
-                        </label>
-
-                        <InputTextarea
-                            value={
-                                formData.content
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    "content",
-                                    e.target.value
+                        <FileUpload
+                            mode="advanced"
+                            multiple
+                            customUpload
+                            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                            maxFileSize={5000000}
+                            onSelect={e => setFiles(e.files)}
+                            onRemove={e =>
+                                setFiles(prev =>
+                                    prev.filter(file => file !== e.file)
                                 )
                             }
-                            rows={4}
-                            autoResize
-                            placeholder="Nhập thêm thông tin nếu cần..."
-                            disabled={loading}
+                            chooseLabel="Chọn tệp"
+                            uploadLabel="Tải lên"
+                            cancelLabel="Hủy"
+                            emptyTemplate={
+                                <div className="approval-form-upload-empty">
+                                    <i className="pi pi-cloud-upload" />
+                                    <span>Kéo thả hoặc chọn ảnh / tài liệu</span>
+                                    <small>Tối đa 5MB / tệp</small>
+                                </div>
+                            }
                         />
 
-                    </div>
+                        <small className="approval-form-upload-note">
+                            Có thể đính kèm giấy xác nhận, hóa đơn,
+                            hình ảnh hoặc tài liệu liên quan.
+                        </small>
+                    </section>
 
                 </div>
-
-
-                {/* =========================
-                    ATTACHMENTS
-                ========================= */}
-
-                <div className="approval-form-section">
-
-                    <div className="approval-form-section-title">
-
-                        <i className="pi pi-paperclip" />
-
-                        Tài liệu đính kèm
-
-                    </div>
-
-
-                    <FileUpload
-                        mode="advanced"
-                        multiple
-                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-                        maxFileSize={5000000}
-                        customUpload
-                        onSelect={handleFileSelect}
-                        onRemove={handleFileRemove}
-                        chooseLabel="Chọn tệp"
-                        uploadLabel="Tải lên"
-                        cancelLabel="Hủy"
-                        emptyTemplate={
-                            <div className="approval-form-upload-empty">
-
-                                <i className="pi pi-cloud-upload" />
-
-                                <span>
-                                    Kéo thả hoặc chọn ảnh / tài liệu
-                                </span>
-
-                                <small>
-                                    Tối đa 5MB / tệp
-                                </small>
-
-                            </div>
-                        }
-                    />
-
-                    <small className="approval-form-upload-note">
-                        Có thể đính kèm giấy xác nhận, hóa đơn,
-                        hình ảnh hoặc tài liệu liên quan.
-                    </small>
-
-                </div>
-
-            </div>
-
-        </Dialog>
-
+            </Dialog>
+        </>
     );
 }
-

@@ -1,5 +1,7 @@
+
 package com.example.erp.service;
 
+import com.example.erp.dto.ApprovalResponse;
 import com.example.erp.entity.Approval;
 
 import java.util.List;
@@ -13,11 +15,17 @@ public interface ApprovalService {
     Approval getById(Long id);
 
     // Lấy approval của một request
-    Approval getByRequestId(Long requestId);
+    ApprovalResponse getByRequestId(Long requestId);
 
     // Tạo approval
     Approval create(Approval approval);
 
-    // Cập nhật approval
+    // Cập nhật thông tin approval
     Approval update(Long id, Approval approval);
+
+    // Phê duyệt một bước và tự động chuyển cấp tiếp theo
+    void approveLine(Long approvalLineId, Long actionEmpId, String comment);
+
+    // Từ chối một bước và kết thúc quy trình
+    void rejectLine(Long approvalLineId, Long actionEmpId, String comment);
 }

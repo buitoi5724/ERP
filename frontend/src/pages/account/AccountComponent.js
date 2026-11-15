@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 
 import { DataTable } from "primereact/datatable";
@@ -21,734 +22,483 @@ import "primeicons/primeicons.css";
 
 import "./account.css";
 
-
 export default function AccountComponent() {
 
-    // =====================================================
-    // STATE
-    // =====================================================
-
     const [accounts, setAccounts] = useState([]);
+    const [departments, setDepartments] = useState([]);
 
     const [selectedAccount, setSelectedAccount] = useState(null);
-
     const [selectedAccounts, setSelectedAccounts] = useState([]);
 
     const [formVisible, setFormVisible] = useState(false);
-
     const [globalSearch, setGlobalSearch] = useState("");
-
     const [loading, setLoading] = useState(false);
 
     const toast = useRef(null);
 
-
-    // =====================================================
-    // ROLE OPTIONS
-    // =====================================================
-
+    // Role backend hiện có
     const roleOptions = [
-        {
-            label: "ADMIN",
-            value: "ADMIN"
-        },
-        {
-            label: "SALES",
-            value: "SALES"
-        },
-        {
-            label: "WAREHOUSE",
-            value: "WAREHOUSE"
-        },
-        {
-            label: "MANAGER",
-            value: "MANAGER"
-        }
+        { label: "ADMIN", value: "ADMIN" },
+        { label: "SALES", value: "SALES" },
+        { label: "WAREHOUSE", value: "WAREHOUSE" },
+        { label: "MANAGER", value: "MANAGER" },
+        { label: "USER", value: "USER" }
     ];
 
+    // Chức vụ nghiệp vụ
+    const positionOptions = [
+        { label: "Nhân viên", value: "EMPLOYEE" },
+        { label: "Phó phòng", value: "DEPUTY_MANAGER" },
+        { label: "Trưởng phòng", value: "DEPARTMENT_MANAGER" }
+    ];
+
+    const isEmployeeForm =
+        selectedAccount?.isEmployee === true;
+
+    // =====================================================
+    // TOAST
+    // =====================================================
+
+    const toastError = (message) => {
+        toast.current?.show({
+            severity: "error",
+            summary: "Lỗi",
+            detail: message
+        });
+    };
 
     // =====================================================
     // LOAD ACCOUNTS
     // =====================================================
 
     const loadAccounts = async () => {
-
         try {
-
             setLoading(true);
 
-            const data =
-                await accountService.getAccounts();
+            const data = await accountService.getAccounts();
 
-            console.log(
-                "===== ACCOUNTS FROM API ====="
-            );
-
-            console.log(data);
-
-            if (Array.isArray(data)) {
-
-                data.forEach((account) => {
-
-                    console.log(
-                        account.username,
-                        "=>",
-                        account.roles
-                    );
-
-                });
-
-            }
-
-            setAccounts(
-                Array.isArray(data)
-                    ? data
-                    : []
-            );
+            setAccounts(Array.isArray(data) ? data : []);
 
         } catch (error) {
-
-            console.error(
-                "Load accounts error:",
-                error
-            );
-
-            toast.current?.show({
-                severity: "error",
-                summary: "Lỗi",
-                detail:
-                    "Không thể tải danh sách tài khoản"
-            });
-
+            console.error("Load accounts error:", error);
+            toastError("Không thể tải danh sách tài khoản");
         } finally {
-
             setLoading(false);
-
         }
-
     };
 
+    // =====================================================
+    // LOAD DEPARTMENTS
+    // =====================================================
 
-    // =====================================================
-    // LOAD WHEN COMPONENT MOUNT
-    // =====================================================
+    const loadDepartments = async () => {
+        try {
+            const data = await accountService.getDepartments();
+
+            setDepartments(
+                Array.isArray(data)
+                    ? data.filter(item => item.active !== false)
+                    : []
+            );
+        } catch (error) {
+            console.error("Load departments error:", error);
+            toastError("Không thể tải danh sách phòng ban");
+        }
+    };
 
     useEffect(() => {
-
         loadAccounts();
-
+        loadDepartments();
     }, []);
-
 
     // =====================================================
     // SEARCH
     // =====================================================
 
-    const filteredAccounts =
-        accounts.filter((account) => {
+    const filteredAccounts = accounts.filter(account => {
+        const keyword = globalSearch.trim().toLowerCase();
 
-            const keyword =
-                globalSearch
-                    .trim()
-                    .toLowerCase();
+        if (!keyword) return true;
 
-            if (!keyword) {
-                return true;
-            }
-
-            return (
-                account.username
-                    ?.toLowerCase()
-                    .includes(keyword)
-            );
-
-        });
-
+        return (
+            account.username?.toLowerCase().includes(keyword) ||
+            account.employee?.empCode?.toLowerCase().includes(keyword) ||
+            account.employee?.empName?.toLowerCase().includes(keyword)
+        );
+    });
 
     // =====================================================
-    // ERROR
+    // OPEN CREATE
     // =====================================================
 
-    const toastError = (message) => {
+    const openCreateDialog = () => {
+        setSelectedAccount({
+            isEmployee: true,
 
-        toast.current?.show({
-            severity: "error",
-            summary: "Lỗi",
-            detail: message
+            username: "",
+            password: "",
+            status: true,
+
+            empCode: "",
+            empName: "",
+            email: "",
+
+            departmentId: null,
+            position: "EMPLOYEE",
+
+            // Role mặc định cho nhân viên
+            role: "USER"
         });
 
-        return false;
-
+        setFormVisible(true);
     };
 
+    // =====================================================
+    // OPEN EDIT
+    // =====================================================
+
+    const openEditDialog = (account) => {
+        const currentRole =
+            account.roles?.[0]?.name || "USER";
+
+        setSelectedAccount({
+            id: account.id,
+            isEmployee: false,
+
+            username: account.username,
+            password: "",
+            status: account.status,
+            role: currentRole
+        });
+
+        setFormVisible(true);
+    };
+
+    // =====================================================
+    // FORM CHANGE
+    // =====================================================
+
+  const updateField = (field, value) => {
+    setSelectedAccount(previous => {
+        const updated = {
+            ...previous,
+            [field]: value
+        };
+
+        // Tự động phân quyền theo chức vụ
+        if (field === "position") {
+            if (value === "EMPLOYEE") {
+                updated.role = "USER";
+            } else if (
+                value === "DEPUTY_MANAGER" ||
+                value === "DEPARTMENT_MANAGER"
+            ) {
+                updated.role = "MANAGER";
+            }
+        }
+
+        return updated;
+    });
+};
 
     // =====================================================
     // VALIDATE
     // =====================================================
 
-    const validateAccount = (account) => {
+    const validateAccount = () => {
+        const account = selectedAccount;
 
-        if (!account) {
-
-            return toastError(
-                "Không có dữ liệu tài khoản"
-            );
-
+        if (!account?.username?.trim()) {
+            toastError("Vui lòng nhập username");
+            return false;
         }
 
-
-        if (!account.username?.trim()) {
-
-            return toastError(
-                "Vui lòng nhập username"
-            );
-
+        if (!account.id && !account.password?.trim()) {
+            toastError("Vui lòng nhập mật khẩu");
+            return false;
         }
 
-
-        // Tạo mới bắt buộc password
-        if (
-            !account.id &&
-            !account.password?.trim()
-        ) {
-
-            return toastError(
-                "Vui lòng nhập password"
-            );
-
-        }
-
-
-        // Username không được trùng
-        const usernameExists =
-            accounts.some(
-                (item) =>
-                    item.id !== account.id &&
-                    item.username ===
-                        account.username
-            );
-
+        const usernameExists = accounts.some(item =>
+            item.id !== account.id &&
+            item.username?.toLowerCase() ===
+                account.username.trim().toLowerCase()
+        );
 
         if (usernameExists) {
-
-            return toastError(
-                "Username đã tồn tại"
-            );
-
+            toastError("Username đã tồn tại");
+            return false;
         }
 
+        if (account.isEmployee) {
+            if (!account.empCode?.trim()) {
+                toastError("Vui lòng nhập mã nhân viên");
+                return false;
+            }
 
-        // Phải có role
-        if (!account.role) {
+            if (!account.empName?.trim()) {
+                toastError("Vui lòng nhập họ tên nhân viên");
+                return false;
+            }
 
-            return toastError(
-                "Vui lòng chọn quyền"
-            );
+            if (!account.email?.trim()) {
+                toastError("Vui lòng nhập email");
+                return false;
+            }
 
+            if (!account.departmentId) {
+                toastError("Vui lòng chọn phòng ban");
+                return false;
+            }
+
+            if (!account.position) {
+                toastError("Vui lòng chọn chức vụ");
+                return false;
+            }
+        } else if (!account.role) {
+            toastError("Vui lòng chọn quyền");
+            return false;
         }
-
 
         return true;
-
     };
 
-
     // =====================================================
-    // SAVE ACCOUNT
+    // SAVE
     // =====================================================
 
-    const saveAccount = async () => {
+  const saveAccount = async () => {
+    if (!validateAccount()) return;
 
-        if (
-            !validateAccount(
-                selectedAccount
-            )
-        ) {
+    try {
+        setLoading(true);
 
-            return;
+        if (selectedAccount.isEmployee) {
 
-        }
+            // Xác định role trực tiếp từ position
+            let role;
 
+            switch (selectedAccount.position) {
+                case "EMPLOYEE":
+                    role = "USER";
+                    break;
 
-        try {
+                case "DEPUTY_MANAGER":
+                case "DEPARTMENT_MANAGER":
+                    role = "MANAGER";
+                    break;
 
-            setLoading(true);
-
-
-            // =================================================
-            // REQUEST
-            // =================================================
+                default:
+                    toastError("Chức vụ không hợp lệ");
+                    return;
+            }
 
             const request = {
+                username: selectedAccount.username.trim(),
+                password: selectedAccount.password,
+                role: role,
+                status: selectedAccount.status,
 
-                username:
-                    selectedAccount.username,
+                empCode: selectedAccount.empCode.trim(),
+                empName: selectedAccount.empName.trim(),
+                email: selectedAccount.email.trim(),
 
-                password:
-                    selectedAccount.password || "",
-
-                status:
-                    selectedAccount.status,
-
-                role:
-                    selectedAccount.role
-
+                departmentId: Number(selectedAccount.departmentId),
+                position: selectedAccount.position
             };
 
+            console.log("===== EMPLOYEE REQUEST =====");
+            console.log("Username:", request.username);
+            console.log("Position:", request.position);
+            console.log("Role:", request.role);
+            console.log("Department:", request.departmentId);
+            console.log("Full data:", request);
 
-            console.log(
-                "===== ACCOUNT REQUEST ====="
-            );
+            await accountService.createEmployeeAccount(request);
 
-            console.log(request);
+        } else {
 
-
-            // =================================================
-            // UPDATE
-            // =================================================
+            const request = {
+                username: selectedAccount.username.trim(),
+                password: selectedAccount.password || "",
+                status: selectedAccount.status,
+                role: selectedAccount.role
+            };
 
             if (selectedAccount.id) {
-
-                console.log(
-                    "===== UPDATE ACCOUNT ====="
-                );
-
-                console.log(
-                    "USER ID:",
-                    selectedAccount.id
-                );
-
-                console.log(
-                    "ROLE:",
-                    selectedAccount.role
-                );
-
-
                 await accountService.updateAccount(
                     selectedAccount.id,
                     request
                 );
-
+            } else {
+                await accountService.createAccount(request);
             }
-
-
-            // =================================================
-            // CREATE
-            // =================================================
-
-            else {
-
-                console.log(
-                    "===== CREATE ACCOUNT ====="
-                );
-
-
-                await accountService.createAccount(
-                    request
-                );
-
-            }
-
-
-            // =================================================
-            // SUCCESS
-            // =================================================
-
-            toast.current?.show({
-                severity: "success",
-                summary: "Thành công",
-                detail:
-                    "Lưu tài khoản thành công"
-            });
-
-
-            // Đóng dialog
-            setFormVisible(false);
-
-            setSelectedAccount(null);
-
-
-            // =================================================
-            // QUAN TRỌNG
-            // LẤY DỮ LIỆU MỚI TỪ BACKEND
-            // =================================================
-
-            await loadAccounts();
-
-        } catch (error) {
-
-            console.error(
-                "Save account error:",
-                error
-            );
-
-            console.error(
-                "Response:",
-                error.response?.data
-            );
-
-
-            toastError(
-                error.response?.data?.message ||
-                "Không thể lưu tài khoản"
-            );
-
-        } finally {
-
-            setLoading(false);
-
         }
 
-    };
+        toast.current?.show({
+            severity: "success",
+            summary: "Thành công",
+            detail: selectedAccount.isEmployee
+                ? "Tạo tài khoản nhân viên thành công"
+                : "Lưu tài khoản thành công"
+        });
 
+        setFormVisible(false);
+        setSelectedAccount(null);
+
+        await loadAccounts();
+
+    } catch (error) {
+        console.error("Save account error:", error);
+        console.error("Backend response:", error.response?.data);
+
+        toastError(
+            typeof error.response?.data === "string"
+                ? error.response.data
+                : error.response?.data?.message ||
+                  "Không thể lưu tài khoản"
+        );
+
+    } finally {
+        setLoading(false);
+    }
+};
 
     // =====================================================
     // DELETE ONE
     // =====================================================
 
     const removeAccount = (id) => {
-
         confirmDialog({
-
-            message:
-                "Bạn có chắc muốn xóa tài khoản này?",
-
-            header:
-                "Xác nhận xóa",
-
-            icon:
-                "pi pi-exclamation-triangle",
-
-            acceptLabel:
-                "Có",
-
-            rejectLabel:
-                "Không",
+            message: "Bạn có chắc muốn xóa tài khoản này?",
+            header: "Xác nhận xóa",
+            icon: "pi pi-exclamation-triangle",
+            acceptLabel: "Có",
+            rejectLabel: "Không",
 
             accept: async () => {
-
                 try {
-
-                    await accountService.deleteAccount(
-                        id
-                    );
-
+                    await accountService.deleteAccount(id);
 
                     toast.current?.show({
                         severity: "success",
                         summary: "Thành công",
-                        detail:
-                            "Đã xóa tài khoản"
+                        detail: "Đã xóa tài khoản"
                     });
 
-
                     await loadAccounts();
-
                 } catch (error) {
-
-                    console.error(
-                        "Delete account error:",
-                        error
-                    );
-
-
+                    console.error(error);
                     toastError(
-                        "Không thể xóa tài khoản"
+                        "Không thể xóa tài khoản. Có thể tài khoản đang được liên kết với nhân viên."
                     );
-
                 }
-
             }
-
         });
-
     };
-
 
     // =====================================================
     // DELETE SELECTED
     // =====================================================
 
     const removeSelectedAccounts = () => {
-
-        if (
-            !selectedAccounts.length
-        ) {
-
-            return;
-
-        }
-
+        if (!selectedAccounts.length) return;
 
         confirmDialog({
-
-            message:
-                `Bạn có chắc muốn xóa ${selectedAccounts.length} tài khoản đã chọn?`,
-
-            header:
-                "Xác nhận xóa",
-
-            icon:
-                "pi pi-exclamation-triangle",
-
-            acceptLabel:
-                "Có",
-
-            rejectLabel:
-                "Không",
+            message: `Bạn có chắc muốn xóa ${selectedAccounts.length} tài khoản đã chọn?`,
+            header: "Xác nhận xóa",
+            icon: "pi pi-exclamation-triangle",
+            acceptLabel: "Có",
+            rejectLabel: "Không",
 
             accept: async () => {
-
                 try {
-
                     await Promise.all(
-
-                        selectedAccounts.map(
-                            (account) =>
-                                accountService.deleteAccount(
-                                    account.id
-                                )
+                        selectedAccounts.map(account =>
+                            accountService.deleteAccount(account.id)
                         )
-
                     );
 
-
                     setSelectedAccounts([]);
-
 
                     toast.current?.show({
                         severity: "success",
                         summary: "Thành công",
-                        detail:
-                            "Đã xóa các tài khoản đã chọn"
+                        detail: "Đã xóa các tài khoản đã chọn"
                     });
 
-
                     await loadAccounts();
-
                 } catch (error) {
-
-                    console.error(
-                        "Delete selected error:",
-                        error
-                    );
-
-
-                    toastError(
-                        "Không thể xóa tài khoản"
-                    );
-
+                    console.error(error);
+                    toastError("Không thể xóa một số tài khoản đã chọn");
+                    await loadAccounts();
                 }
-
             }
-
         });
-
     };
-
-
-    // =====================================================
-    // CREATE
-    // =====================================================
-
-    const openCreateDialog = () => {
-
-        setSelectedAccount({
-
-            username: "",
-
-            password: "",
-
-            role: "SALES",
-
-            status: true
-
-        });
-
-
-        setFormVisible(true);
-
-    };
-
-
-    // =====================================================
-    // EDIT
-    // =====================================================
-
-    const openEditDialog = (account) => {
-
-        // Backend:
-        //
-        // roles: [
-        //     {
-        //         id: 3,
-        //         name: "SALES"
-        //     }
-        // ]
-        //
-        // Dropdown cần:
-        //
-        // "SALES"
-
-        const currentRole =
-            account.roles &&
-            account.roles.length > 0
-                ? account.roles[0].name
-                : "SALES";
-
-
-        console.log(
-            "===== EDIT ACCOUNT ====="
-        );
-
-        console.log(
-            "ID:",
-            account.id
-        );
-
-        console.log(
-            "USERNAME:",
-            account.username
-        );
-
-        console.log(
-            "ROLES:",
-            account.roles
-        );
-
-        console.log(
-            "CURRENT ROLE:",
-            currentRole
-        );
-
-
-        setSelectedAccount({
-
-            id:
-                account.id,
-
-            username:
-                account.username,
-
-            // Không đưa BCrypt password
-            password:
-                "",
-
-            status:
-                account.status,
-
-            role:
-                currentRole
-
-        });
-
-
-        setFormVisible(true);
-
-    };
-
 
     // =====================================================
     // ROLE DISPLAY
     // =====================================================
 
     const roleBodyTemplate = (row) => {
-
-        if (
-            !row.roles ||
-            row.roles.length === 0
-        ) {
-
-            return (
-
-                <span
-                    className="p-tag p-tag-secondary"
-                >
-                    Chưa có quyền
-                </span>
-
-            );
-
+        if (!row.roles?.length) {
+            return <span className="p-tag p-tag-secondary">Chưa có quyền</span>;
         }
 
-
         return (
-
-            <div className="flex gap-1">
-
-                {row.roles.map(
-                    (role) => (
-
-                        <span
-                            key={role.id}
-                            className="p-tag p-tag-info"
-                        >
-                            {role.name}
-                        </span>
-
-                    )
-                )}
-
+            <div className="flex gap-1 flex-wrap">
+                {row.roles.map(role => (
+                    <span key={role.id} className="p-tag p-tag-info">
+                        {role.name}
+                    </span>
+                ))}
             </div>
-
         );
-
     };
 
+    // =====================================================
+    // EMPLOYEE DISPLAY
+    // =====================================================
+
+    const employeeBodyTemplate = (row) => {
+        if (!row.employee) return "-";
+
+        return (
+            <div>
+                <div>{row.employee.empName}</div>
+                <small>{row.employee.empCode}</small>
+            </div>
+        );
+    };
 
     // =====================================================
     // STATUS DISPLAY
     // =====================================================
 
-    const statusBodyTemplate = (row) => {
-
-        if (row.status) {
-
-            return (
-
-                <span
-                    className="p-tag p-tag-success"
-                >
-                    Hoạt động
-                </span>
-
-            );
-
-        }
-
-
-        return (
-
-            <span
-                className="p-tag p-tag-danger"
-            >
-                Khóa
-            </span>
-
-        );
-
-    };
-
+    const statusBodyTemplate = (row) => (
+        <span className={
+            row.status
+                ? "p-tag p-tag-success"
+                : "p-tag p-tag-danger"
+        }>
+            {row.status ? "Hoạt động" : "Khóa"}
+        </span>
+    );
 
     // =====================================================
     // ACTION
     // =====================================================
 
     const actionBodyTemplate = (row) => (
-
         <div className="flex gap-1">
-
             <Button
                 icon="pi pi-pencil"
                 rounded
                 text
                 severity="warning"
                 tooltip="Chỉnh sửa"
-                onClick={() =>
-                    openEditDialog(row)
-                }
+                onClick={() => openEditDialog(row)}
             />
-
 
             <Button
                 icon="pi pi-trash"
@@ -756,452 +506,258 @@ export default function AccountComponent() {
                 text
                 severity="danger"
                 tooltip="Xóa"
-                onClick={() =>
-                    removeAccount(row.id)
-                }
+                onClick={() => removeAccount(row.id)}
             />
-
         </div>
-
     );
 
-
     // =====================================================
-    // TOOLBAR LEFT
+    // TOOLBAR
     // =====================================================
 
     const leftToolbarTemplate = () => (
-
         <Button
-            label="Thêm tài khoản"
-            icon="pi pi-plus"
-            onClick={
-                openCreateDialog
-            }
+            label="Thêm nhân viên"
+            icon="pi pi-user-plus"
+            onClick={openCreateDialog}
         />
-
     );
 
-
-    // =====================================================
-    // TOOLBAR RIGHT
-    // =====================================================
-
     const rightToolbarTemplate = () => (
-
-        <div
-            className="flex align-items-center gap-2"
-        >
-
-            <span
-                className="p-input-icon-left"
-            >
-
+        <div className="flex align-items-center gap-2">
+            <span className="p-input-icon-left">
                 <i className="pi pi-search" />
-
-
                 <InputText
-                    placeholder="Tìm username..."
+                    placeholder="Tìm tài khoản, mã NV, họ tên..."
                     value={globalSearch}
-                    onChange={(e) =>
-                        setGlobalSearch(
-                            e.target.value
-                        )
-                    }
+                    onChange={e => setGlobalSearch(e.target.value)}
                 />
-
             </span>
-
 
             <Button
                 label="Xóa đã chọn"
                 icon="pi pi-trash"
                 severity="danger"
-                disabled={
-                    !selectedAccounts.length
-                }
-                onClick={
-                    removeSelectedAccounts
-                }
+                disabled={!selectedAccounts.length}
+                onClick={removeSelectedAccounts}
             />
-
         </div>
-
     );
-
 
     // =====================================================
     // UI
     // =====================================================
 
     return (
-
         <div className="p-4">
-
             <Toast ref={toast} />
-
             <ConfirmDialog />
 
-
-            <h2>
-                Quản lý tài khoản
-            </h2>
-
+            <h2>Quản lý tài khoản</h2>
 
             <Toolbar
                 className="mb-3"
-                start={
-                    leftToolbarTemplate
-                }
-                end={
-                    rightToolbarTemplate
-                }
+                start={leftToolbarTemplate}
+                end={rightToolbarTemplate}
             />
 
-
-            {/* =================================================
-                TABLE
-            ================================================= */}
-
             <DataTable
-
-                value={
-                    filteredAccounts
-                }
-
-                loading={
-                    loading
-                }
-
+                value={filteredAccounts}
+                loading={loading}
                 paginator
-
                 rows={10}
-
-                selection={
-                    selectedAccounts
-                }
-
-                onSelectionChange={(e) =>
-                    setSelectedAccounts(
-                        e.value
-                    )
-                }
-
+                selection={selectedAccounts}
+                onSelectionChange={e => setSelectedAccounts(e.value)}
                 selectionMode="checkbox"
-
                 stripedRows
-
                 responsiveLayout="scroll"
-
-                emptyMessage={
-                    "Không có tài khoản"
-                }
-
+                emptyMessage="Không có tài khoản"
             >
-
-
                 <Column
                     selectionMode="multiple"
-                    headerStyle={{
-                        width: "3rem"
-                    }}
+                    headerStyle={{ width: "3rem" }}
                 />
 
+                <Column field="id" header="ID" sortable />
+
+                <Column field="username" header="Username" sortable />
 
                 <Column
-                    field="id"
-                    header="ID"
-                    sortable
+                    header="Nhân viên"
+                    body={employeeBodyTemplate}
                 />
-
-
-                <Column
-                    field="username"
-                    header="Username"
-                    sortable
-                />
-
 
                 <Column
                     header="Quyền"
-                    body={
-                        roleBodyTemplate
-                    }
+                    body={roleBodyTemplate}
                 />
-
 
                 <Column
                     header="Trạng thái"
-                    body={
-                        statusBodyTemplate
-                    }
+                    body={statusBodyTemplate}
                 />
-
 
                 <Column
                     header="Thao tác"
-                    body={
-                        actionBodyTemplate
-                    }
+                    body={actionBodyTemplate}
                 />
-
             </DataTable>
 
-
-            {/* =================================================
-                EDIT / CREATE DIALOG
-            ================================================= */}
+            {/* DIALOG */}
 
             <Dialog
-
                 header={
                     selectedAccount?.id
                         ? "Chỉnh sửa tài khoản"
-                        : "Thêm tài khoản"
+                        : "Tạo tài khoản nhân viên"
                 }
-
-                visible={
-                    formVisible
-                }
-
-                style={{
-                    width: "30rem"
-                }}
-
+                visible={formVisible}
+                style={{ width: "min(95vw, 40rem)" }}
                 modal
-
                 onHide={() => {
-
                     setFormVisible(false);
-
-                    setSelectedAccount(
-                        null
-                    );
-
+                    setSelectedAccount(null);
                 }}
-
             >
-
                 {selectedAccount && (
-
                     <div className="p-fluid">
 
-
-                        {/* =====================================
-                            USERNAME
-                        ===================================== */}
+                        <h4>Thông tin đăng nhập</h4>
 
                         <div className="field">
-
-                            <label>
-                                Username
-                            </label>
-
-
+                            <label>Username *</label>
                             <InputText
-
-                                value={
-                                    selectedAccount.username ||
-                                    ""
-                                }
-
-                                onChange={(e) =>
-                                    setSelectedAccount({
-                                        ...selectedAccount,
-
-                                        username:
-                                            e.target.value
-                                    })
-                                }
-
-                                disabled={
-                                    !!selectedAccount.id
-                                }
-
+                                value={selectedAccount.username || ""}
+                                onChange={e => updateField("username", e.target.value)}
+                                disabled={!!selectedAccount.id}
                             />
-
                         </div>
 
-
-                        {/* =====================================
-                            PASSWORD
-                        ===================================== */}
-
                         <div className="field">
-
-                            <label>
-                                Password
-                            </label>
-
-
+                            <label>Password *</label>
                             <InputText
-
                                 type="password"
-
-                                value={
-                                    selectedAccount.password ||
-                                    ""
-                                }
-
+                                value={selectedAccount.password || ""}
                                 placeholder={
                                     selectedAccount.id
                                         ? "Để trống nếu không đổi"
-                                        : "Nhập password"
+                                        : "Nhập mật khẩu"
                                 }
-
-                                onChange={(e) =>
-                                    setSelectedAccount({
-                                        ...selectedAccount,
-
-                                        password:
-                                            e.target.value
-                                    })
-                                }
-
+                                onChange={e => updateField("password", e.target.value)}
                             />
-
                         </div>
 
+                        {isEmployeeForm ? (
+                            <>
+                                <h4>Thông tin nhân viên</h4>
 
-                        {/* =====================================
-                            ROLE
-                        ===================================== */}
+                                <div className="field">
+                                    <label>Mã nhân viên *</label>
+                                    <InputText
+                                        value={selectedAccount.empCode || ""}
+                                        onChange={e => updateField("empCode", e.target.value)}
+                                    />
+                                </div>
 
-                        <div className="field">
+                                <div className="field">
+                                    <label>Họ và tên *</label>
+                                    <InputText
+                                        value={selectedAccount.empName || ""}
+                                        onChange={e => updateField("empName", e.target.value)}
+                                    />
+                                </div>
 
-                            <label>
-                                Quyền
-                            </label>
+                                <div className="field">
+                                    <label>Email *</label>
+                                    <InputText
+                                        type="email"
+                                        value={selectedAccount.email || ""}
+                                        onChange={e => updateField("email", e.target.value)}
+                                    />
+                                </div>
 
+                                <div className="field">
+                                    <label>Phòng ban *</label>
+                                    <Dropdown
+                                        value={selectedAccount.departmentId}
+                                        options={departments.map(department => ({
+                                            label: `${department.deptCode} - ${department.deptName}`,
+                                            value: department.deptId
+                                        }))}
+                                        onChange={e => updateField("departmentId", e.value)}
+                                        placeholder="Chọn phòng ban"
+                                        filter
+                                    />
+                                </div>
 
-                            <Dropdown
+                                <div className="field">
+                                    <label>Chức vụ *</label>
+                                    <Dropdown
+                                        value={selectedAccount.position}
+                                        options={positionOptions}
+                                        onChange={e => updateField("position", e.value)}
+                                        placeholder="Chọn chức vụ"
+                                    />
+                                </div>
 
-                                value={
-                                    selectedAccount.role
-                                }
+                                <div className="field">
+                                    <label>Trạng thái</label>
+                                    <Dropdown
+                                        value={selectedAccount.status}
+                                        options={[
+                                            { label: "Hoạt động", value: true },
+                                            { label: "Khóa", value: false }
+                                        ]}
+                                        onChange={e => updateField("status", e.value)}
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="field">
+                                    <label>Quyền</label>
+                                    <Dropdown
+                                        value={selectedAccount.role}
+                                        options={roleOptions}
+                                        onChange={e => updateField("role", e.value)}
+                                        placeholder="Chọn quyền"
+                                    />
+                                </div>
 
-                                options={
-                                    roleOptions
-                                }
+                                <div className="field">
+                                    <label>Trạng thái</label>
+                                    <Dropdown
+                                        value={selectedAccount.status}
+                                        options={[
+                                            { label: "Hoạt động", value: true },
+                                            { label: "Khóa", value: false }
+                                        ]}
+                                        onChange={e => updateField("status", e.value)}
+                                    />
+                                </div>
+                            </>
+                        )}
 
-                                onChange={(e) => {
-
-                                    console.log(
-                                        "ROLE SELECTED:",
-                                        e.value
-                                    );
-
-
-                                    setSelectedAccount({
-                                        ...selectedAccount,
-
-                                        role:
-                                            e.value
-                                    });
-
-                                }}
-
-                                placeholder={
-                                    "Chọn quyền"
-                                }
-
-                            />
-
-                        </div>
-
-
-                        {/* =====================================
-                            STATUS
-                        ===================================== */}
-
-                        <div className="field">
-
-                            <label>
-                                Trạng thái
-                            </label>
-
-
-                            <Dropdown
-
-                                value={
-                                    selectedAccount.status
-                                }
-
-                                options={[
-                                    {
-                                        label:
-                                            "Hoạt động",
-                                        value:
-                                            true
-                                    },
-                                    {
-                                        label:
-                                            "Khóa",
-                                        value:
-                                            false
-                                    }
-                                ]}
-
-                                onChange={(e) =>
-                                    setSelectedAccount({
-                                        ...selectedAccount,
-
-                                        status:
-                                            e.value
-                                    })
-                                }
-
-                            />
-
-                        </div>
-
-
-                        {/* =====================================
-                            BUTTON
-                        ===================================== */}
-
-                        <div
-                            className="flex justify-content-end gap-2 mt-4"
-                        >
-
+                        <div className="flex justify-content-end gap-2 mt-4">
                             <Button
                                 label="Hủy"
                                 severity="secondary"
                                 onClick={() => {
-
-                                    setFormVisible(
-                                        false
-                                    );
-
-                                    setSelectedAccount(
-                                        null
-                                    );
-
+                                    setFormVisible(false);
+                                    setSelectedAccount(null);
                                 }}
                             />
-
 
                             <Button
                                 label="Lưu"
                                 icon="pi pi-check"
-                                onClick={
-                                    saveAccount
-                                }
-                                loading={
-                                    loading
-                                }
+                                onClick={saveAccount}
+                                loading={loading}
                             />
-
                         </div>
-
                     </div>
-
                 )}
-
             </Dialog>
-
         </div>
-
     );
-
 }

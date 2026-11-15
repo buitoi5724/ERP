@@ -2,11 +2,30 @@
    APPROVAL PAGE
    ========================================================= */
 
-.approval-page {
-    padding: 24px;
-    background: #f8fafc;
+.approval-page,
+.approval-detail-page {
     min-height: 100vh;
+    padding: 28px;
+    background: #f4f7fb;
     box-sizing: border-box;
+}
+
+
+/* =========================================================
+   MAIN CONTAINER
+   ========================================================= */
+
+.approval-container {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+
+    background: #fff;
+    border: 1px solid #e5e9ef;
+    border-radius: 16px;
+
+    box-shadow: 0 8px 30px rgba(15, 23, 42, .06);
+    overflow: hidden;
 }
 
 
@@ -18,21 +37,67 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 24px;
+
+    padding: 24px 30px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.approval-header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.approval-header-icon {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    color: #2563eb;
+    font-size: 20px;
 }
 
 .approval-title {
     margin: 0;
-    font-size: 28px;
+    color: #0f172a;
+    font-size: 25px;
     font-weight: 700;
-    color: #1e293b;
 }
 
 .approval-subtitle {
-    margin: 6px 0 0;
+    margin: 5px 0 0;
     color: #64748b;
-    font-size: 14px;
+    font-size: 13px;
+}
+
+.approval-header .p-button {
+    min-height: 40px;
+    padding: 10px 17px;
+    border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    box-shadow: 0 3px 8px rgba(37, 99, 235, .15);
+    transition: .2s;
+}
+
+.approval-header .p-button:hover {
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.approval-content {
+    padding: 26px 30px 32px;
 }
 
 
@@ -43,47 +108,62 @@
 .approval-statistics {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    margin-bottom: 24px;
+
+    margin-bottom: 30px;
+
+    border: 1px solid #e6eaf0;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .approval-stat-card {
+    position: relative;
+
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 15px;
 
-    padding: 20px;
+    min-height: 92px;
+    padding: 18px 21px;
 
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-right: 1px solid #edf0f4;
+    background: #fff;
 
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+    transition: .2s;
 }
 
 .approval-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    background: #fafcff;
+}
+
+.approval-stat-card:last-child {
+    border-right: none;
+}
+
+.approval-stat-card::before {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 3px;
+    background: #3b82f6;
 }
 
 .approval-stat-icon {
-    width: 46px;
-    height: 46px;
+    width: 43px;
+    height: 43px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     border-radius: 10px;
-
-    background: #eff6ff;
+    background: #f1f5f9;
     color: #2563eb;
-
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .approval-stat-card span {
@@ -91,284 +171,521 @@
     margin-bottom: 5px;
 
     color: #64748b;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .approval-stat-card strong {
-    display: block;
-
     color: #0f172a;
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 23px;
 }
 
 
 /* =========================================================
-   TABLE SECTION
+   TABLE HEADER
    ========================================================= */
 
-.approval-table-section {
-    background: #ffffff;
-
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-
-    padding: 22px;
-
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-}
-
 .approval-table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .approval-table-header h2 {
     margin: 0;
-
-    color: #1e293b;
-    font-size: 19px;
-    font-weight: 650;
+    color: #172033;
+    font-size: 18px;
 }
 
 .approval-table-header span {
     display: block;
-
     margin-top: 5px;
+
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+.approval-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.approval-search {
+    position: relative;
+    flex: 1;
+    max-width: 470px;
+}
+
+.approval-search i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.approval-search input,
+.approval-status-filter {
+    height: 40px;
+
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    outline: none;
+
+    background: #fff;
+    color: #334155;
+    font-size: 13px;
+
+    transition: .2s;
+}
+
+.approval-search input {
+    width: 100%;
+    padding: 0 14px 0 39px;
+    box-sizing: border-box;
+}
+
+.approval-search input:focus,
+.approval-status-filter:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .08);
+}
+
+.approval-status-filter {
+    min-width: 190px;
+    padding: 0 13px;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.approval-table {
+    border: 1px solid #e5e9ef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.approval-table .p-datatable-thead > tr > th {
+    padding: 13px 15px;
+
+    background: #f8fafc;
+    color: #475569;
+
+    border-color: #e8ecf1;
+    font-size: 12px;
+}
+
+.approval-table .p-datatable-tbody > tr > td {
+    padding: 14px 15px;
+
+    color: #334155;
+    border-color: #edf0f3;
+
+    font-size: 13px;
+}
+
+.approval-table .p-datatable-tbody > tr:hover {
+    background: #f8fbff;
+}
+
+.approval-table .p-datatable-tbody > tr > td:first-child {
+    color: #2563eb;
+    font-weight: 650;
+}
+
+.approval-table .p-tag {
+    min-width: 82px;
+    justify-content: center;
+
+    padding: 4px 9px;
+    border-radius: 6px;
+
+    font-size: 11px;
+}
+
+.approval-table .p-button.p-button-rounded {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 8px;
+}
+
+.approval-table .p-paginator {
+    min-height: 52px;
+
+    border: none;
+    border-top: 1px solid #edf0f3;
+    background: #fff;
+}
+
+.approval-table .p-datatable-emptymessage > td {
+    height: 140px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+
+/* =========================================================
+   DETAIL HEADER
+   ========================================================= */
+
+.approval-detail-page {
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.approval-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    margin-bottom: 22px;
+}
+
+.approval-detail-header .p-button {
+    margin-bottom: 7px;
+    padding: 5px 8px;
 
     color: #64748b;
     font-size: 13px;
 }
 
+.approval-detail-header .p-button:hover {
+    background: #eef2f7;
+    color: #2563eb;
+}
+
+.approval-detail-header .approval-title {
+    font-size: 27px;
+}
+
+.approval-detail-header .approval-subtitle {
+    font-size: 13px;
+}
+
+.approval-detail-header > .p-tag {
+    margin-top: 30px;
+    min-width: 90px;
+    justify-content: center;
+}
+
 
 /* =========================================================
-   FILTERS
+   DETAIL CARD
    ========================================================= */
 
-.approval-filters {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
+.approval-detail-card {
     margin-bottom: 18px;
-}
 
-.approval-search {
-    position: relative;
+    background: #fff;
+    border: 1px solid #e5e9ef;
+    border-radius: 13px;
 
-    flex: 1;
-    max-width: 480px;
-}
-
-.approval-search i {
-    position: absolute;
-
-    left: 13px;
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    color: #94a3b8;
-    font-size: 14px;
-
-    pointer-events: none;
-}
-
-.approval-search input {
-    width: 100%;
-    height: 40px;
-
-    padding: 0 14px 0 38px;
-
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-
-    outline: none;
-
-    color: #1e293b;
-    background: #ffffff;
-
-    font-size: 14px;
-
-    box-sizing: border-box;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.approval-search input::placeholder {
-    color: #94a3b8;
-}
-
-.approval-search input:focus {
-    border-color: #3b82f6;
-
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.approval-status-filter {
-    height: 40px;
-
-    min-width: 190px;
-
-    padding: 0 12px;
-
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-
-    background: #ffffff;
-    color: #334155;
-
-    outline: none;
-
-    font-size: 14px;
-
-    cursor: pointer;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.approval-status-filter:focus {
-    border-color: #3b82f6;
-
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-
-/* =========================================================
-   PRIME REACT DATATABLE
-   ========================================================= */
-
-.approval-table-section .p-datatable {
-    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(15, 23, 42, .045);
     overflow: hidden;
 }
 
-.approval-table-section .p-datatable .p-datatable-thead > tr > th {
+.approval-detail-card-header {
+    min-height: 56px;
+    padding: 0 22px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border-bottom: 1px solid #edf0f4;
+}
+
+.approval-detail-card-header > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.approval-detail-card-header i {
+    width: 31px;
+    height: 31px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.approval-detail-card-header span {
+    color: #172033;
+    font-size: 14px;
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   DETAIL INFORMATION
+   ========================================================= */
+
+.approval-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 0 40px;
+
+    padding: 5px 22px 18px;
+}
+
+.approval-detail-field {
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.approval-detail-field label {
+    display: block;
+    margin-bottom: 6px;
+
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+.approval-detail-field strong {
+    color: #334155;
+    font-size: 13px;
+}
+
+.approval-detail-field:first-child strong {
+    color: #2563eb;
+}
+
+.approval-detail-field-full {
+    grid-column: 1 / -1;
+}
+
+.approval-detail-content {
+    min-height: 65px;
+    padding: 12px 15px;
+
+    border-left: 3px solid #dbeafe;
     background: #f8fafc;
 
     color: #475569;
-
     font-size: 13px;
-    font-weight: 650;
+    line-height: 1.7;
 
-    padding: 13px 14px;
-
-    border-color: #e2e8f0;
-}
-
-.approval-table-section .p-datatable .p-datatable-tbody > tr > td {
-    padding: 13px 14px;
-
-    color: #334155;
-
-    font-size: 14px;
-
-    border-color: #e2e8f0;
-}
-
-.approval-table-section
-.p-datatable
-.p-datatable-tbody
-> tr:hover {
-    background: #f8fafc;
+    white-space: pre-wrap;
 }
 
 
 /* =========================================================
-   REQUEST CODE
+   APPROVAL PROCESS
    ========================================================= */
 
-.approval-table-section
-.p-datatable
-.p-datatable-tbody
-> tr
-> td:first-child {
-    color: #2563eb;
-    font-weight: 600;
+.approval-lines {
+    padding: 18px 22px 22px;
 }
 
+.approval-line {
+    display: flex;
+    gap: 14px;
 
-/* =========================================================
-   BUTTON
-   ========================================================= */
+    padding: 15px;
+    margin-bottom: 10px;
 
-.approval-header .p-button {
-    border-radius: 8px;
+    border: 1px solid #e7ebf0;
+    border-radius: 10px;
 
-    padding: 10px 16px;
-
-    font-size: 14px;
-    font-weight: 600;
+    background: #fff;
+    transition: .2s;
 }
 
-
-/* =========================================================
-   PAGINATION
-   ========================================================= */
-
-.approval-table-section .p-paginator {
-    border: none;
-
-    padding: 14px 0 0;
+.approval-line:last-child {
+    margin-bottom: 0;
 }
 
-.approval-table-section .p-paginator .p-paginator-element {
-    min-width: 34px;
+.approval-line:hover {
+    border-color: #d5deea;
+    background: #fcfdff;
+}
+
+.approval-line-current {
+    border-color: #bfdbfe;
+    background: #f8fbff;
+}
+
+.approval-line-number {
+    width: 34px;
     height: 34px;
 
-    border-radius: 6px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #f1f5f9;
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.approval-line-current .approval-line-number {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.approval-line-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.approval-line-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.approval-line-top strong {
+    color: #1e293b;
+    font-size: 13px;
+}
+
+.approval-line-info {
+    display: flex;
+    gap: 15px;
+
+    margin-top: 5px;
+
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.approval-line-comment {
+    display: flex;
+    gap: 8px;
+
+    margin-top: 10px;
+    padding: 8px 10px;
+
+    border-radius: 7px;
+    background: #f8fafc;
+
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.5;
 }
 
 
 /* =========================================================
-   RESPONSIVE - TABLET
+   LOADING / EMPTY / ERROR
+   ========================================================= */
+
+.approval-detail-loading,
+.approval-detail-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.approval-detail-loading {
+    min-height: 350px;
+}
+
+.approval-detail-loading i {
+    color: #3b82f6;
+    font-size: 25px;
+}
+
+.approval-detail-empty {
+    min-height: 100px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.approval-detail-error {
+    min-height: 220px;
+    margin-top: 18px;
+
+    background: #fff;
+    border: 1px solid #e5e9ef;
+    border-radius: 13px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
    ========================================================= */
 
 @media (max-width: 1024px) {
+
+    .approval-page,
+    .approval-detail-page {
+        padding: 20px;
+    }
+
+    .approval-content {
+        padding: 22px;
+    }
 
     .approval-statistics {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .approval-filters {
-        flex-wrap: wrap;
+    .approval-stat-card:nth-child(2) {
+        border-right: none;
     }
 
-    .approval-search {
-        max-width: none;
-        flex: 1 1 100%;
-    }
-
-    .approval-status-filter {
-        width: 220px;
+    .approval-stat-card:nth-child(-n + 2) {
+        border-bottom: 1px solid #edf0f4;
     }
 }
 
 
-/* =========================================================
-   RESPONSIVE - MOBILE
-   ========================================================= */
-
 @media (max-width: 640px) {
 
-    .approval-page {
-        padding: 16px;
+    .approval-page,
+    .approval-detail-page {
+        padding: 10px;
     }
+
+    .approval-container,
+    .approval-detail-card {
+        border-radius: 11px;
+    }
+
+
+    /* LIST */
 
     .approval-header {
+        padding: 20px;
+
         align-items: flex-start;
         flex-direction: column;
-    }
-
-    .approval-title {
-        font-size: 23px;
+        gap: 17px;
     }
 
     .approval-header .p-button {
@@ -376,29 +693,508 @@
         justify-content: center;
     }
 
+    .approval-content {
+        padding: 18px 14px 22px;
+    }
+
     .approval-statistics {
         grid-template-columns: 1fr;
-        gap: 12px;
     }
 
     .approval-stat-card {
-        padding: 16px;
+        border-right: none;
+        border-bottom: 1px solid #edf0f4;
     }
 
-    .approval-table-section {
-        padding: 15px;
+    .approval-stat-card:last-child {
+        border-bottom: none;
     }
 
     .approval-filters {
         flex-direction: column;
-        align-items: stretch;
     }
 
     .approval-search {
-        width: 100%;
+        max-width: none;
     }
 
     .approval-status-filter {
         width: 100%;
     }
+
+    .approval-table {
+        overflow-x: auto;
+    }
+
+    .approval-table .p-datatable {
+        min-width: 800px;
+    }
+
+
+    /* DETAIL */
+
+    .approval-detail-header .approval-title {
+        font-size: 22px;
+    }
+
+    .approval-detail-grid {
+        grid-template-columns: 1fr;
+        padding: 5px 15px 15px;
+    }
+
+    .approval-detail-field-full {
+        grid-column: auto;
+    }
+
+    .approval-detail-card-header {
+        padding: 0 15px;
+    }
+
+    .approval-lines {
+        padding: 14px 12px;
+    }
+
+    .approval-line-top {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .approval-line-info {
+        flex-wrap: wrap;
+    }
+}
+/* =========================================================
+   APPROVAL FORM
+   ========================================================= */
+
+.approval-form {
+    padding: 4px 2px;
+    color: #1e293b;
+}
+
+.approval-form-section {
+    padding: 6px 0;
+}
+
+.approval-form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.approval-form-section-title i {
+    font-size: 16px;
+    color: #3b82f6;
+}
+
+
+/* =========================================================
+   DIALOG HEADER
+   ========================================================= */
+
+.approval-form-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.approval-form-dialog-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 18px;
+}
+
+.approval-form-dialog-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.approval-form-dialog-subtitle {
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.approval-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.approval-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 16px;
+}
+
+.approval-form-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.approval-form-field label span {
+    margin-left: 3px;
+    color: #ef4444;
+}
+
+.approval-form-field small {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.approval-form .p-inputtext,
+.approval-form .p-inputtextarea,
+.approval-form .p-dropdown,
+.approval-form .p-inputnumber,
+.approval-form .p-inputnumber-input {
+    width: 100%;
+}
+
+.approval-form .p-inputtext,
+.approval-form .p-inputtextarea,
+.approval-form .p-dropdown {
+    border-radius: 8px;
+    border-color: #dbe2ea;
+    font-size: 13px;
+}
+
+.approval-form .p-inputtext,
+.approval-form .p-inputtextarea {
+    padding: 10px 12px;
+}
+
+.approval-form .p-inputtext:enabled:focus,
+.approval-form .p-inputtextarea:enabled:focus,
+.approval-form .p-dropdown:not(.p-disabled).p-focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.approval-form .p-inputtext:disabled {
+    background: #f8fafc;
+}
+
+
+/* =========================================================
+   SELECTED TYPE
+   ========================================================= */
+
+.approval-form-type-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: -3px 0 17px;
+    padding: 10px 12px;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    background: #f8fbff;
+    color: #475569;
+    font-size: 12px;
+}
+
+.approval-form-type-info i {
+    color: #3b82f6;
+    font-size: 15px;
+}
+
+.approval-form-type-info strong {
+    color: #2563eb;
+}
+
+
+/* =========================================================
+   DAYS
+   ========================================================= */
+
+.approval-form-days {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: -2px 0 17px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 13px;
+}
+
+.approval-form-days i {
+    color: #3b82f6;
+}
+
+.approval-form-days strong {
+    color: #0f172a;
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.approval-form-error {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+    padding: 11px 13px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 13px;
+}
+
+.approval-form-error i {
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   DIVIDER
+   ========================================================= */
+
+.approval-form + .p-divider {
+    margin: 8px 0 18px;
+}
+
+
+/* =========================================================
+   FILE UPLOAD
+   ========================================================= */
+
+.approval-form .p-fileupload {
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.approval-form .p-fileupload-buttonbar {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.approval-form .p-fileupload-content {
+    min-height: 130px;
+    padding: 12px;
+    border: 0;
+}
+
+.approval-form .p-fileupload-choose,
+.approval-form .p-fileupload-upload,
+.approval-form .p-fileupload-cancel {
+    border-radius: 7px;
+    font-size: 12px;
+}
+
+.approval-form-upload-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 105px;
+    gap: 7px;
+    color: #64748b;
+    text-align: center;
+}
+
+.approval-form-upload-empty i {
+    font-size: 28px;
+    color: #94a3b8;
+}
+
+.approval-form-upload-empty span {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.approval-form-upload-empty small {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.approval-form-upload-note {
+    display: block;
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.approval-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
+.approval-form-footer .p-button {
+    min-width: 105px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   DIALOG
+   ========================================================= */
+
+.p-dialog:has(.approval-form) {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.p-dialog:has(.approval-form) .p-dialog-header {
+    padding: 17px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.p-dialog:has(.approval-form) .p-dialog-content {
+    padding: 18px 20px;
+}
+
+.p-dialog:has(.approval-form) .p-dialog-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #e2e8f0;
+    background: #fafafa;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+    .approval-form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .approval-form-dialog-title {
+        font-size: 16px;
+    }
+
+    .approval-form-dialog-subtitle {
+        display: none;
+    }
+
+    .p-dialog:has(.approval-form) .p-dialog-content {
+        padding: 15px;
+    }
+
+    .p-dialog:has(.approval-form) .p-dialog-header {
+        padding: 14px 15px;
+    }
+
+    .p-dialog:has(.approval-form) .p-dialog-footer {
+        padding: 10px 15px;
+    }
+
+    .approval-form-footer .p-button {
+        flex: 1;
+    }
+}
+/* =========================================================
+   APPROVAL DETAIL ACTION
+   ========================================================= */
+
+.approval-detail-action {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.approval-detail-action .p-button {
+    min-width: 110px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.approval-detail-action-dialog {
+    padding-top: 4px;
+}
+
+.approval-detail-action-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.approval-detail-action-message i {
+    margin-top: 2px;
+    font-size: 17px;
+    color: #3b82f6;
+}
+
+.approval-detail-action-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.approval-detail-action-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.approval-detail-action-field .p-inputtextarea {
+    width: 100%;
+    border-radius: 8px;
+    border-color: #dbe2ea;
+    font-size: 13px;
+}
+
+.approval-detail-action-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
+.approval-detail-action-footer .p-button {
+    min-width: 125px;
+    border-radius: 8px;
+    font-size: 13px;
 }

@@ -1,5 +1,6 @@
 package com.example.erp.repository;
 
+import com.example.erp.entity.Employee;
 import com.example.erp.entity.EmployeeDepartment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,11 +15,15 @@ public interface EmployeeDepartmentRepository
     List<EmployeeDepartment> findByEmployeeEmpId(Long empId);
 
     // Lấy phòng ban hiện tại của nhân viên
-    Optional<EmployeeDepartment> findByEmployeeEmpIdAndToDate(
+    Optional<EmployeeDepartment>
+    findByEmployeeEmpIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(
             Long empId,
+            LocalDate fromDate,
             LocalDate toDate
     );
 
     // Lấy các bản ghi theo phòng ban
     List<EmployeeDepartment> findByDepartmentDeptId(Long deptId);
+    
+    List<EmployeeDepartment> findByEmployee(Employee employee);
 }

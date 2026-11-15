@@ -141,7 +141,21 @@ public class SecurityConfig {
                     "MANAGER",
                     "WAREHOUSE"
                 )
+             // =========================
+             // APPROVAL
+             // =========================
 
+             .requestMatchers(
+                 "/api/request-approves/**",
+                 "/api/approvals/**",
+                 "/api/approval-lines/**"
+             )
+             .hasAnyRole(
+                 "ADMIN",
+                 "MANAGER",
+                 "SALES",
+                 "USER"
+             )
 
                 // =========================
                 // CÒN LẠI

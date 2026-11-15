@@ -1,20 +1,14 @@
 package com.example.erp.dto;
 
-import com.example.erp.util.RoleType;
-
 public class RegisterRequest {
 
     private String username;
-
     private String email;
-
     private String name;
-
     private String password;
 
-    private RoleType role;
-
-    // Getter & Setter
+    public RegisterRequest() {
+    }
 
     public String getUsername() {
         return username;
@@ -46,13 +40,5 @@ public class RegisterRequest {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public RoleType getRole() {
-        return role;
-    }
-
-    public void setRole(RoleType role) {
-        this.role = role;
     }
 }

@@ -1,8 +1,10 @@
 package com.example.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
+import java.time.LocalDate;
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "request_approve")
 public class RequestApprove {
@@ -11,6 +13,13 @@ public class RequestApprove {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
+    
     // Mã yêu cầu
     // Ví dụ: REQ-2026-0001
     @Column(nullable = false, unique = true)
@@ -53,6 +62,21 @@ public class RequestApprove {
     // GETTER / SETTER
     // =========================
 
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
     public Long getId() {
         return id;
     }

@@ -25,3 +25,83 @@ Function:
 4. cấu hình phòng ban, ai là người phê duyệt, cấu hình người ủy quyền
 5. download file eexcel các đơn
 
+src/main/java/com/example/erp/
+│
+├── controller/
+│   │
+│   ├── EmployeeController.java
+│   ├── DepartmentController.java
+│   ├── EmployeeDepartmentController.java
+│   ├── DepartmentApproverController.java
+│   ├── ApprovalDelegationController.java
+│   ├── RequestApproveController.java
+│   ├── ApprovalController.java
+│   ├── ApprovalLineController.java
+│   ├── CMFileController.java
+│   ├── CMCodeController.java
+│   └── RequestTemplateController.java
+│
+├── service/
+│   │
+│   ├── EmployeeService.java
+│   ├── DepartmentService.java
+│   ├── EmployeeDepartmentService.java
+│   ├── DepartmentApproverService.java
+│   ├── ApprovalDelegationService.java
+│   ├── RequestApproveService.java
+│   ├── ApprovalService.java
+│   ├── ApprovalLineService.java
+│   ├── CMFileService.java
+│   ├── CMCodeService.java
+│   └── RequestTemplateService.java
+│
+├── service/impl/
+│   │
+│   ├── EmployeeServiceImpl.java
+│   ├── DepartmentServiceImpl.java
+│   ├── EmployeeDepartmentServiceImpl.java
+│   ├── DepartmentApproverServiceImpl.java
+│   ├── ApprovalDelegationServiceImpl.java
+│   ├── RequestApproveServiceImpl.java
+│   ├── ApprovalServiceImpl.java
+│   ├── ApprovalLineServiceImpl.java
+│   ├── CMFileServiceImpl.java
+│   ├── CMCodeServiceImpl.java
+│   └── RequestTemplateServiceImpl.java
+│
+├── repository/
+│   │
+│   ├── EmployeeRepository.java
+│   ├── DepartmentRepository.java
+│   ├── EmployeeDepartmentRepository.java
+│   ├── DepartmentApproverRepository.java
+│   ├── ApprovalDelegationRepository.java
+│   ├── RequestApproveRepository.java
+│   ├── ApprovalRepository.java
+│   ├── ApprovalLineRepository.java
+│   ├── CMFileRepository.java
+│   ├── CMCodeRepository.java
+│   └── RequestTemplateRepository.java
+│
+└── entity/
+    │
+    ├── User.java
+    ├── Employee.java
+    ├── Department.java
+    ├── EmployeeDepartment.java
+    ├── DepartmentApprover.java
+    ├── ApprovalDelegation.java
+    ├── RequestApprove.java
+    ├── Approval.java
+    ├── ApprovalLine.java
+    ├── CMFile.java
+    ├── CMCode.java
+    └── RequestTemplate.java
+sửa lại phòng gửi dơn sale gửi đơn lên phó phòng ban rồi phó gửi lên trưởng để phê duyệt 
+thêm lại phòng tạo tài khoản cho nhân viên vào phòng ban nào vào phòng ban đó 
+rồi tạo trưởng phòng mặt định trong đó 
+gửi gmail cho các nhân viên 
+Thêm danh sách quản lý phòng ban có những ai và có chức vụ gì 
+Và xem lịch xin nghĩ có bị trùng hay không nếu trùng 
+
+

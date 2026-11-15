@@ -182,4 +182,20 @@
     .login-form-title {
         font-size: 22px;
     }
+    .login-form-forgot {
+    text-align: center;
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.login-form-forgot-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.login-form-forgot-link:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
 }

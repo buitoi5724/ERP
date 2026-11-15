@@ -1,56 +1,114 @@
 package com.example.erp.service;
 
+import com.example.erp.dto.ApprovalLineResponse;
 import com.example.erp.entity.ApprovalLine;
 
 import java.util.List;
 
 public interface ApprovalLineService {
 
-    // Lấy tất cả dòng phê duyệt
+    // =========================================================
+    // LẤY TẤT CẢ APPROVAL LINE
+    // =========================================================
+
     List<ApprovalLine> getAll();
 
-    // Lấy theo ID
+
+    // =========================================================
+    // LẤY APPROVAL LINE THEO ID
+    // =========================================================
+
     ApprovalLine getById(Long id);
 
-    // Lấy các dòng của một Approval
-    List<ApprovalLine> getByApprovalId(Long approvalId);
 
-    // Lấy một dòng theo Approval + thứ tự duyệt
+    // =========================================================
+    // LẤY APPROVAL LINE THEO APPROVAL
+    // =========================================================
+
+    List<ApprovalLineResponse> getByApprovalId(
+            Long approvalId
+    );
+
+
+    // =========================================================
+    // LẤY THEO APPROVAL + THỨ TỰ
+    // =========================================================
+
     ApprovalLine getByApprovalIdAndOrder(
             Long approvalId,
             Integer approvalOrder
     );
 
-    // Lấy các yêu cầu đang chờ một nhân viên duyệt
+
+    // =========================================================
+    // LẤY THEO NGƯỜI PHÊ DUYỆT
+    // =========================================================
+
     List<ApprovalLine> getByApprover(
             Long empId,
             String status
     );
 
-    // Lấy các dòng mà nhân viên đã xử lý
+
+    // =========================================================
+    // LẤY THEO NGƯỜI THỰC HIỆN
+    // =========================================================
+
     List<ApprovalLine> getByActionEmployee(
             Long empId,
             String status
     );
 
-    // Tạo dòng phê duyệt
-    ApprovalLine create(ApprovalLine approvalLine);
 
-    // Cập nhật dòng phê duyệt
+    // =========================================================
+    // LẤY PHÊ DUYỆT ĐANG CHỜ CỦA TÔI
+    // =========================================================
+
+    List<ApprovalLineResponse> getMyPendingApprovals();
+
+
+    // =========================================================
+    // LỊCH SỬ PHÊ DUYỆT CỦA TÔI
+    // =========================================================
+
+    List<ApprovalLineResponse> getMyApprovalHistory();
+
+
+    // =========================================================
+    // TẠO
+    // =========================================================
+
+    ApprovalLine create(
+            ApprovalLine approvalLine
+    );
+
+
+    // =========================================================
+    // CẬP NHẬT
+    // =========================================================
+
     ApprovalLine update(
             Long id,
             ApprovalLine approvalLine
     );
 
-    // Duyệt
-    ApprovalLine approve(
+
+    // =========================================================
+    // APPROVE
+    // =========================================================
+
+    ApprovalLineResponse approve(
             Long id,
             Long actionEmployeeId,
             String comment
     );
 
-    // Từ chối
-    ApprovalLine reject(
+
+    // =========================================================
+    // REJECT
+    // =========================================================
+
+    ApprovalLineResponse reject(
             Long id,
             Long actionEmployeeId,
             String comment

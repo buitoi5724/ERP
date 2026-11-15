@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 
@@ -17,18 +18,40 @@ import {
     FaTachometerAlt
 } from "react-icons/fa";
 
+
 export default function Menu({ user, onLogout }) {
+
+    // =========================================================
+    // KIỂM TRA QUYỀN
+    // =========================================================
 
     const isAdmin =
         user?.roles?.includes("ADMIN");
+
+    const isApprover =
+        user?.approver === true;
+
+
+    // =========================================================
+    // MENU LINK CLASS
+    // =========================================================
+
+    const getMenuLinkClass = ({ isActive }) => {
+
+        return isActive
+            ? "menu-link active"
+            : "menu-link";
+
+    };
+
 
     return (
 
         <aside className="menu">
 
-            {/* =========================
+            {/* =================================================
                 LOGO
-            ========================= */}
+            ================================================= */}
 
             <div className="menu-brand">
 
@@ -37,22 +60,30 @@ export default function Menu({ user, onLogout }) {
                 </div>
 
                 <div className="menu-brand-info">
-                    <h1>ERP SHOP</h1>
-                    <span>Management System</span>
+
+                    <h1>
+                        ERP SHOP
+                    </h1>
+
+                    <span>
+                        Management System
+                    </span>
+
                 </div>
 
             </div>
 
 
-            {/* =========================
+            {/* =================================================
                 MENU
-            ========================= */}
+            ================================================= */}
 
             <nav className="menu-nav">
 
-                {/* =========================
+
+                {/* =================================================
                     TỔNG QUAN
-                ========================= */}
+                ================================================= */}
 
                 {user && (
 
@@ -65,17 +96,20 @@ export default function Menu({ user, onLogout }) {
                         <ul>
 
                             <li>
+
                                 <NavLink
                                     to="/dashboard"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaTachometerAlt />
-                                    <span>Dashboard</span>
+
+                                    <span>
+                                        Dashboard
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
                         </ul>
@@ -85,9 +119,9 @@ export default function Menu({ user, onLogout }) {
                 )}
 
 
-                {/* =========================
+                {/* =================================================
                     BÁN HÀNG
-                ========================= */}
+                ================================================= */}
 
                 {user && (
 
@@ -100,32 +134,38 @@ export default function Menu({ user, onLogout }) {
                         <ul>
 
                             <li>
+
                                 <NavLink
                                     to="/shopping"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaShoppingCart />
-                                    <span>Bán hàng</span>
+
+                                    <span>
+                                        Bán hàng
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
 
                             <li>
+
                                 <NavLink
                                     to="/customers"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaUsers />
-                                    <span>Khách hàng</span>
+
+                                    <span>
+                                        Khách hàng
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
                         </ul>
@@ -135,9 +175,10 @@ export default function Menu({ user, onLogout }) {
                 )}
 
 
-                {/* =========================
+                {/* =================================================
                     SẢN PHẨM & KHO
-                ========================= */}
+                    CHỈ ADMIN
+                ================================================= */}
 
                 {isAdmin && (
 
@@ -150,92 +191,110 @@ export default function Menu({ user, onLogout }) {
                         <ul>
 
                             <li>
+
                                 <NavLink
                                     to="/products"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaBoxOpen />
-                                    <span>Sản phẩm</span>
+
+                                    <span>
+                                        Sản phẩm
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
 
                             <li>
+
                                 <NavLink
                                     to="/product-cat"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaBoxOpen />
-                                    <span>Danh mục sản phẩm</span>
+
+                                    <span>
+                                        Danh mục sản phẩm
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
 
                             <li>
+
                                 <NavLink
                                     to="/inventory"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaWarehouse />
-                                    <span>Kho hàng</span>
+
+                                    <span>
+                                        Kho hàng
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
 
                             <li>
+
                                 <NavLink
                                     to="/suppliers"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaUsers />
-                                    <span>Nhà cung cấp</span>
+
+                                    <span>
+                                        Nhà cung cấp
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
 
                             <li>
+
                                 <NavLink
                                     to="/downtime"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaClock />
-                                    <span>Thời gian dừng</span>
+
+                                    <span>
+                                        Thời gian dừng
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
 
                             <li>
+
                                 <NavLink
                                     to="/scrap"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaTools />
-                                    <span>Hàng lỗi / phế liệu</span>
+
+                                    <span>
+                                        Hàng lỗi / phế liệu
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
                         </ul>
@@ -245,9 +304,9 @@ export default function Menu({ user, onLogout }) {
                 )}
 
 
-                {/* =========================
+                {/* =================================================
                     PHÊ DUYỆT
-                ========================= */}
+                ================================================= */}
 
                 {user && (
 
@@ -259,19 +318,82 @@ export default function Menu({ user, onLogout }) {
 
                         <ul>
 
+
+                            {/* =================================================
+                                ĐƠN CỦA TÔI
+                                TẤT CẢ USER ĐĂNG NHẬP ĐỀU THẤY
+                            ================================================= */}
+
                             <li>
+
                                 <NavLink
                                     to="/approval"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaClipboardCheck />
-                                    <span>Yêu cầu phê duyệt</span>
+
+                                    <span>
+                                        Đơn của tôi
+                                    </span>
+
                                 </NavLink>
+
                             </li>
+
+
+                            {/* =================================================
+                                CHỜ TÔI PHÊ DUYỆT
+                                CHỈ APPROVER
+                            ================================================= */}
+
+                            {isApprover && (
+
+                                <li>
+
+                                    <NavLink
+                                        to="/approval/pending"
+                                        className={getMenuLinkClass}
+                                    >
+
+                                        <FaClipboardCheck />
+
+                                        <span>
+                                            Chờ tôi phê duyệt
+                                        </span>
+
+                                    </NavLink>
+
+                                </li>
+
+                            )}
+
+
+                            {/* =================================================
+                                LỊCH SỬ PHÊ DUYỆT
+                                CHỈ APPROVER
+                            ================================================= */}
+
+                            {isApprover && (
+
+                                <li>
+
+                                    <NavLink
+                                        to="/approval/history"
+                                        className={getMenuLinkClass}
+                                    >
+
+                                        <FaClock />
+
+                                        <span>
+                                            Lịch sử phê duyệt
+                                        </span>
+
+                                    </NavLink>
+
+                                </li>
+
+                            )}
 
                         </ul>
 
@@ -280,9 +402,10 @@ export default function Menu({ user, onLogout }) {
                 )}
 
 
-                {/* =========================
-                    NHÂN SỰ
-                ========================= */}
+                {/* =================================================
+                    NHÂN SỰ & QUẢN TRỊ
+                    CHỈ ADMIN
+                ================================================= */}
 
                 {isAdmin && (
 
@@ -295,47 +418,56 @@ export default function Menu({ user, onLogout }) {
                         <ul>
 
                             <li>
+
                                 <NavLink
                                     to="/accounts"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaUsers />
-                                    <span>Tài khoản</span>
+
+                                    <span>
+                                        Tài khoản
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
 
                             <li>
+
                                 <NavLink
                                     to="/employees"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaUserTie />
-                                    <span>Nhân viên</span>
+
+                                    <span>
+                                        Nhân viên
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
 
                             <li>
+
                                 <NavLink
                                     to="/departments"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "menu-link active"
-                                            : "menu-link"
-                                    }
+                                    className={getMenuLinkClass}
                                 >
+
                                     <FaBuilding />
-                                    <span>Phòng ban</span>
+
+                                    <span>
+                                        Phòng ban
+                                    </span>
+
                                 </NavLink>
+
                             </li>
 
                         </ul>
@@ -347,19 +479,22 @@ export default function Menu({ user, onLogout }) {
             </nav>
 
 
-            {/* =========================
-                USER
-            ========================= */}
+            {/* =================================================
+                USER INFO
+            ================================================= */}
 
             {user && (
 
                 <div className="menu-user">
 
                     <div className="menu-user-avatar">
+
                         {(user.username || "U")
                             .charAt(0)
                             .toUpperCase()}
+
                     </div>
+
 
                     <div className="menu-user-info">
 
@@ -378,34 +513,41 @@ export default function Menu({ user, onLogout }) {
             )}
 
 
-            {/* =========================
+            {/* =================================================
                 LOGIN / LOGOUT
-            ========================= */}
+            ================================================= */}
 
             <div className="menu-bottom">
 
                 {user ? (
 
                     <button
+                        type="button"
                         onClick={onLogout}
                         className="menu-logout"
                     >
+
                         <FaSignOutAlt />
-                        <span>Đăng xuất</span>
+
+                        <span>
+                            Đăng xuất
+                        </span>
+
                     </button>
 
                 ) : (
 
                     <NavLink
                         to="/login"
-                        className={({ isActive }) =>
-                            isActive
-                                ? "menu-link active"
-                                : "menu-link"
-                        }
+                        className={getMenuLinkClass}
                     >
+
                         <FaCogs />
-                        <span>Đăng nhập</span>
+
+                        <span>
+                            Đăng nhập
+                        </span>
+
                     </NavLink>
 
                 )}
@@ -415,4 +557,5 @@ export default function Menu({ user, onLogout }) {
         </aside>
 
     );
+
 }

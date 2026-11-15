@@ -1,7 +1,7 @@
+
 package com.example.erp.entity;
 
 import jakarta.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -14,7 +14,6 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long empId;
 
-    // Liên kết Employee với tài khoản User
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -35,11 +34,9 @@ public class Employee {
     @Column(nullable = false)
     private Boolean active = true;
 
-    // Constructor
     public Employee() {
     }
 
-    // Getter / Setter
     public Long getEmpId() {
         return empId;
     }
@@ -86,5 +83,15 @@ public class Employee {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+    @Column(nullable = false, length = 30)
+    private String position = "EMPLOYEE";
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }

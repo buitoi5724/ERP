@@ -70,4 +70,27 @@ public class CurrentUserService {
                         )
                 );
     }
+
+    // Kiểm tra tài khoản hiện tại có quyền ADMIN hay không
+    public boolean isCurrentUserAdmin() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication == null ||
+                !authentication.isAuthenticated()) {
+
+            return false;
+        }
+
+        return authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        "ROLE_ADMIN".equals(
+                                authority.getAuthority()
+                        )
+                );
+    }
 }

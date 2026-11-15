@@ -1,5 +1,6 @@
 package com.example.erp.controller;
 
+import com.example.erp.dto.ApprovalLineResponse;
 import com.example.erp.entity.ApprovalLine;
 import com.example.erp.service.ApprovalLineService;
 
@@ -15,13 +16,18 @@ public class ApprovalLineController {
 
     private final ApprovalLineService approvalLineService;
 
+
     public ApprovalLineController(
             ApprovalLineService approvalLineService) {
 
         this.approvalLineService = approvalLineService;
     }
 
-    // GET /api/approval-lines
+
+    // =========================================================
+    // GET ALL
+    // =========================================================
+
     @GetMapping
     public ResponseEntity<List<ApprovalLine>> getAll() {
 
@@ -30,7 +36,11 @@ public class ApprovalLineController {
         );
     }
 
-    // GET /api/approval-lines/{id}
+
+    // =========================================================
+    // GET BY ID
+    // =========================================================
+
     @GetMapping("/{id}")
     public ResponseEntity<ApprovalLine> getById(
             @PathVariable Long id) {
@@ -40,63 +50,113 @@ public class ApprovalLineController {
         );
     }
 
-    // GET /api/approval-lines/approval/{approvalId}
+
+    // =========================================================
+    // GET BY APPROVAL ID
+    // =========================================================
+
     @GetMapping("/approval/{approvalId}")
-    public ResponseEntity<List<ApprovalLine>> getByApprovalId(
+    public ResponseEntity<List<ApprovalLineResponse>>
+    getByApprovalId(
             @PathVariable Long approvalId) {
 
         return ResponseEntity.ok(
-                approvalLineService
-                        .getByApprovalId(approvalId)
+                approvalLineService.getByApprovalId(
+                        approvalId
+                )
         );
     }
 
-    // GET /api/approval-lines/approval/{approvalId}/order/{approvalOrder}
+
+    // =========================================================
+    // GET BY APPROVAL ID + ORDER
+    // =========================================================
+
     @GetMapping("/approval/{approvalId}/order/{approvalOrder}")
-    public ResponseEntity<ApprovalLine> getByApprovalIdAndOrder(
+    public ResponseEntity<ApprovalLine>
+    getByApprovalIdAndOrder(
             @PathVariable Long approvalId,
             @PathVariable Integer approvalOrder) {
 
         return ResponseEntity.ok(
-                approvalLineService
-                        .getByApprovalIdAndOrder(
-                                approvalId,
-                                approvalOrder
-                        )
+                approvalLineService.getByApprovalIdAndOrder(
+                        approvalId,
+                        approvalOrder
+                )
         );
     }
 
-    // GET /api/approval-lines/approver/{empId}?status=PENDING
+
+    // =========================================================
+    // GET BY APPROVER
+    // =========================================================
+
     @GetMapping("/approver/{empId}")
-    public ResponseEntity<List<ApprovalLine>> getByApprover(
+    public ResponseEntity<List<ApprovalLine>>
+    getByApprover(
             @PathVariable Long empId,
             @RequestParam String status) {
 
         return ResponseEntity.ok(
-                approvalLineService
-                        .getByApprover(
-                                empId,
-                                status
-                        )
+                approvalLineService.getByApprover(
+                        empId,
+                        status
+                )
         );
     }
 
-    // GET /api/approval-lines/action-employee/{empId}?status=APPROVED
+
+    // =========================================================
+    // GET BY ACTION EMPLOYEE
+    // =========================================================
+
     @GetMapping("/action-employee/{empId}")
-    public ResponseEntity<List<ApprovalLine>> getByActionEmployee(
+    public ResponseEntity<List<ApprovalLine>>
+    getByActionEmployee(
             @PathVariable Long empId,
             @RequestParam String status) {
 
         return ResponseEntity.ok(
-                approvalLineService
-                        .getByActionEmployee(
-                                empId,
-                                status
-                        )
+                approvalLineService.getByActionEmployee(
+                        empId,
+                        status
+                )
         );
     }
 
-    // POST /api/approval-lines
+
+    // =========================================================
+    // MY APPROVAL HISTORY
+    // =========================================================
+
+    @GetMapping("/my-history")
+    public ResponseEntity<List<ApprovalLineResponse>>
+    getMyApprovalHistory() {
+
+        return ResponseEntity.ok(
+                approvalLineService.getMyApprovalHistory()
+        );
+    }
+
+
+    // =========================================================
+    // MY PENDING APPROVALS
+    // =========================================================
+
+    @GetMapping("/my-pending")
+    public ResponseEntity<List<ApprovalLineResponse>>
+    getMyPendingApprovals() {
+
+        return ResponseEntity.ok(
+                approvalLineService.getMyPendingApprovals()
+        );
+    }
+
+
+    // =========================================================
+    // CREATE
+    // =========================================================
+
     @PostMapping
     public ResponseEntity<ApprovalLine> create(
             @RequestBody ApprovalLine approvalLine) {
@@ -108,7 +168,11 @@ public class ApprovalLineController {
         );
     }
 
-    // PUT /api/approval-lines/{id}
+
+    // =========================================================
+    // UPDATE
+    // =========================================================
+
     @PutMapping("/{id}")
     public ResponseEntity<ApprovalLine> update(
             @PathVariable Long id,
@@ -122,29 +186,42 @@ public class ApprovalLineController {
         );
     }
 
-    // PUT /api/approval-lines/{id}/approve
+
+    // =========================================================
+    // APPROVE
+    // =========================================================
+
     @PutMapping("/{id}/approve")
-    public ResponseEntity<ApprovalLine> approve(
+    public ResponseEntity<ApprovalLineResponse> approve(
             @PathVariable Long id,
-            @RequestParam(required = false) String comment) {
+            @RequestParam(required = false)
+            String comment) {
 
         return ResponseEntity.ok(
                 approvalLineService.approve(
-                        id,id, comment
+                        id,
+                        id,
+                        comment
                 )
         );
     }
 
-    // PUT /api/approval-lines/{id}/reject
+
+    // =========================================================
+    // REJECT
+    // =========================================================
+
     @PutMapping("/{id}/reject")
-    public ResponseEntity<ApprovalLine> reject(
+    public ResponseEntity<ApprovalLineResponse> reject(
             @PathVariable Long id,
-            @RequestParam(required = false) String comment) {
+            @RequestParam(required = false)
+            String comment) {
 
         return ResponseEntity.ok(
                 approvalLineService.reject(
                         id,
-                        id, comment
+                        id,
+                        comment
                 )
         );
     }
