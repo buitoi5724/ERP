@@ -1,0 +1,135 @@
+.auth-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+}
+
+.auth-page-card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-page-title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 24px;
+}
+
+.auth-page-group {
+    margin-bottom: 18px;
+}
+
+.auth-page-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #555;
+    font-weight: 500;
+}
+
+.auth-page-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.auth-page-input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.auth-page-input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.auth-page-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.auth-page-button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.auth-page-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.auth-page-error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.auth-page-success {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.auth-page-token-box {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.auth-page-token {
+    margin-top: 8px;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    word-break: break-all;
+    color: #495057;
+}
+
+.auth-page-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.auth-page-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.auth-page-link:hover {
+    text-decoration: underline;
+}
+
+.auth-page-footer {
+    margin-top: 20px;
+    text-align: center;
+}

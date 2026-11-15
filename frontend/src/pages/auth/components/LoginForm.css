@@ -1,0 +1,201 @@
+.login-form-container {
+    min-height: 100vh;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: #f4f6f8;
+
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.login-form-card {
+    width: 100%;
+    max-width: 420px;
+
+    background: #ffffff;
+
+    padding: 35px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+
+    box-sizing: border-box;
+}
+
+.login-form-title {
+    margin: 0 0 25px 0;
+
+    text-align: center;
+
+    font-size: 26px;
+    font-weight: 600;
+
+    color: #333333;
+}
+
+.login-form-group {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.login-form-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #333333;
+}
+
+.login-form-input {
+    width: 100%;
+
+    padding: 12px 14px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #d0d5da;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.login-form-input:focus {
+    border-color: #1976d2;
+
+    box-shadow:
+        0 0 0 3px rgba(25, 118, 210, 0.12);
+}
+
+.login-form-input::placeholder {
+    color: #999999;
+}
+
+.login-form-input:disabled {
+    background: #f1f1f1;
+
+    cursor: not-allowed;
+}
+
+.login-form-error {
+    margin: 0 0 18px 0;
+
+    padding: 10px 12px;
+
+    border: 1px solid #ffcaca;
+    border-radius: 6px;
+
+    background: #ffe5e5;
+
+    color: #d32f2f;
+
+    font-size: 14px;
+}
+
+.login-form-button {
+    width: 100%;
+
+    padding: 12px;
+
+    margin-top: 5px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: #1976d2;
+
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.1s ease;
+}
+
+.login-form-button:hover {
+    background: #1565c0;
+}
+
+.login-form-button:active {
+    transform: scale(0.98);
+}
+
+.login-form-button:disabled {
+    background: #90caf9;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+.login-form-register {
+    margin: 20px 0 0 0;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    color: #666666;
+}
+
+.login-form-register-link {
+    color: #1976d2;
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+.login-form-register-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+
+    .login-form-container {
+        padding: 15px;
+    }
+
+    .login-form-card {
+        padding: 25px 20px;
+    }
+
+    .login-form-title {
+        font-size: 22px;
+    }
+    .login-form-forgot {
+    text-align: center;
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.login-form-forgot-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.login-form-forgot-link:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+}

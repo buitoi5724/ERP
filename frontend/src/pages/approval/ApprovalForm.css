@@ -1,0 +1,485 @@
+/* ================================
+   APPROVAL FORM - DIALOG
+================================ */
+
+.approval-form-dialog {
+    border-radius: 18px !important;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2) !important;
+}
+
+.approval-form-dialog .p-dialog-header {
+    padding: 22px 26px;
+    border-bottom: 1px solid #e9edf5;
+    background: #ffffff;
+}
+
+.approval-form-dialog .p-dialog-content {
+    padding: 24px 26px;
+    background: #f8fafc;
+}
+
+.approval-form-dialog .p-dialog-footer {
+    padding: 16px 26px;
+    border-top: 1px solid #e9edf5;
+    background: #ffffff;
+}
+
+/* Header */
+
+.approval-form-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.approval-form-dialog-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+    color: #2563eb;
+    font-size: 21px;
+}
+
+.approval-form-dialog-title {
+    font-size: 19px;
+    font-weight: 750;
+    color: #172033;
+}
+
+.approval-form-dialog-subtitle {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #8490a3;
+}
+
+/* ================================
+   FORM CONTENT
+================================ */
+
+.approval-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.approval-form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.approval-form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #25334b;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.approval-form-section-title i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: #eaf2ff;
+    color: #2563eb;
+    font-size: 14px;
+}
+
+.approval-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.approval-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.approval-form-field label {
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.approval-form-field label span {
+    color: #ef4444;
+}
+
+.approval-form-field small {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+/* Inputs */
+
+.approval-form .p-inputtext,
+.approval-form .p-inputtextarea,
+.approval-form .p-dropdown,
+.approval-form .p-inputnumber-input {
+    width: 100%;
+    border: 1px solid #dce3ed;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #263449;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.approval-form .p-inputtext,
+.approval-form .p-inputnumber-input {
+    min-height: 42px;
+    padding: 10px 12px;
+}
+
+.approval-form .p-inputtextarea {
+    padding: 12px;
+    resize: vertical;
+}
+
+.approval-form .p-dropdown {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+}
+
+.approval-form .p-dropdown .p-dropdown-label {
+    padding: 11px 12px;
+    font-size: 13px;
+}
+
+.approval-form .p-inputtext:enabled:focus,
+.approval-form .p-inputtextarea:enabled:focus,
+.approval-form .p-dropdown:not(.p-disabled).p-focus,
+.approval-form .p-inputnumber-input:enabled:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.approval-form .p-inputtext:disabled,
+.approval-form .p-inputtextarea:disabled {
+    background: #f1f5f9;
+}
+
+/* Selected type */
+
+.approval-form-type-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #475569;
+    font-size: 12px;
+}
+
+.approval-form-type-info i {
+    color: #2563eb;
+    font-size: 15px;
+}
+
+.approval-form-type-info strong {
+    color: #1d4ed8;
+}
+
+/* Leave days */
+
+.approval-form-days {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #475569;
+    font-size: 13px;
+}
+
+.approval-form-days i {
+    color: #2563eb;
+}
+
+.approval-form-days strong {
+    margin-left: auto;
+    color: #1d4ed8;
+    font-size: 14px;
+}
+
+/* Divider */
+
+.approval-form-dialog .p-divider.p-divider-horizontal {
+    margin: 0;
+}
+
+.approval-form-dialog .p-divider:before {
+    border-top-color: #e5eaf1;
+}
+
+/* ================================
+   FILE UPLOAD
+================================ */
+
+.approval-form .p-fileupload {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.approval-form .p-fileupload-buttonbar {
+    padding: 12px;
+    border: none;
+    border-bottom: 1px solid #edf0f5;
+    background: #ffffff;
+}
+
+.approval-form .p-fileupload-content {
+    min-height: 130px;
+    padding: 18px;
+    border: none;
+    background: #ffffff;
+}
+
+.approval-form-upload-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 95px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.approval-form-upload-empty i {
+    color: #3b82f6;
+    font-size: 30px;
+}
+
+.approval-form-upload-empty small {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.approval-form-upload-note {
+    color: #94a3b8;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* ================================
+   FOOTER BUTTONS
+================================ */
+
+.approval-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.approval-form-footer .p-button {
+    min-height: 40px;
+    padding: 9px 17px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.approval-form-footer .p-button:not(.p-button-outlined) {
+    border-color: #2563eb;
+    background: #2563eb;
+}
+
+.approval-form-footer .p-button:not(.p-button-outlined):hover {
+    border-color: #1d4ed8;
+    background: #1d4ed8;
+}
+
+/* ================================
+   TOAST - NOTIFICATION
+================================ */
+
+.approval-toast {
+    width: 390px;
+    max-width: calc(100vw - 30px);
+    z-index: 99999 !important;
+}
+
+.approval-toast .p-toast-message {
+    margin-bottom: 12px;
+    border: none !important;
+    border-radius: 14px !important;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.16) !important;
+    animation: approvalToastIn 0.3s ease-out;
+}
+
+.approval-toast .p-toast-message-content {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 17px 16px !important;
+}
+
+.approval-toast .p-toast-message-icon {
+    margin-top: 2px;
+    font-size: 21px;
+}
+
+.approval-toast .p-toast-message-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.approval-toast .p-toast-summary {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+.approval-toast .p-toast-detail {
+    margin: 0 !important;
+    font-size: 12px;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.approval-toast .p-toast-icon-close {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    transition: background 0.2s ease;
+}
+
+.approval-toast .p-toast-icon-close:hover {
+    background: rgba(15, 23, 42, 0.08);
+}
+
+/* Error - Trùng lịch */
+
+.approval-toast .p-toast-message-error {
+    border-left: 5px solid #dc2626 !important;
+    background: #ffffff !important;
+}
+
+.approval-toast .p-toast-message-error .p-toast-message-icon {
+    color: #dc2626 !important;
+}
+
+.approval-toast .p-toast-message-error .p-toast-summary {
+    color: #b91c1c !important;
+}
+
+.approval-toast .p-toast-message-error .p-toast-detail {
+    color: #475569 !important;
+}
+
+/* Warning - Validation */
+
+.approval-toast .p-toast-message-warn {
+    border-left: 5px solid #f59e0b !important;
+    background: #ffffff !important;
+}
+
+.approval-toast .p-toast-message-warn .p-toast-message-icon {
+    color: #d97706 !important;
+}
+
+.approval-toast .p-toast-message-warn .p-toast-summary {
+    color: #92400e !important;
+}
+
+.approval-toast .p-toast-message-warn .p-toast-detail {
+    color: #475569 !important;
+}
+
+/* Success */
+
+.approval-toast .p-toast-message-success {
+    border-left: 5px solid #16a34a !important;
+    background: #ffffff !important;
+}
+
+.approval-toast .p-toast-message-success .p-toast-message-icon {
+    color: #16a34a !important;
+}
+
+.approval-toast .p-toast-message-success .p-toast-summary {
+    color: #15803d !important;
+}
+
+.approval-toast .p-toast-message-success .p-toast-detail {
+    color: #475569 !important;
+}
+
+/* Toast animation */
+
+@keyframes approvalToastIn {
+    from {
+        opacity: 0;
+        transform: translateX(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media screen and (max-width: 640px) {
+    .approval-form-dialog {
+        width: 95vw !important;
+        max-width: 95vw !important;
+    }
+
+    .approval-form-dialog .p-dialog-header {
+        padding: 17px;
+    }
+
+    .approval-form-dialog .p-dialog-content {
+        padding: 18px;
+    }
+
+    .approval-form-dialog .p-dialog-footer {
+        padding: 14px 18px;
+    }
+
+    .approval-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .approval-form-dialog-title {
+        font-size: 17px;
+    }
+
+    .approval-form-footer .p-button {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .approval-toast {
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+        right: 12px !important;
+    }
+}

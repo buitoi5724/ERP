@@ -1,92 +1,124 @@
 import { Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useContext } from "react";
 import Menu from "./Menu";
-import AccountComponent from "./pages/account/account";
+
+// =========================================================
+// APPROVAL
+// =========================================================
+import ApprovalPage from "./pages/approval/ApprovalPage";
+import ApprovalDetailPage from "./pages/approval/ApprovalDetailPage";
+import ApprovalPendingPage from "./pages/approval/ApprovalPendingPage";
+import ApprovalHistoryPage from "./pages/approval/ApprovalHistoryPage";
+
+// =========================================================
+// ACCOUNT
+// =========================================================
+import AccountComponent from "./pages/account/AccountComponent";
+
+// =========================================================
+// PRODUCT
+// =========================================================
 import Product from "./pages/product/Product";
 import ProductDetail from "./pages/product/ProductDetail";
+
+// =========================================================
+// SHOPPING
+// =========================================================
 import Shopping from "./pages/shopping/shopping";
 import CartShopping from "./pages/shopping/cartShopping";
 import ShoppingDetail from "./pages/shopping/shoppingDetail";
 import InvoiceShopping from "./pages/shopping/InvoiceShopping";
-import Header from './pages/login/Header';
-import LoginForm from './pages/login/LoginForm';
+
+// =========================================================
+// INVENTORY
+// =========================================================
 import Inventory from "./pages/inventory/InventoryPage";
+import InventoryEntryPage from "./pages/inventory/InventoryEntryPage";
+
+// =========================================================
+// SUPPLIER
+// =========================================================
 import SupplierPage from "./pages/supplier/SupplierPage";
+
+// =========================================================
+// CUSTOMER
+// =========================================================
+import CustomersPage from "./pages/customers/CustomersPage";
+
+// =========================================================
+// AUTH — ✅ SỬA ĐÚNG ĐƯỜNG DẪN
+// =========================================================
+import LoginPage from "./pages/auth/components/LoginForm";
+import RegisterPage from "./pages/auth/components/RegisterForm";
+import ForgotPasswordPage from "./pages/auth/pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/pages/ResetPasswordPage";
+
+// =========================================================
+// AUTH CONTEXT
+// =========================================================
+import { AuthContext } from "./pages/auth/context/AuthContext";
+
+// =========================================================
+// CSS
+// =========================================================
 import "./App.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primeflex/primeflex.css";
-import CustomersPage from "./pages/customers/CustomersPage";
-import InventoryEntryPage from "./pages/inventory/InventoryEntryPage";
+
+// =========================================================
+// APP
+// =========================================================
 export default function App() {
-  // trạng thái login
-  const [user, setUser] = useState(null);
-  const [loginVisible, setLoginVisible] = useState(false)
+    const { user, logout } = useContext(AuthContext);
 
-  // hiển thị dialog login
-  const handleLoginClick = () => setLoginVisible(true);
-  const handleLoginClose = () => setLoginVisible(false);
+    return (
+        <div className="app-container">
+            <Menu user={user} onLogout={logout} />
+            <div className="content">
+                <Routes>
+                    {/* AUTH — KHÔNG CẦN ĐĂNG NHẬP */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-  // khi login thành công
-  const handleLoginSuccess = (userData) => {
-    setUser(userData); // { username, role }
-    setLoginVisible(false);
-  };
+                    {/* ADMIN */}
+                    {user?.roles?.includes("ADMIN") && (
+                        <>
+                            <Route path="/accounts" element={<AccountComponent />} />
+                            <Route path="/products" element={<Product />} />
+                            <Route path="/products/:id" element={<ProductDetail />} />
+                            <Route path="/inventory" element={<Inventory />} />
+                            <Route path="/inventory-entry" element={<InventoryEntryPage />} />
+                            <Route path="/suppliers" element={<SupplierPage />} />
+                        </>
+                    )}
 
-  // logout
-const handleLogout = () => {
-  setUser(null);       // xóa user → menu/admin/shopping ẩn hết
-  setLoginVisible(false); // không mở LoginForm tự động
-};
+                    {/* APPROVAL */}
+                    {user && (
+                        <>
+                            <Route path="/approval" element={<ApprovalPage />} />
+                            <Route path="/approval/pending" element={<ApprovalPendingPage />} />
+                            <Route path="/approval/history" element={<ApprovalHistoryPage />} />
+                            <Route path="/approval/:id" element={<ApprovalDetailPage />} />
+                        </>
+                    )}
 
-  return (
-    <div className="app-container">
-<Header
-  onLoginClick={handleLoginClick}
-  user={user}
-  onLogoutClick={handleLogout} // khớp với Header
-/>
+                    {/* SHOPPING */}
+                    {user && (
+                        <>
+                            <Route path="/shopping" element={<Shopping />} />
+                            <Route path="/shopping/:id" element={<ShoppingDetail />} />
+                            <Route path="/cart" element={<CartShopping />} />
+                            <Route path="/invoice/:orderId" element={<InvoiceShopping />} />
+                            <Route path="/customers" element={<CustomersPage />} />
+                        </>
+                    )}
 
-      {/* menu truyền user + logout */}
-      <Menu user={user} onLogout={handleLogout} />
-
-      {/* Login dialog */}
-      {!user && (
-        <LoginForm
-          visible={loginVisible}
-          onClose={handleLoginClose}
-          onLoginSuccess={handleLoginSuccess}
-        />
-      )}
-
-      <div className="content">
-        <Routes>
-          {/* Admin pages */}
-          {user?.role === "admin" && (
-            <>
-              <Route path="/accounts" element={<AccountComponent />} />
-              <Route path="/products" element={<Product />} />
-              <Route path="/products/:id" element={<ProductDetail />} />
-              <Route path="/inventory" element={<Inventory />} />
-               <Route path="/inventory-entry" element={<InventoryEntryPage />} />
-               <Route path="/suppliers" element={<SupplierPage />} />
-            </>
-          )}
-
-          {/* Shopping (user + admin) */}
-    {user && (
-      <>
-        <Route path="/shopping" element={<Shopping />} />
-        <Route path="/shopping/:id" element={<ShoppingDetail />} />
-        <Route path="/cart" element={<CartShopping />} />
-        <Route path="/invoice/:orderId" element={<InvoiceShopping />} />
-  <Route path="/customers" element={<CustomersPage />} />
-      </>
-    )}
-
-          {/* Fallback */}
-          <Route path="*" element={<h1>Welcome BuiToi</h1>} />
-        </Routes>
-      </div>
-    </div>
-  );
+                    {/* DEFAULT */}
+                    <Route path="*" element={<h1>Welcome BuiToi</h1>} />
+                </Routes>
+            </div>
+        </div>
+    );
 }

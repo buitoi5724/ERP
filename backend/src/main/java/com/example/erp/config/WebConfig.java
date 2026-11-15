@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     // ✅ Cấu hình CORS chuẩn, fix lỗi allowCredentials + multi-port dev
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
+    	registry.addMapping("/**")
                 // Liệt kê rõ các origin frontend/backend mà bạn dùng
                 .allowedOriginPatterns(
                         "http://localhost:3000", // React dev
